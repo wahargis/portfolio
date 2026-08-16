@@ -1,0 +1,12 @@
+flowchart TD
+    CALL["Model requests a tool call"] --> AD["Advertised-tool allowlist (ToolLoop)"]
+    AD -->|not advertised| REJECT["Rejected with synthetic result + telemetry"]
+    AD -->|advertised| SCOPE["Tools.execute authz_scope check"]
+    SCOPE -->|unauthorized| FAILCLOSED["Fail closed (search tools)"]
+    SCOPE -->|authorized| URL["UrlGuard SSRF denylist"]
+    URL -->|blocked| BLOCK["Blocked"]
+    URL -->|allowed| ISO["IsolatedDispatch (async_nolink + per-tool timeout)"]
+    ISO --> EXEC["Tool implementation (read_webpage, wayback, research_session, compare_sources)"]
+    EXEC --> EXT["External calls (Brave Search, web pages, Wayback)"]
+    EXT --> RESULT["Normalized result returned to loop"]
+    ISO -->|crash or timeout| CONTAINED["Contained; loop continues or finishes"]

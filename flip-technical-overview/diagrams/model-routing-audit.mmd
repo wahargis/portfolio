@@ -1,0 +1,12 @@
+flowchart LR
+    APP["AppSettings (llm_provider, key id, reasoning params)"] --> KEYS["Flip.Settings.LlmProviderKey (encrypted: openrouter/deepseek/other)"]
+    ROOM["Room synthesis_config (model, caps)"] --> LLM["Flip.Synthesis.LlmClient (OpenAI-compatible endpoint)"]
+    KEYS --> LLM
+    LLM --> P["OpenRouter / DeepSeek / other providers"]
+    VIDEO["Video request"] --> VROUTER["Flip.Videogen.Router (deterministic)"]
+    VROUTER --> VCAPS["Flip.Videogen.ProviderCapabilities"]
+    VCAPS --> VPROV["Video provider"]
+    LLM --> AUDIT["Flip.LLM.CallAudit / Activities"]
+    P --> AUDIT
+    VROUTER --> AUDIT
+    AUDIT --> OPS["Admin/operational audit rows"]

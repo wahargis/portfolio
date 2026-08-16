@@ -1,0 +1,20 @@
+flowchart LR
+    subgraph SERVER["Server"]
+        PG[("PostgreSQL 16 (logical WAL)")]
+        EL["ElectricSQL 1.4.6"]
+        PHX["Phoenix API + channels"]
+        PG --> EL
+        PG --> PHX
+    end
+    subgraph CLIENT["Tauri desktop client"]
+        SHAPES["In-memory ShapeStream/Shape subscriptions (ref-counted dedup)"]
+        UI["React UI"]
+        QUEUE["In-memory optimistic send queue (FIFO, replay on reconnect)"]
+        IND["Offline indicator / dimming"]
+        EL -->|shape sync| SHAPES
+        SHAPES --> UI
+        QUEUE --> PHX
+        PHX --> IND
+        IND --> UI
+    end
+    PHX -->|401 refresh / 426 update-required| SHAPES

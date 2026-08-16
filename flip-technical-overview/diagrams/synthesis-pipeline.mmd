@@ -1,0 +1,14 @@
+flowchart TD
+    TRIGGER["Chat message / room config"] --> ENABLE{synthesis enabled?}
+    ENABLE -->|no| SKIP["No synthesis"]
+    ENABLE -->|yes| JOB["Oban AiReplyWorker job"]
+    JOB --> LOOP["ToolLoop gather phase (bounded rounds)"]
+    LOOP --> TOOLS["Governed tools (search, read, wayback)"]
+    TOOLS --> SOURCES["Sources + citations collected"]
+    SOURCES --> TERMINAL["Terminal phase: submit_plan"]
+    TERMINAL --> PLAN["Curation plan / synthesis text"]
+    PLAN --> PERSIST["Persist forum thread or reply with source enum"]
+    PERSIST --> LINK["Link source_channel_id / source_message_id"]
+    LINK --> CITE["Attach quote-verified citations"]
+    CITE --> LEDGER["Write source ledger entries"]
+    LEDGER --> DONE["Synthesis visible with provenance"]

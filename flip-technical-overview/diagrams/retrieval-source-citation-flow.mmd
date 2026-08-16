@@ -1,0 +1,12 @@
+flowchart LR
+    Q["User question / synthesis trigger"] --> SD["Flip.Search.SourceDiscovery (source ranking, domain groups)"]
+    SD --> BRAVE["Flip.Search.BraveClient (Brave Search API, circuit breaker)"]
+    BRAVE --> CASCADE["Flip.Retrieval.Cascade (staged retrieval)"]
+    CASCADE --> READ["Read tools (read_webpage, wayback, research_session)"]
+    READ --> GUARD["UrlGuard SSRF filter"]
+    GUARD --> PAGES["Web pages / Wayback captures"]
+    PAGES --> MINT["AI-minted citations (WebCitation / PdfCitation)"]
+    MINT --> VERIFY["Quote verification + citation identity hash"]
+    VERIFY --> LEDGER["Flip.LLM.SourceLedger (reader-facing)"]
+    VERIFY --> OUTPUT["Synthesis output with citations"]
+    OUTPUT --> API["message_source_ledger API"]
