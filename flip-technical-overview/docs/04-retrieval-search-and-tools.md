@@ -1,13 +1,17 @@
 # 04 — Retrieval, Search, and Tools
 
-Flip gives AI participants governed access to external sources through search, retrieval, and read tools.
-
-Source discovery is handled by `Flip.Search.SourceDiscovery`, which ranks source types and profiles, groups domains, and supports preferred-domain discovery. `Flip.Search.BraveClient` wraps the Brave Search API with a circuit breaker. `Flip.Retrieval.Cascade` provides staged retrieval helpers, so searches can degrade or escalate through retrieval stages rather than issuing unbounded calls.
-
-The tool layer is context-gated. `Flip.Synthesis.Tools.available_tools/1` and `apply_capability_context/1` define capability contexts including `:synthesis`, `:personal_ai_reply`, `:forum_ai_reply`, `:forum_enrichment`, and `:game_turn`. `execute/2` accepts an `authz_scope` and fails closed for search tools when the scope does not authorize them. `ToolLoop` enforces the advertised-tool allowlist before dispatch.
-
-Outbound web access is filtered by `Flip.Synthesis.UrlGuard`, which maintains an SSRF denylist. Read tools include `read_webpage`, `research_session`, and `wayback`; `webpage_reader` and `Flip.Archive.Wayback` support page and archive reads.
-
-The design pattern is consistent: a model is told about a narrow set of tools, each tool call is checked against the advertised set, the execution scope must authorize the tool, the URL must pass the guard, and the actual dispatch is isolated and time-bound. External searches are protected by a circuit breaker. This is defense in depth around retrieval rather than a single prompt instruction.
+Flip gives AI participants governed access to external sources through source discovery, search, retrieval, and read tools.
 
 <img src="../diagrams/retrieval-source-citation-flow.svg" alt="Retrieval, search, and citation flow" width="760" />
+
+## Source discovery and retrieval
+
+A source-discovery layer ranks source types and domains, groups related sources, and supports preferred-domain discovery. Retrieval is staged: searches can degrade or escalate through retrieval stages instead of issuing unbounded calls. External search access is protected by a circuit breaker so repeated provider failures do not accumulate retries.
+
+## Context-gated tools
+
+The tool layer is context-gated. Each capability context defines which tools are available for that kind of work — for example, synthesis, personal AI replies, forum AI replies, forum enrichment, or game turns. Tool execution checks the requested authorization scope and fails closed for search tools when the scope does not authorize them. The runtime enforces an advertised-tool allowlist before dispatch.
+
+## Safe outbound access
+
+Outbound web access is filtered by a URL guard that blocks unsafe destinations. Read tools cover live pages and archived captures, with page readers and archive retrieval behind the same guard. The design pattern is consistent: the model sees a narrow set of tools, each call is checked against the advertised set, the scope must authorize it, the URL must pass the guard, and dispatch is isolated and time-bound.

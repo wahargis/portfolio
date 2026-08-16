@@ -1,17 +1,17 @@
 flowchart LR
-    U["User / reviewer"] --> WB["Phoenix LiveView web app"]
-    U --> DC["Tauri desktop client"]
-    WB --> EP["Phoenix Endpoint (REST + channels)"]
-    DC --> EP
-    EP --> CHAT["Flip.Chat context"]
-    EP --> FORUM["Flip.Forum context"]
-    EP --> SYNTH["Flip.Synthesis agent runtime"]
-    CHAT --> DB[("PostgreSQL 16")]
+    U["User / reviewer"] --> WEB["Web application"]
+    U --> DESKTOP["Native desktop client"]
+    WEB --> APP["Application server"]
+    DESKTOP --> APP
+    APP --> CHAT["Chat surface"]
+    APP --> FORUM["Forum surface"]
+    APP --> AI["Bounded AI runtime"]
+    CHAT --> DB[("Database")]
     FORUM --> DB
-    SYNTH --> DB
-    DB --> ELECTRIC["ElectricSQL"]
-    ELECTRIC --> DC
-    SYNTH --> LLM["LLM providers"]
-    SYNTH --> SEARCH["Brave Search / web sources"]
-    EP --> AUDIT["Flip.AuditLog / CallAudit"]
-    SYNTH --> AUDIT
+    AI --> DB
+    DB --> SYNC["Sync service"]
+    SYNC --> DESKTOP
+    AI --> LLM["Supported LLM providers"]
+    AI --> SOURCES["Search / web sources"]
+    APP --> AUDIT["Audit log"]
+    AI --> AUDIT

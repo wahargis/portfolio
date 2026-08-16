@@ -1,29 +1,15 @@
-# ADR-0001: Public Architecture Boundary
-
-- **Status:** Accepted
-- **Decision owner:** William Hargis
-
-## Context
+# Public Architecture Boundary
 
 Flip is a production application with implementation details that stay out of public view: production prompts, credentials, vendor pricing, and internal configuration. Reviewers and public audiences still need to understand what the system does and how it is structured.
 
-## Decision
+## Principle
 
-This repository will describe Flip as public architecture only. It will:
+This repository describes Flip as public architecture only. It documents capabilities and structure in conceptual terms, publishes diagrams and demo scenarios, and links only to the live public hosts `https://flip.engineering` and `https://flip.tech-demo.dev`.
 
-- document capabilities using structural names (module names, route shapes, service names, protocol names);
-- publish diagrams, ADRs, and demo scenarios;
-- link only to the live public hosts `https://flip.engineering` and `https://flip.tech-demo.dev`;
-- omit source code, source mirrors, production persona prompts, secrets, credentials, vendor pricing, and internal URLs.
+## What is not published
 
-It will not:
+Source code, source mirrors, production persona prompts, secrets, credentials, vendor pricing, internal URLs, and implementation-specific names are not published. The overview does not quote implementation source or expose exact internal configuration.
 
-- create a source mirror or a public git remote for Flip;
-- quote implementation source beyond short structural names;
-- publish internal email excerpts, reviewer/applicant names, or conflict findings.
+## Expected effect
 
-## Consequences
-
-- Reviewers can evaluate the architecture without accessing implementation internals.
-- The overview cannot answer implementation-level questions about prompts, exact algorithms, or configurations.
-- Maintaining the boundary requires ongoing discipline: every document in this repository must be checked against the public-architecture rule before publication.
+Reviewers can evaluate the architecture without accessing implementation internals. The overview cannot answer implementation-level questions about prompts, exact algorithms, or configurations, and that is intentional.

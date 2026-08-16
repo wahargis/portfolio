@@ -1,13 +1,21 @@
 # 07 — Model Routing and Inference
 
-Model access is routed, not hardcoded. `Flip.Synthesis.LlmClient` speaks an OpenAI-compatible endpoint and handles reasoning modes for DeepSeek, OpenRouter, and other providers. Provider keys are stored encrypted via `Flip.Settings.LlmProviderKey` for `openrouter`, `deepseek`, and `other` provider types.
-
-`Flip.Settings.AppSettings` holds the selected `llm_provider`, `llm_provider_key_id`, and a reasoning parameter map. `Flip.Settings.ProviderMigration` supports migrating settings between providers. This allows per-deployment or per-room model choice without code changes; room-level `synthesis_config` can select a model within the configured provider boundary.
-
-Video generation has its own deterministic router: `Flip.Videogen.Router` selects a video provider based on configured capabilities, and `Flip.Videogen.ProviderCapabilities` describes those capabilities. The router is deterministic, so the same request and configuration map to the same provider path.
-
-Inference is auditable. `Flip.LLM.CallAudit`, `Flip.LLM.Activity`, and `Flip.LLM.Activities` record LLM activity, and telemetry bridges operational AI events into admin-visible audit rows. The LLM client installs a fuse/breaker pattern in the application, so repeated transport or server errors can open the circuit rather than accumulating retries.
-
-Encrypted keys, provider migration, per-room model selection, deterministic video routing, and LLM call audit together form the inference boundary. Prompt assembly and persona rendering are product internals; this overview covers the routing and control mechanisms only.
+Model access is routed, not hardcoded, so deployments and rooms can choose models within a configured boundary while keeping credentials encrypted and activity auditable.
 
 <img src="../diagrams/model-routing-audit.svg" alt="Model routing and call audit" width="760" />
+
+## Provider routing
+
+The inference layer speaks a standard model API and supports reasoning modes from multiple providers. Provider credentials are stored encrypted, and settings select the active provider without code changes. Room-level AI configuration can select a model within the configured provider boundary. A settings migration path supports moving between providers.
+
+## Deterministic routing for media generation
+
+Media generation uses a deterministic router: the same request and configuration always map to the same provider path. Provider capability descriptions let the router choose based on configured capabilities rather than ad hoc logic.
+
+## Audit and reliability
+
+Inference activity is recorded for operational visibility. The client installs a circuit-breaker pattern so repeated transport or server errors open the circuit instead of accumulating retries.
+
+## Boundary
+
+Prompt assembly and persona rendering are product internals; this overview covers routing and control mechanisms only.

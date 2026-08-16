@@ -1,19 +1,18 @@
 flowchart TB
     subgraph HOST["Deployment host"]
-        DB[("db: PostgreSQL 16 (wal_level=logical)")]
-        EL["electric: ElectricSQL 1.4.6"]
-        APP["app: Phoenix 1.8.9 on port 4001"]
-        TUNNEL["cloudflared tunnel (demo path)"]
-        DB --> EL
-        EL --> APP
+        DB[("Database")]
+        SYNC["Sync service"]
+        APP["Application server"]
+        TUNNEL["Demo tunnel"]
+        DB --> SYNC
+        SYNC --> APP
         APP --> DB
     end
-    WEB["Browser / LiveView web"] --> APP
-    CLIENT["Tauri desktop client"] --> APP
-    CLIENT --> EL
-    APP --> LLM["LLM providers (OpenAI-compatible, DeepSeek, OpenRouter, other)"]
-    APP --> BRAVE["Brave Search API"]
-    APP --> WEBPAGES["Web pages / Wayback"]
+    WEB["Web client"] --> APP
+    CLIENT["Native desktop client"] --> APP
+    CLIENT --> SYNC
+    APP --> LLM["Supported LLM providers"]
+    APP --> SOURCES["Search / web sources"]
     DEPLOY["Deploy automation"] --> HOST
     TUNNEL --> DEMO["flip.tech-demo.dev"]
     APP --> PROD["flip.engineering"]

@@ -1,22 +1,26 @@
 # 08 — Production and Demo Topology
 
-Flip maintains two live targets with a separation boundary.
+Flip maintains two live targets with a clear separation boundary: a production environment and a synthetic technical demo.
+
+<img src="../diagrams/deployment-topology.svg" alt="Production and demo deployment topology" width="760" />
+
+## Separation boundary
 
 | Concern | Production | Technical demo |
 |---|---|---|
 | Host | `flip.engineering` | `flip.tech-demo.dev` |
 | Data | Authorized production | Versioned synthetic seed data |
-| Database/storage | Production resources | Separate resources |
+| Resources | Production resources | Separate resources |
 | Credentials | Production routing | Separate capped credentials |
 | Accounts | Real users | Stable demo accounts |
 | Reset | Normal retention | Reproducible reset |
 | Client target | Default production | Explicit demo profile |
 | UI | Canonical product | Persistent technical-demo banner |
 
-Production deployments are workflow-gated: a deploy workflow runs in the production environment on a self-hosted runner, serializes deploys with `flock`, fast-forwards the canonical checkout, runs drift checks against `https://flip.engineering/api/version`, and invokes a guarded host redeploy.
+## Deployment approach
 
-Demo deployments use `bin/deploy-beta`, which brings up the stack and a Cloudflare Tunnel and verifies `https://flip.tech-demo.dev/api/health/ready`. `docker-compose.yml` includes both hosts in `CORS_ORIGINS` and `CHECK_ORIGIN`.
+Production deployments are workflow-gated: changes pass automated checks before reaching the live host, and deployments are serialized to avoid conflicts. The demo is deployed as a separate environment with its own resources, seeded from synthetic data only, and can be reset reproducibly.
 
-Both hosts expose health and version endpoints for operational visibility, and both are live for review.
+## Operational visibility
 
-<img src="../diagrams/deployment-topology.svg" alt="Production and demo deployment topology" width="760" />
+Both hosts expose health and version information for operational visibility, but the exact endpoints, scripts, and deployment mechanics are not part of the public architecture. What matters publicly is that production and demo remain isolated and reviewable.

@@ -1,34 +1,34 @@
 flowchart LR
     subgraph clients["Clients"]
-        OPS["HomeCloud operators<br/>LiveView, REST API, MCP"]
+        OPS["Operators<br/>dashboard, API, MCP"]
     end
 
-    subgraph server["HomeCloud server — Ubuntu, 4x NVIDIA V100 32GB"]
+    subgraph server["Home lab server - 4x NVIDIA V100 32GB"]
         subgraph apps["Application layer"]
-            HCAPP["HomeCloud Phoenix application<br/>homecloud-phoenix"]
+            APP["HomeCloud application"]
         end
 
         subgraph inference["Supervised inference layer"]
-            PRIMARY["llama-server :8081<br/>primary model, GPUs 0+1 NVLink"]
-            RESEARCH["llama-server :8082<br/>research model, GPU2"]
-            SECONDARY["llama-server :8083<br/>secondary model, GPU3"]
+            PRIMARY["Primary model service<br/>reserved GPU pair"]
+            RESEARCH["Research model service<br/>research GPU"]
+            SECONDARY["Secondary model service<br/>on-demand GPU"]
         end
 
         subgraph data["Data layer"]
-            HCDB[("HomeCloud PostgreSQL + pgvector")]
+            DB[("Database + vector storage")]
         end
 
         subgraph sandbox["Sandbox layer"]
-            DOCKER["Docker sandboxes<br/>agent tool execution"]
+            DOCKER["Sandboxed tool execution"]
         end
     end
 
-    OPS --> HCAPP
-    HCAPP --> PRIMARY
-    HCAPP --> RESEARCH
-    HCAPP --> SECONDARY
-    HCAPP --> HCDB
-    HCAPP --> DOCKER
+    OPS --> APP
+    APP --> PRIMARY
+    APP --> RESEARCH
+    APP --> SECONDARY
+    APP --> DB
+    APP --> DOCKER
     PRIMARY --> GPUS["GPU0 + GPU1 (NVLink pair)"]
     RESEARCH --> GPU2["GPU2"]
     SECONDARY --> GPU3["GPU3"]

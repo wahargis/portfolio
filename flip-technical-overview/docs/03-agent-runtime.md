@@ -1,15 +1,21 @@
 # 03 — Agent Runtime
 
-Flip's AI work runs in a bounded agent runtime rather than in unbounded model loops. Three layers of control shape every run: `Flip.Synthesis.ToolLoop`, `Flip.Synthesis.IsolatedDispatch`, and `Flip.Synthesis.AiReplyWorker`.
-
-`ToolLoop` implements a two-phase tool loop. The gather phase lets the model call read/analysis tools; the terminal phase requires a plan submission. The loop enforces a round cap (default 6 rounds, configurable per room), a wall-clock deadline (default 480,000 ms) checked between rounds, and an input-token envelope that ensures history plus reserved terminal output still fits the model context. When a cap is hit, the loop enters a finish mode that forces the terminal submission and marks a finish-timeout as non-retryable so side-effectful tools are not replayed by Oban retries.
-
-`IsolatedDispatch` runs each tool call under `Task.Supervisor.async_nolink` with a per-tool timeout. This isolates crashes and timeouts so a linked-child raise inside a tool cannot kill the worker. The advertised-tool allowlist in `ToolLoop` is a second barrier: only tool names actually advertised to the model in that turn can reach dispatch, independent of the larger tool catalog.
-
-`AiReplyWorker` adds worker-level bounds: a default deadline of 300 seconds, round caps, backoff, and Oban Lifeline rescue after 5,400 seconds. The application configuration carries the Oban engine, queues, Pruner, and Lifeline settings.
-
-The runtime is supervised: the reply worker's tool-dispatch supervisor is started before Oban so queued jobs can always dispatch safely. Synthesis hooks are registered with the application, and Oban queues are feature-gated.
-
-The practical result is that AI participants can use tools, but every run has a ceiling on rounds, time, tokens, and tool execution, and a single bad tool cannot take down the worker.
+Flip’s AI work runs in a bounded agent runtime rather than in unbounded model loops, with explicit ceilings on rounds, time, tokens, and tool execution.
 
 <img src="../diagrams/agent-execution-sequence.svg" alt="Agent execution sequence" width="760" />
+
+## Bounded tool loop
+
+The runtime uses a two-phase loop. A gather phase lets the model call read and analysis tools; a terminal phase requires a plan or final response. The loop enforces a per-run round cap, a wall-clock deadline checked between rounds, and an input-token envelope so the model’s context remains predictable. When a cap is reached, the run forces a terminal submission and marks the finish-timeout as non-retryable, preventing side-effectful tools from being replayed by retries.
+
+## Isolated dispatch
+
+Each tool call runs in its own isolated unit with a per-tool timeout. A crash or timeout in one tool cannot bring down the worker or the rest of the run. The runtime also enforces an advertised-tool allowlist: only the tools the model was told about in that turn can actually be dispatched, independent of the larger tool catalog.
+
+## Worker-level bounds
+
+The async worker adds another layer of control: a deadline, round caps, backoff, and a rescue mechanism for runs that are stuck beyond the normal deadline. The runtime is supervised so queued AI work can always dispatch safely, and synthesis capabilities are feature-gated per deployment.
+
+## Practical result
+
+AI participants can use tools, but every run has a ceiling, and a single bad tool cannot take down the worker.

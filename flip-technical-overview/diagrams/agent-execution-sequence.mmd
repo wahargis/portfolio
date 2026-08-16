@@ -1,29 +1,29 @@
 sequenceDiagram
     autonumber
-    participant O as Oban (AiReplyWorker job)
-    participant W as Flip.Synthesis.AiReplyWorker
-    participant L as Flip.Synthesis.ToolLoop
-    participant D as Flip.Synthesis.IsolatedDispatch
-    participant T as Flip.Synthesis.Tools
+    participant JOB as Background job scheduler
+    participant W as AI worker
+    participant L as Bounded loop
+    participant D as Isolated dispatch
+    participant T as Tool layer
     participant M as LLM provider
 
-    O->>W: start bounded job
-    W->>L: run synthesis loop (round cap, deadline, token envelope)
+    JOB->>W: start bounded AI job
+    W->>L: run synthesis loop under round, time, and token limits
     loop Gather phase
         L->>M: call with advertised tools
         M-->>L: tool calls
-        L->>L: verify call is in advertised allowlist
+        L->>L: verify call is allowed for this context
         L->>D: dispatch approved call
-        D->>T: execute with authz_scope and timeout
+        D->>T: execute with authorization scope and timeout
         T-->>D: tool result
-        D-->>L: isolated result (crash/timeout contained)
+        D-->>L: isolated result (crash or timeout contained)
     end
     alt Terminal phase
-        L->>M: force submit_plan
-        M-->>L: plan JSON
+        L->>M: request final plan
+        M-->>L: plan result
         L-->>W: terminal result
-    else Cap hit
+    else Limit reached
         L->>L: enter finish mode
         L-->>W: forced terminal or non-retryable timeout
     end
-    W-->>O: complete or bounded stop
+    W-->>JOB: complete or bounded stop

@@ -1,17 +1,15 @@
-# Portfolio — consolidated reviewer path
+# Portfolio
 
-Four project presentations only. Supporting systems are presented inside the project they serve:
+I build full-stack products where real-time collaboration, AI assistance, and durable provenance meet. The projects below are public snapshots of that work: they emphasize architecture and product thinking, with implementation details intentionally kept out of the public path.
 
-1. **Flip** — production AI application platform, including its Tauri native client and `flip.tech-demo.dev`.
-2. **Project Manager** — evidence-aware institutional memory and research-control system.
-3. **Baton** — deterministic multi-agent control plane.
-4. **HomeCloud** — self-hosted AI runtime and LLMOps platform, including the homecloud-tools integration layer.
+## Projects
 
-## Reviewer path
+- **[Flip Technical Overview](flip-technical-overview/)** — A hybrid chat + forum platform with bounded AI participants, retrieval, citations, and a production/demo separation boundary. Live at [flip.engineering](https://flip.engineering) and [flip.tech-demo.dev](https://flip.tech-demo.dev).
+- **[HomeCloud](homecloud/)** — A self-hosted AI runtime and LLMOps platform built around four NVIDIA V100 32GB GPUs, supervised model serving, GPU scheduling, sandboxed agents, RAG memory, checkpoints, and evaluation harnesses.
+- **[Project Manager](https://github.com/wahargis/project-manager)** — Evidence-aware institutional memory and research-control system.
+- **[Baton](https://github.com/Flip-Engineering/baton)** — Deterministic multi-agent control plane.
 
-1. [GitHub profile](https://github.com/wahargis/wahargis)
-2. [Flip Technical Overview](https://github.com/wahargis/portfolio/tree/main/flip-technical-overview)
-3. [Technical demo](https://flip.tech-demo.dev)
-4. [Project Manager](https://github.com/wahargis/project-manager)
-5. [Baton](https://github.com/Flip-Engineering/baton)
-6. [HomeCloud](https://github.com/wahargis/portfolio/tree/main/homecloud)
+## Elsewhere
+
+- [GitHub profile](https://github.com/wahargis/wahargis)
+- [Live Flip technical demo](https://flip.tech-demo.dev)

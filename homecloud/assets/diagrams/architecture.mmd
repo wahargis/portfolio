@@ -1,53 +1,53 @@
 flowchart TD
     subgraph clients["Clients"]
-        LV["HomeCloud LiveView<br/>chat, research, vault, infrastructure"]
-        API["Agent REST API and MCP<br/>external tools and dispatchers"]
+        UI["Operator dashboard<br/>chat, research, memory, infrastructure"]
+        API["Agent API and MCP<br/>external tools and dispatchers"]
     end
 
-    subgraph app["HomeCloud Phoenix application"]
-        EE["ExecutionEngine<br/>autonomous / interactive / plan-only"]
-        CE["ContextEngine + ContextManager<br/>token budgeting, RAG, memory retrieval"]
-        MR["ModelRouter + InferenceRouter<br/>provider selection, round-robin, failover"]
-        IP["InstancePool<br/>adopt-only llama-server pool"]
-        TR["ToolRegistry + DynamicToolRegistry<br/>built-in and runtime-synthesized tools"]
-        SB["AgentSandbox<br/>Docker-isolated tool execution"]
-        CK["Checkpointer + GitCheckpoint<br/>Postgres snapshots and git rollback"]
+    subgraph app["Application layer"]
+        EXEC["Agent execution<br/>autonomous / interactive / plan-only"]
+        CTX["Context management<br/>token budgeting, RAG, memory retrieval"]
+        ROUTE["Model routing<br/>provider selection, round-robin, failover"]
+        POOL["Supervised model pool"]
+        TOOLS["Tool registry<br/>built-in and runtime tools"]
+        SANDBOX["Sandboxed tool execution"]
+        CHECK["Checkpoints<br/>session snapshots and rollback"]
     end
 
     subgraph services["Supervised platform services"]
-        PG[("PostgreSQL + pgvector")]
-        SD["systemd user units<br/>pre-flight GPU health checks"]
-        L1["llama-server :8081<br/>primary model, GPUs 0+1 NVLink"]
-        L2["llama-server :8082<br/>research model, GPU2"]
-        L3["llama-server :8083<br/>secondary model, GPU3"]
-        GM["GpuMonitor + GpuClaimRegistry<br/>+ GpuWorkloadScheduler"]
+        DB[("Database + vector storage")]
+        HEALTH["Health checks"]
+        M1["Primary model service<br/>reserved GPU pair"]
+        M2["Research model service<br/>research GPU"]
+        M3["Secondary model service<br/>on-demand GPU"]
+        SCHED["GPU scheduler + claim registry"]
     end
 
     subgraph hw["Hardware"]
-        G0["GPU0<br/>Tesla V100-SXM2-32GB"]
-        G1["GPU1<br/>Tesla V100-SXM2-32GB"]
-        G2["GPU2<br/>Tesla V100-SXM2-32GB"]
-        G3["GPU3<br/>Tesla V100-SXM2-32GB"]
+        G0["GPU0<br/>NVIDIA V100 32GB"]
+        G1["GPU1<br/>NVIDIA V100 32GB"]
+        G2["GPU2<br/>NVIDIA V100 32GB"]
+        G3["GPU3<br/>NVIDIA V100 32GB"]
     end
 
-    LV --> EE
-    API --> EE
-    EE --> CE
-    EE --> MR
-    MR --> IP
-    IP --> L1
-    IP --> L2
-    IP --> L3
-    EE --> SB
-    EE --> CK
-    CE --> PG
-    CK --> PG
-    TR --> SB
-    SD --> L1
-    SD --> L2
-    SD --> L3
-    GM --> SD
-    L1 --> G0
-    L1 --> G1
-    L2 --> G2
-    L3 --> G3
+    UI --> EXEC
+    API --> EXEC
+    EXEC --> CTX
+    EXEC --> ROUTE
+    ROUTE --> POOL
+    POOL --> M1
+    POOL --> M2
+    POOL --> M3
+    EXEC --> SANDBOX
+    EXEC --> CHECK
+    CTX --> DB
+    CHECK --> DB
+    TOOLS --> SANDBOX
+    HEALTH --> M1
+    HEALTH --> M2
+    HEALTH --> M3
+    SCHED --> HEALTH
+    M1 --> G0
+    M1 --> G1
+    M2 --> G2
+    M3 --> G3
