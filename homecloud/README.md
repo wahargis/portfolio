@@ -207,3 +207,7 @@ HomeCloud can supply local inference for Flip through a provider-compatible endp
 - Sandboxes reduce blast radius but do not make arbitrary generated code safe by definition.
 - Experimental reward functions can be gamed unless verification remains deterministic and task-specific.
 - The broad source repository contains host- and research-specific implementation; this public page is an architecture case study rather than a turnkey appliance promise.
+
+## Source
+
+The implementation is available in the public [HomeCloud repository](https://github.com/wahargis/home-cloud). This portfolio page selects the stable runtime architecture, capability boundaries, and maturity distinctions needed for review; host-specific configuration, production data, credentials, and research chronology remain outside the case study.

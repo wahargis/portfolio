@@ -1,7 +1,7 @@
 # Portfolio notice
 
-This repository is an architecture and engineering portfolio.
+This repository is a curated architecture and engineering portfolio.
 
-Unless a project page explicitly links to a public source repository and license, the documentation does not grant a license to private implementation code, product assets, prompts, data, or deployment configuration. Diagrams and prose are provided for review and discussion.
+Source-code availability and licensing are governed by the canonical repositories linked from each project page. Nothing in this portfolio expands, replaces, or overrides those repository licenses. The portfolio prose and diagrams are provided for technical review and discussion unless a separate license states otherwise.
 
-The examples are sanitized. They intentionally omit credentials, private data, host-specific paths, proprietary prompt content, and operational thresholds that are not necessary to understand the architecture.
+The examples intentionally omit production data, credentials, private messages, host-specific secrets, proprietary prompt/persona configuration, security-sensitive thresholds, and deployment state that are not necessary to understand the architecture.
