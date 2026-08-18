@@ -1,232 +1,98 @@
-# 09 — Quality, Evaluation, and Operations
+# 09 — Quality and Evaluation Strategy
 
-## Quality model
+## A good model response is not evidence that the product works
 
-Flip needs several forms of evidence because a passing model response does not prove product correctness.
+Flip combines deterministic product rules with non-deterministic model behavior and asynchronous infrastructure. Its quality strategy therefore separates four questions:
 
-<img src="../diagrams/ci-quality-gates.svg" alt="Flip quality gates" width="900" />
+1. Are the product invariants correct regardless of model?
+2. Does the selected model route behave acceptably for its assigned surface?
+3. Do the full user workflows converge across HTTP, jobs, database, sync, and UI?
+4. Does deployed behavior remain healthy and correct over time?
 
-| Evidence layer | Proves |
-|---|---|
-| **Domain unit tests** | Authorization, validation, state transitions, search, and pure logic. |
-| **Database/integration tests** | Transactions, constraints, migrations, Oban uniqueness/retry, cross-context relationships. |
-| **AI runtime contract tests** | Triggering, catalog selection, argument parsing, tool failures, finish/repair behavior, persistence. |
-| **Provider adapter tests** | Request/response normalization, streaming, tool-call shape, compatibility fallbacks. |
-| **Client tests** | State reducers, optimistic reconciliation, sync handling, rendering, native adapters. |
-| **End-to-end scenarios** | One user-visible workflow across HTTP, jobs, database, sync/channels, and UI. |
-| **Security tests** | Cross-community retrieval denial, URL/fetch policy, sanitization, secret redaction, admin boundaries. |
-| **Evaluation corpora** | Relevance, citation support, curation validity, tool selection, and route-specific behavior. |
-| **Operational telemetry** | Latency, error classes, retries, queue/capacity, terminal outcomes, recovery. |
+<img src="../diagrams/ci-quality-gates.svg" alt="Flip quality and release evidence" width="900" />
 
-No one layer substitutes for the others.
+## 1. Prove the deterministic shell
 
-## Test the deterministic shell first
+The highest-value tests target the code-owned contracts that must survive every model change:
 
-The highest-value tests assert code-owned invariants:
+- authorization scope cannot widen during internal retrieval;
+- duplicate triggers do not produce duplicate visible effects;
+- tool failure cannot silently kill an AI turn;
+- curation cannot attribute text to the wrong participant or reference ineligible messages;
+- invalid citation/artifact identities do not render as evidence;
+- provider protocol cannot be persisted as normal content;
+- a failed transaction cannot publish a phantom realtime success;
+- optimistic clients converge on canonical identities;
+- asynchronous continuation happens once for the intended terminal event.
 
-- an actor cannot search a community they cannot read;
-- missing trusted scope returns no internal results;
-- a tool exception cannot kill the reply job;
-- a duplicate trigger cannot create a duplicate reply;
-- a curation plan cannot reference a source outside its eligible set;
-- user-authored source identity survives synthesis;
-- an invalid citation identity cannot render as supported evidence;
-- provider protocol markup cannot be persisted as a normal reply;
-- client optimism converges with canonical transaction identity;
-- a failed transaction cannot publish a phantom realtime update;
-- an artifact continuation runs once per intended terminal event.
+These checks belong in domain, database, integration, job, adapter, and client tests. They should assert durable product state rather than merely that a function returned `:ok`.
 
-These remain valid across model upgrades.
+## 2. Evaluate model behavior by surface
 
-## Model-behavior evaluation
+Model quality is not one benchmark score. The relevant behavior depends on the role.
 
-Model-dependent behavior requires representative, dated cases rather than only unit fixtures.
+For a research reply, the evaluation asks whether the model recognizes the need for current evidence, reads rather than cites search snippets, selects the right tools, handles disagreement, places citations near supported claims, and remains honest when evidence is insufficient.
 
-### AI reply corpus
+For curation, it asks whether the plan forms coherent topics, preserves source identity and reply relationships, chooses a valid destination, avoids duplication, and defers material that needs review.
 
-Include cases for:
+For action or artifact workflows, it asks whether the model uses typed capabilities correctly, produces a valid terminal response, and handles pending or failed external work without claiming success.
 
-- direct answer without tools;
-- external search and source reading;
-- conflicting sources;
-- internal authorized retrieval;
-- internal denied retrieval;
-- document/PDF evidence;
-- structured data and chart;
-- asynchronous artifact continuation;
-- tool failure;
-- provider failure after evidence collection;
-- terminal protocol leakage;
-- insufficient evidence and honest uncertainty.
+Evaluation cases are versioned with the route, model, adapter, configuration, and date. A result supports a deployment decision for that surface; it is not a timeless claim about the model.
 
-### Curation corpus
+## 3. Test convergence across the product
 
-Include:
-
-- one coherent topic;
-- several interleaved topics;
-- duplicate material already represented in a forum;
-- participant correction;
-- messages with reply dependencies;
-- excluded/private material;
-- invalid destination;
-- low-signal conversation;
-- content requiring manual review.
-
-Evaluation can check structural plan validity, source coverage, authorship preservation, destination quality, duplicate rate, and reviewer correction rate.
-
-### Route matrix
-
-Each candidate route is assessed against the surfaces it may serve. A fast model that is unreliable at tool calls may still be useful for non-tool classification; a strong long-context route may be too slow for ordinary chat.
-
-## Citation evaluation
-
-A citation evaluation distinguishes:
-
-1. citation identity exists;
-2. source was actually retrieved;
-3. selected passage appears in the source;
-4. passage is relevant to the nearby claim;
-5. claim does not exceed what the passage supports;
-6. source type/date are represented honestly;
-7. inaccessible or disputed source state is visible.
-
-The first three are substantially deterministic. The latter require semantic evaluation and sometimes human review.
-
-## Client synchronization tests
-
-Realtime correctness should include adversarial ordering:
-
-- mutation response before sync event;
-- sync event before mutation response;
-- duplicate event;
-- reconnect during pending mutation;
-- permission revoked while cached;
-- two devices editing/reacting;
-- background job updates while client sleeps;
-- channel loss while durable sync continues;
-- local clock skew;
-- server migration/shape change.
-
-The expected result is convergence, not one exact packet order.
-
-## Job and recovery tests
-
-Oban workflows should cover:
-
-- uniqueness under simultaneous enqueue;
-- retry after transient failure;
-- terminal state not retried;
-- partial synthesis/linkback failure;
-- worker crash during tool execution;
-- continuation deduplication;
-- queue cancellation or shutdown;
-- stale/pending artifact repair;
-- backoff behavior without multi-hour hidden stalls.
-
-Tests should assert product state, not merely that the worker function returned `:ok`.
-
-## Security regression suite
-
-Minimum high-value cases:
-
-- cross-community chat/forum search;
-- forged actor/community identifiers in tool arguments;
-- missing authorization scope;
-- private source included in a public synthesized artifact;
-- server-side request forgery;
-- malicious webpage/document prompt injection;
-- unsafe rendered HTML/markdown;
-- credential-like text in logs or source ledger;
-- unauthorized platform action;
-- stale client capability after permission change;
-- admin setting manipulated through AI content.
-
-## CI gates
-
-A practical CI pipeline can include:
+End-to-end scenarios cover the seams that unit tests cannot:
 
 ```text
-format
-  -> compile with warnings as errors
-  -> dependency consistency
-  -> database create/migrate
-  -> server tests
-  -> client tests/type checks/build
-  -> artifact/diagram/docs checks
-  -> dependency advisory checks
-  -> container/release build
-  -> selected integration scenarios
+user command
+  -> authorization and transaction
+  -> background job / model / tools
+  -> durable reply, curation, or artifact state
+  -> Electric / channel projection
+  -> web or native rendering
 ```
 
-Large model/provider evaluations can run on a separate scheduled or pre-release track because they are slower and non-deterministic. Their results should still be versioned and tied to the route/model/configuration under test.
+The adversarial cases matter most: response and sync arriving in either order, disconnect during a pending mutation, provider failure after evidence collection, worker crash during tool dispatch, linkback failing after forum commit, permission revocation against cached state, or a client waking after an artifact completed.
 
-## Observability
+The expected result is coherent state and honest failure, not one exact packet order.
 
-### Product metrics
+## 4. Use operations as quality feedback
 
-- active rooms/threads;
-- message and forum participation;
-- search use and successful navigation;
-- synthesis creation/merge/correction;
-- source-link traversal;
-- AI invocation and response completion;
-- artifact lifecycle.
+Runtime telemetry should explain where user-visible outcomes degrade without retaining unnecessary private content. Useful signals include queue wait, provider and tool latency, terminal reason, retry/repair rate, citation validation failure, curation correction, artifact abandonment, sync lag, and route-specific evaluation drift.
 
-### Runtime metrics
+Product feedback matters as much as infrastructure health. Participant correction, recuration, deletion of AI replies, source-link traversal, and unresolved artifact state reveal failures that a latency dashboard cannot.
 
-- queue wait and execution time;
-- model latency and terminal reason;
-- tool count, duration, and failure class;
-- citation/artifact counts;
-- retry and repair rate;
-- provider circuit state;
-- internal retrieval denial/missing-scope events;
-- sync lag and reconnects.
+Operational data should feed new deterministic regressions or versioned evaluation cases rather than becoming a pile of unexamined logs.
 
-### Quality signals
+## Citation quality has deterministic and semantic layers
 
-- participant feedback;
-- recuration/manual-review rate;
-- citation validation failure;
-- unsupported-claim review;
-- duplicate durable threads;
-- AI reply deletion/correction;
-- artifact abandonment;
-- route-specific evaluation drift.
+Flip can deterministically check that a citation identity exists, the source was retrieved, and the selected passage appears in it. It cannot deterministically prove that the passage is true, current, or sufficient for every nearby inference.
 
-Metrics should be sliced by surface and route without exposing private content.
+Semantic evaluation therefore considers relevance, claim scope, source type/date, and disagreement. High-stakes or disputed cases may require human review. The architecture is explicit about where automation ends.
 
-## Operational failure domains
+## Security regressions are product regressions
 
-| Failure domain | Isolation expectation |
-|---|---|
-| Hosted/local model endpoint | AI feature degrades; chat/forum transactions remain available. |
-| One tool provider | That capability fails honestly; reply may continue with existing evidence. |
-| Oban queue backlog | Durable jobs wait; synchronous product state remains coherent. |
-| Electric/sync path | Clients can fall back/reconnect; server remains canonical. |
-| Channel/PubSub interruption | Ephemeral events are lost; durable records recover. |
-| Media provider | Artifact remains pending/failed; source conversation remains intact. |
-| One Phoenix process | BEAM supervision restarts it without corrupting durable state. |
-| Database unavailable | Reject/queue writes; do not publish non-durable success. |
+The suite must exercise cross-community retrieval denial, forged scope arguments, missing trusted scope, private source leakage into public artifacts, unsafe external fetching, prompt injection in retrieved content, rendered-content sanitization, unauthorized product actions, stale client capability, and credential redaction.
 
-## Deployment checks
+These are not separate from AI quality. An answer that is relevant but violates visibility is a failed product outcome.
 
-Operational readiness should verify:
+## CI and release evidence
 
-- schema migration compatibility;
-- required feature/provider configuration;
-- queue and schedule admission;
-- database backup/restore;
-- credential separation;
-- route health and capability;
-- sync/channel behavior;
-- artifact storage access;
-- rollback plan;
-- observability and alert paths.
+A practical deterministic gate compiles and formats the server, applies migrations, runs server/client/integration/security tests, checks dependencies and documentation, and builds the release/container. Selected end-to-end scenarios verify the assembled product.
 
-These checks belong in deployment automation or runbooks. They should not dominate the public product case study.
+Model/provider evaluations are slower and can run on scheduled or pre-release tracks, but route changes should not ship without current evidence for the surfaces they affect. When a route regresses, the product can constrain or remove that route without blocking unrelated deterministic changes.
+
+## Failure-domain evidence
+
+The test and operations model should confirm that:
+
+- model or tool outages degrade AI capability while ordinary collaboration remains coherent;
+- queue backlog delays durable work without inventing completion;
+- sync/channel interruption preserves PostgreSQL authority;
+- media failure produces a failed artifact rather than a broken conversation;
+- BEAM process restarts do not corrupt durable state;
+- database unavailability prevents non-durable success from being published.
 
 ## Evidence discipline
 
-Claims such as “production-ready,” “zero hallucinations,” “supports N users,” or “novel” require dated, reproducible evidence. The portfolio instead documents the architecture, deterministic contracts, representative evaluation methods, and known limitations.
+Claims such as “production-ready,” “zero hallucinations,” “supports N users,” or “novel” require dated, reproducible evidence. The portfolio instead states the contracts, evaluation methods, failure boundaries, and known limitations that can be defended from the implementation.
