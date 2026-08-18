@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">Baton deterministic agent control loop</title>
+  <desc id="desc">An orchestrator uses unified surfaces to control a deterministic coordinator, which launches isolated full-session workers, records durable events, verifies results in fresh worktrees, and gates adoption or integration.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
+    </marker>
+    <style>
+      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
+      .kernel{fill:#f0f2f5;stroke:#20242a;stroke-width:2.5;rx:18}
+      .t{font:700 26px Arial,sans-serif;fill:#17191d}.h{font:700 17px Arial,sans-serif;fill:#20242a}
+      .b{font:14px Arial,sans-serif;fill:#454b55}.l{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
+      .a{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .d{stroke:#626a75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1280" height="760"/>
+  <text x="55" y="52" class="t">Baton: reasoning above, exact authority below</text>
+
+  <rect class="box" x="55" y="95" width="260" height="110"/>
+  <text x="82" y="127" class="l">ORCHESTRATOR</text>
+  <text x="82" y="158" class="h">AI harness or human</text>
+  <text x="82" y="183" class="b">goals · decomposition · decisions</text>
+
+  <rect class="box" x="380" y="95" width="500" height="110"/>
+  <text x="407" y="127" class="l">UNIFIED NORTHBOUND SURFACES</text>
+  <text x="407" y="158" class="h">MCP · CLI · resident bus · embedded API</text>
+  <text x="407" y="183" class="b">one command grammar and one authority</text>
+
+  <path class="a" d="M315 150 L380 150"/>
+
+  <rect class="kernel" x="245" y="265" width="790" height="205"/>
+  <text x="275" y="300" class="l">DETERMINISTIC COORDINATOR</text>
+
+  <rect class="box" x="275" y="325" width="210" height="105"/>
+  <text x="300" y="355" class="h">Lifecycle authority</text>
+  <text x="300" y="380" class="b">plans · approval · fencing</text>
+  <text x="300" y="403" class="b">stop · reap · recovery</text>
+
+  <rect class="box" x="535" y="325" width="210" height="105"/>
+  <text x="560" y="355" class="h">Durable event truth</text>
+  <text x="560" y="380" class="b">ordering · cursors · replay</text>
+  <text x="560" y="403" class="b">idempotence · attention</text>
+
+  <rect class="box" x="795" y="325" width="210" height="105"/>
+  <text x="820" y="355" class="h">Policy and evidence</text>
+  <text x="820" y="380" class="b">scope · receipts · trust gates</text>
+  <text x="820" y="403" class="b">review · adopt · integrate</text>
+
+  <path class="a" d="M630 205 L630 265"/>
+
+  <rect class="box" x="55" y="545" width="330" height="130"/>
+  <text x="82" y="577" class="l">ISOLATED WORKERS</text>
+  <text x="82" y="609" class="h">Full-session coding harnesses</text>
+  <text x="82" y="635" class="b">exact route · exact scope · own worktree</text>
+  <text x="82" y="658" class="b">messages · checkpoints · result pin</text>
+
+  <rect class="box" x="475" y="545" width="330" height="130"/>
+  <text x="502" y="577" class="l">FRESH VERIFICATION</text>
+  <text x="502" y="609" class="h">Independent worktree and checks</text>
+  <text x="502" y="635" class="b">build · test · mutation · evidence</text>
+  <text x="502" y="658" class="b">optional independent semantic review</text>
+
+  <rect class="box" x="895" y="545" width="330" height="130"/>
+  <text x="922" y="577" class="l">CONTROLLED EFFECT</text>
+  <text x="922" y="609" class="h">Adopt or integrate</text>
+  <text x="922" y="635" class="b">explicit policy decision</text>
+  <text x="922" y="658" class="b">candidate remains isolated on failure</text>
+
+  <path class="a" d="M380 470 C350 500 300 520 220 545"/>
+  <path class="a" d="M385 610 L475 610"/>
+  <path class="a" d="M805 610 L895 610"/>
+  <path class="d" d="M1060 545 C1060 500 970 480 900 455"/>
+  <text x="1000" y="493" class="b">receipt</text>
+</svg>

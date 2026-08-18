@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="690" viewBox="0 0 1200 690" role="img" aria-labelledby="title desc">
+  <title id="title">Project Manager architecture</title>
+  <desc id="desc">CLI, MCP, and web surfaces share a Rust domain core containing project, DAG, knowledge graph, truth maintenance, review, retrieval, and session engines backed by versioned SQLite.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
+    </marker>
+    <style>
+      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
+      .group{fill:#f3f4f6;stroke:#707782;stroke-width:1.5;rx:18}
+      .t{font:700 25px Arial,sans-serif;fill:#17191d}.h{font:700 17px Arial,sans-serif;fill:#20242a}
+      .b{font:14px Arial,sans-serif;fill:#454b55}.l{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
+      .a{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="690"/>
+  <text x="55" y="52" class="t">Project Manager: one evidence model, three surfaces</text>
+
+  <rect class="group" x="55" y="85" width="1090" height="125"/>
+  <text x="80" y="112" class="l">SURFACES</text>
+  <rect class="box" x="90" y="130" width="285" height="55"/><text x="205" y="164" class="h">CLI</text>
+  <rect class="box" x="458" y="130" width="285" height="55"/><text x="552" y="164" class="h">MCP stdio</text>
+  <rect class="box" x="825" y="130" width="285" height="55"/><text x="910" y="164" class="h">Web dashboard</text>
+
+  <path class="a" d="M232 185 L232 245"/>
+  <path class="a" d="M600 185 L600 245"/>
+  <path class="a" d="M968 185 L968 245"/>
+
+  <rect class="group" x="55" y="245" width="1090" height="300"/>
+  <text x="80" y="275" class="l">RUST DOMAIN CORE</text>
+
+  <rect class="box" x="85" y="300" width="300" height="95"/>
+  <text x="110" y="330" class="h">Typed project model</text>
+  <text x="110" y="356" class="b">projects · phases · experiments</text>
+  <text x="110" y="378" class="b">findings · decisions · hypotheses</text>
+
+  <rect class="box" x="450" y="300" width="300" height="95"/>
+  <text x="475" y="330" class="h">Dependency DAG</text>
+  <text x="475" y="356" class="b">topology · impact · next action</text>
+  <text x="475" y="378" class="b">blocking · stagnation</text>
+
+  <rect class="box" x="815" y="300" width="300" height="95"/>
+  <text x="840" y="330" class="h">Evidence graph</text>
+  <text x="840" y="356" class="b">typed edges · traversal · causality</text>
+  <text x="840" y="378" class="b">branching · convergence</text>
+
+  <rect class="box" x="85" y="425" width="300" height="95"/>
+  <text x="110" y="455" class="h">Truth maintenance</text>
+  <text x="110" y="481" class="b">confidence · belief status</text>
+  <text x="110" y="503" class="b">support · contradiction · suspension</text>
+
+  <rect class="box" x="450" y="425" width="300" height="95"/>
+  <text x="475" y="455" class="h">Review and repair</text>
+  <text x="475" y="481" class="b">orphans · staleness · expired constraints</text>
+  <text x="475" y="503" class="b">graph health · explicit repair</text>
+
+  <rect class="box" x="815" y="425" width="300" height="95"/>
+  <text x="840" y="455" class="h">Retrieval and sessions</text>
+  <text x="840" y="481" class="b">text + graph context · recency</text>
+  <text x="840" y="503" class="b">orientation · handoff · temporal state</text>
+
+  <path class="a" d="M600 545 L600 595"/>
+  <rect class="box" x="310" y="595" width="580" height="65"/>
+  <text x="523" y="624" class="h">Versioned SQLite store</text>
+  <text x="420" y="647" class="b">constraints · migrations · durable typed nodes and edges</text>
+</svg>
