@@ -36,6 +36,8 @@ For the cross-project architecture and those boundaries, see [Portfolio Architec
 
 ## How to read this repository
 
-The project pages are written as engineering case studies. They emphasize the problem being solved, the architectural decision that matters, the failure modes that shaped it, and the evidence that the design is real. Implementation details are included when they explain those decisions; exhaustive feature inventories are intentionally avoided.
+The intended audience is a technical reviewer deciding whether the work shows sound engineering judgment, architectural depth, and the ability to turn ambiguous AI capabilities into coherent systems.
+
+The project pages therefore emphasize **why a system exists, which design decision makes it interesting, which failure modes shaped that decision, and how the implementation supports the claim**. Low-level mechanisms are included when they prove or explain those points. Feature enumeration, tool inventories, exhaustive type lists, and implementation diaries are deliberately excluded when they do not help a reviewer understand the work.
 
 The [portfolio notice](NOTICE.md) describes the publication boundary for private implementation code and sanitized architecture material.
