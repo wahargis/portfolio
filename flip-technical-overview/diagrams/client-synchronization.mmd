@@ -1,20 +1,23 @@
 flowchart LR
-    subgraph SERVER["Server"]
-        DB[("Server database<br/>(logical replication enabled)")]
-        SYNC["Sync service"]
-        APP["Web application API + realtime channels"]
-        DB --> SYNC
-        DB --> APP
+    subgraph CLIENT["Web / desktop / mobile client"]
+      UI["UI state"]
+      OPT["Optimistic mutation"]
+      CACHE["Authorized durable cache"]
+      EPH["Presence / typing / transient progress"]
+      UI --> OPT
+      CACHE --> UI
     end
-    subgraph CLIENT["Native desktop client"]
-        SHAPES["Synced data shapes in memory"]
-        UI["Desktop UI"]
-        QUEUE["Optimistic send queue (replays on reconnect)"]
-        IND["Offline indicator"]
-        SYNC -->|live shape sync| SHAPES
-        SHAPES --> UI
-        QUEUE --> APP
-        APP --> IND
-        IND --> UI
+    subgraph SERVER["Phoenix server authority"]
+      CMD["HTTP / domain command"]
+      AUTH["Authorization + validation"]
+      DB[("PostgreSQL")]
+      CH["Channels / PubSub"]
+      SHAPE["Electric shapes"]
+      CMD --> AUTH
+      AUTH --> DB
+      DB --> SHAPE
     end
-    APP -->|session refresh / schema update| SHAPES
+    OPT --> CMD
+    SHAPE --> CACHE
+    AUTH -->|canonical identity / transaction| OPT
+    EPH <--> CH

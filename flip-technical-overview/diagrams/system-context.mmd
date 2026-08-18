@@ -1,17 +1,25 @@
 flowchart LR
-    U["User / reviewer"] --> WEB["Web application"]
-    U --> DESKTOP["Native desktop client"]
-    WEB --> APP["Application server"]
-    DESKTOP --> APP
-    APP --> CHAT["Chat surface"]
-    APP --> FORUM["Forum surface"]
-    APP --> AI["Bounded AI runtime"]
-    CHAT --> DB[("Database")]
-    FORUM --> DB
-    AI --> DB
-    DB --> SYNC["Sync service"]
-    SYNC --> DESKTOP
-    AI --> LLM["Supported LLM providers"]
-    AI --> SOURCES["Search / web sources"]
-    APP --> AUDIT["Audit log"]
-    AI --> AUDIT
+    PEOPLE["Members and administrators"] --> CLIENTS["Web, desktop, and mobile clients"]
+    subgraph FLIP_CORE["Flip product authority"]
+      AUTH["Accounts + authorization"]
+      CHAT["Chat"]
+      FORUM["Forum"]
+      CURATION["Conversation curation"]
+      AIP["AI participants"]
+      ART["Citations and artifacts"]
+      DATA[("PostgreSQL + Oban")]
+      AUTH --> CHAT
+      AUTH --> FORUM
+      AUTH --> CURATION
+      AUTH --> AIP
+      CHAT --> DATA
+      FORUM --> DATA
+      CURATION --> DATA
+      AIP --> ART
+      ART --> DATA
+    end
+    CLIENTS --> AUTH
+    AIP --> MODELS["Hosted or local model endpoints"]
+    AIP --> TOOLS["Web, document, data, and media services"]
+    DATA --> SYNC["Electric + channels"]
+    SYNC --> CLIENTS

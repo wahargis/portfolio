@@ -1,18 +1,40 @@
 flowchart TB
-    subgraph HOST["Deployment host"]
-        DB[("Database")]
-        SYNC["Sync service"]
-        APP["Application server"]
-        TUNNEL["Demo tunnel"]
-        DB --> SYNC
-        SYNC --> APP
-        APP --> DB
+    subgraph CLIENTS["Client layer"]
+      WEB["Phoenix web"]
+      NATIVE["React / TypeScript native clients"]
     end
-    WEB["Web client"] --> APP
-    CLIENT["Native desktop client"] --> APP
-    CLIENT --> SYNC
-    APP --> LLM["Supported LLM providers"]
-    APP --> SOURCES["Search / web sources"]
-    DEPLOY["Deploy automation"] --> HOST
-    TUNNEL --> DEMO["flip.tech-demo.dev"]
-    APP --> PROD["flip.engineering"]
+    subgraph APP["Phoenix application"]
+      AUTH["Accounts + authorization"]
+      CHAT["Chat"]
+      FORUM["Forum"]
+      SYN["Synthesis + AI runtime"]
+      MEDIA["Media + artifacts"]
+      NOTIF["Notifications + settings"]
+      AUTH --> CHAT
+      AUTH --> FORUM
+      AUTH --> SYN
+      AUTH --> MEDIA
+      AUTH --> NOTIF
+    end
+    subgraph ASYNC["Durable asynchronous work"]
+      OBAN["Oban queues and schedules"]
+      WORKERS["Curation, AI reply, linkback, recuration, artifact, maintenance"]
+      OBAN --> WORKERS
+    end
+    subgraph STATE["State and realtime"]
+      PG[("PostgreSQL")]
+      ELECTRIC["Electric durable sync"]
+      PUBSUB["Phoenix PubSub / channels"]
+      PG --> ELECTRIC
+    end
+    WEB --> AUTH
+    NATIVE --> AUTH
+    SYN --> OBAN
+    WORKERS --> PG
+    CHAT --> PG
+    FORUM --> PG
+    MEDIA --> PG
+    ELECTRIC --> NATIVE
+    PUBSUB --> WEB
+    PUBSUB --> NATIVE
+    SYN --> EXT["Model, search, document, data, and media providers"]

@@ -1,26 +1,66 @@
-# 08 — Production and Demo Topology
+# 08 — Product and Synthetic Environment Boundary
 
-Flip maintains two live targets with a clear separation boundary: a production environment and a synthetic technical demo.
+## Why a separate technical environment exists
 
-<img src="../diagrams/deployment-topology.svg" alt="Production and demo deployment topology" width="760" />
+Flip’s architecture should be inspectable without exposing real community data, production credentials, or administrative authority. A synthetic technical environment exercises the same product contracts with versioned non-sensitive relationships.
 
-## Separation boundary
+<img src="../diagrams/deployment-topology.svg" alt="Product and synthetic deployment boundary" width="900" />
 
-| Concern | Production | Technical demo |
-|---|---|---|
-| Host | `flip.engineering` | `flip.tech-demo.dev` |
-| Data | Authorized production | Versioned synthetic seed data |
-| Resources | Production resources | Separate resources |
-| Credentials | Production routing | Separate capped credentials |
-| Accounts | Real users | Stable demo accounts |
-| Reset | Normal retention | Reproducible reset |
-| Client target | Default production | Explicit demo profile |
-| UI | Canonical product | Persistent technical-demo banner |
+This separation supports public review; it is not the product’s defining architecture.
 
-## Deployment approach
+## Shared behavior, independent authority
 
-Production deployments are workflow-gated: changes pass automated checks before reaching the live host, and deployments are serialized to avoid conflicts. The demo is deployed as a separate environment with its own resources, seeded from synthetic data only, and can be reset reproducibly.
+Product, synthetic, CI, and local environments can share source version, migrations, domain contracts, job definitions, provider adapters, and scenario definitions.
 
-## Operational visibility
+They do not share the things that confer authority:
 
-Both hosts expose health and version information for operational visibility, but the exact endpoints, scripts, and deployment mechanics are not part of the public architecture. What matters publicly is that production and demo remain isolated and reviewable.
+- databases or user uploads;
+- credentials, encryption/signing material, or sessions;
+- queues, PubSub namespaces, or administrative state;
+- object/media storage;
+- provider keys unless independently provisioned.
+
+An environment identifier is infrastructure configuration. It is not a model-controlled switch and the synthetic environment cannot become a route into product data.
+
+## Synthetic data must preserve relationships
+
+A useful technical environment does more than populate tables. It needs enough relational fidelity to expose the architecture:
+
+- members with different visibility;
+- chat with reply structure;
+- a forum artifact derived from chat;
+- explicit AI-authored content;
+- safe citations and artifacts in several lifecycle states;
+- a correction or recuration path;
+- client synchronization across durable and ephemeral state.
+
+These relationships let a reviewer inspect authorship, permission, provenance, failure, and recovery rather than only a staged happy-path screen.
+
+## The architecture remains active
+
+A public environment should not bypass the contracts it demonstrates. Authentication, authorization, job uniqueness, tool admission, URL and rendering controls, provider-key secrecy, rate/abuse controls, and product persistence remain in force.
+
+The environment may use cheaper routes, reduced concurrency, deterministic provider fakes for selected cases, or restricted media capability. Those differences cannot change the data model or authorship/provenance rules.
+
+## Reproducibility without operational disclosure
+
+Synthetic scenarios should be reconstructible from versioned fixtures and migrations without depending on product snapshots. The public documentation describes the scenario and expected product transitions.
+
+Reset credentials, host commands, private secrets, and deployment choreography are operational material and do not belong in the architecture portfolio.
+
+## What the environment should make visible
+
+A representative review should be able to answer:
+
+- Does internal retrieval obey the invoking actor’s community access?
+- Does external research produce inspectable evidence?
+- Does curation preserve participant authorship and source navigation?
+- Do artifacts show pending, completed, and failed state honestly?
+- Do web/native clients converge on committed state?
+- Does provider or tool failure degrade explicitly rather than corrupting the product?
+
+The scenario guide is in [demo/README.md](../demo/README.md).
+
+## Endpoint independence
+
+The documentation and diagrams remain the durable public explanation. Temporary endpoint availability or provider configuration should not determine whether the architecture can be understood.

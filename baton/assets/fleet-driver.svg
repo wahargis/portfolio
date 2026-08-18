@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="900" viewBox="0 0 1320 900" role="img" aria-labelledby="title desc">
+  <title id="title">Baton cross-harness fleet-driver architecture</title>
+  <desc id="desc">An AI orchestrator or human operates a Run application that plans and schedules work across persistent full-session coding harnesses. Interaction, context, shared coordination, fleet capabilities, and a reliable kernel support the driver.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
+    </marker>
+    <style>
+      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
+      .group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}
+      .title{font:700 26px Arial,sans-serif;fill:#17191d}
+      .head{font:700 17px Arial,sans-serif;fill:#20242a}
+      .body{font:14px Arial,sans-serif;fill:#454b55}
+      .label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
+      .small{font:12px Arial,sans-serif;fill:#555d68}
+      .arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1320" height="900"/>
+  <text x="55" y="50" class="title">Baton: one orchestrator driving a heterogeneous fleet of full coding harnesses</text>
+
+  <rect class="box" x="70" y="90" width="1180" height="105"/>
+  <text x="95" y="121" class="label">ORCHESTRATOR / HUMAN</text>
+  <text x="95" y="151" class="head">Outcome · route preferences · Plan approval · questions · steering · result selection</text>
+  <text x="95" y="176" class="body">The orchestrator decides; Baton turns those decisions into one durable Run.</text>
+
+  <path class="arrow" d="M660 195 L660 245"/>
+
+  <rect class="group" x="70" y="245" width="1180" height="160"/>
+  <text x="95" y="276" class="label">RUN APPLICATION — THE PRODUCT LAYER</text>
+  <rect class="box" x="100" y="305" width="240" height="75"/>
+  <text x="125" y="334" class="head">Goal + Plan</text>
+  <text x="125" y="358" class="body">routes · members · deps · scopes</text>
+  <rect class="box" x="380" y="305" width="240" height="75"/>
+  <text x="405" y="334" class="head">Scheduler</text>
+  <text x="405" y="358" class="body">ready work · waves · capacity</text>
+  <rect class="box" x="660" y="305" width="240" height="75"/>
+  <text x="685" y="334" class="head">Workflow interpreter</text>
+  <text x="685" y="358" class="body">policies · hierarchy · harvest</text>
+  <rect class="box" x="940" y="305" width="240" height="75"/>
+  <text x="965" y="334" class="head">RunView</text>
+  <text x="965" y="358" class="body">progress · attention · evidence</text>
+
+  <path class="arrow" d="M660 405 L660 455"/>
+
+  <rect class="group" x="70" y="455" width="1180" height="250"/>
+  <text x="95" y="486" class="label">SUPPORTING FLEET PLANES</text>
+
+  <rect class="box" x="100" y="515" width="250" height="150"/>
+  <text x="125" y="545" class="head">Interaction + attention</text>
+  <text x="125" y="571" class="body">briefs · questions · replies</text>
+  <text x="125" y="593" class="body">turn checkpoints · steering</text>
+  <text x="125" y="615" class="body">human deferral · progress</text>
+
+  <rect class="box" x="390" y="515" width="250" height="150"/>
+  <text x="415" y="545" class="head">Context + collaboration</text>
+  <text x="415" y="571" class="body">scratch · boards · REPL</text>
+  <text x="415" y="593" class="body">briefing/context packs</text>
+  <text x="415" y="615" class="body">task/workflow/project horizons</text>
+
+  <rect class="box" x="680" y="515" width="250" height="150"/>
+  <text x="705" y="545" class="head">Fleet capability plane</text>
+  <text x="705" y="571" class="body">Atlas · evidence · orientation</text>
+  <text x="705" y="593" class="body">debug · skills · supply chain</text>
+  <text x="705" y="615" class="body">Cairn knowledge + scorecards</text>
+
+  <rect class="box" x="970" y="515" width="250" height="150"/>
+  <text x="995" y="545" class="head">Reliable fleet kernel</text>
+  <text x="995" y="571" class="body">durable events · adapters</text>
+  <text x="995" y="593" class="body">resource ownership · recovery</text>
+  <text x="995" y="615" class="body">verification/review/integration</text>
+
+  <path class="arrow" d="M1095 665 L1095 745"/>
+  <path class="dash" d="M805 665 L805 725 L1095 725"/>
+  <path class="dash" d="M515 665 L515 725 L1095 725"/>
+  <path class="dash" d="M225 665 L225 725 L1095 725"/>
+
+  <rect class="box" x="70" y="745" width="1180" height="110"/>
+  <text x="95" y="776" class="label">PERSISTENT FULL-SESSION WORKERS</text>
+  <text x="95" y="807" class="head">Claude Code · Codex · GLM · Grok Build · DeepSeek · Kimi · future harness adapters</text>
+  <text x="95" y="832" class="body">Vendor-native tools, context, safety, sessions, exact models/effort, and isolated repository contexts remain intact.</text>
+
+  <path class="dash" d="M1180 800 C1270 800 1270 350 1180 350"/>
+  <text x="1170" y="715" class="small">events, questions, results, and attention return to the RunView</text>
+</svg>

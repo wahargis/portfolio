@@ -1,31 +1,118 @@
 # 10 — Architecture Decisions
 
-This page summarizes the public design principles that shape the Flip platform. The short-form principle records live in [adr/](../adr/README.md).
+## The decisions are organized around product integrity
 
-## Public architecture boundary
+Flip’s architecture is not a collection of fashionable technologies. Its major choices follow from three product requirements:
 
-Flip’s implementation is not published in this repository. This overview describes structure, capabilities, and operational behavior without publishing source code, prompts, credentials, or internal URLs.
+1. live conversation and durable knowledge must remain connected;
+2. AI participation must not erase authorship or bypass permissions;
+3. asynchronous and model-driven work must still converge on one inspectable product state.
 
-## Separate demo environment
+The public ADRs preserve the stable rationale. This page shows how the choices fit together.
 
-The technical demo runs on a separate host with synthetic seed data, separate resources, capped credentials, stable demo accounts, reproducible reset, an explicit demo client profile, and a persistent demo banner.
+## 1. Chat and forum are one product lifecycle
 
-## Bounded agent runtime
+**Decision:** Keep live rooms and durable threaded discussion in one product and one identity/provenance model.
 
-AI work uses round caps, deadlines, token envelopes, forced finish mode, and isolated per-tool dispatch instead of unbounded loops. Finish-mode timeouts are non-retryable to avoid replaying side-effectful tools.
+**Why:** Chat captures the social and causal path of a discussion; forums make the result searchable and extendable. Separating them into unrelated products would make the transition manual and provenance fragile.
 
-## Context-gated tools
+**Cost:** Flip must maintain two interaction models and the cross-domain rules that connect them.
 
-Tools are advertised per capability context, enforced by an advertised-tool allowlist at dispatch, authorized by scope, filtered by a URL guard, and isolated in execution. Search tools fail closed.
+**Rejected alternative:** “Summarize the chat into a post.” A summary alone loses participant wording, reply structure, source navigation, and correction history.
 
-## Provenance by construction
+## 2. Use a modular Phoenix monolith with PostgreSQL authority
 
-Forum and chat records carry source attribution; synthesis threads must reference their source discussion; citations are quote-verified and exposed through a source ledger.
+**Decision:** Keep product domains in one Phoenix application, one migration path, one authorization model, and one canonical PostgreSQL database. Use Oban for durable asynchronous work.
 
-## Encrypted provider keys and deterministic routing
+**Why:** Message-to-forum provenance, AI replies, citations, artifacts, linkback, notifications, and client synchronization all benefit from shared identities and transactions. An external message broker or early service split would add network failure and eventual consistency before a demonstrated need.
 
-Model provider credentials are encrypted, the active provider is selected through settings, and media generation uses a deterministic router.
+**Cost:** The application can accumulate large contexts and workers. Boundary tests and refactoring discipline are mandatory.
 
-## Save-first recovery
+**Revisit when:** A domain demonstrates an independent scaling, regulatory, release, or team-ownership requirement that outweighs distributed consistency cost.
 
-Generated media is staged through recovery paths before final placement, with audit records capturing operational events.
+## 3. Separate curation from AI authorship
+
+**Decision:** Model conversation curation and direct AI participation as different workflows and content semantics.
+
+**Why:** Curation should preserve human words and source identity while changing structure. An AI reply is new composition and must be attributed to the AI participant. One generic “synthesis” path makes authorship ambiguous.
+
+**Cost:** Two lifecycle models, explicit content types, and more provenance-aware UI.
+
+**Rejected alternative:** Rely on a prompt saying “do not rewrite users.” Product integrity must survive model error and therefore requires durable source relationships.
+
+## 4. Keep the capability plane server-authoritative
+
+**Decision:** Compute the available tool catalog from surface, feature state, actor/community authorization, object context, and provider availability. Pass trusted scope into child tool tasks and fail closed for protected retrieval.
+
+**Why:** Prompt instructions are not permission enforcement. Internal search, product actions, and provider-backed effects need the same authorization and audit guarantees as ordinary user commands.
+
+**Cost:** Catalog coherence, effect classification, scope propagation, and parity tests become substantial engineering work.
+
+**Rejected alternative:** Give the model a generic database or CRUD tool. That would bypass domain validation, idempotency, and product-specific effect lifecycles.
+
+## 5. Persist evidence and artifacts outside model prose
+
+**Decision:** Citations, source records, charts, generated media, polls, and asynchronous requests receive durable product identities and lifecycle state.
+
+**Why:** A token or URL embedded only in a model response cannot be validated, deduplicated, permissioned, retried, continued, or rendered reliably. Durable objects make evidence and effects inspectable after the model context is gone.
+
+**Cost:** More schemas, storage, cleanup, retention, and UI state.
+
+**Rejected alternative:** Treat generated output as opaque markdown attachments. That hides pending/failure state and loses causal inputs.
+
+## 6. Split durable synchronization from ephemeral realtime
+
+**Decision:** Use server-authoritative commands for mutations, Electric for recoverable durable projections, and Phoenix channels/PubSub for presence, typing, and transient progress.
+
+**Why:** Durable messages and artifacts need replay and reconnect; ephemeral interaction does not. One websocket stream cannot provide both semantics cleanly.
+
+**Cost:** Clients coordinate several transports and must test ordering and reconnection explicitly.
+
+**Rejected alternative:** Let the client own a local product database and sync later by default. Membership, moderation, and cross-user conflicts remain server-authoritative; offline mutation must be specified per command.
+
+## 7. Keep models and providers replaceable
+
+**Decision:** Place model routing and provider adapters behind a product-owned request, tool, evidence, and terminal-composition contract.
+
+**Why:** Chat, curation, research, documents, and media have different execution needs, and provider APIs change. Product identity and permissions should not change when a route changes or local inference replaces a hosted endpoint.
+
+**Cost:** Adapters must normalize incompatible streaming, tool-call, finish, forced-tool, and error behavior. Routes require surface-specific evaluation.
+
+**Rejected alternative:** Choose one “best model” for every feature. A route strong at long research may be unsuitable for low-latency chat or structured curation.
+
+## 8. Reserve an explicit terminal composition step
+
+**Decision:** Distinguish working/tool rounds from the user-visible reply and validate the terminal draft before persistence.
+
+**Why:** Tool-using models can end with internal intent, hidden protocol, or an incomplete draft. The product needs a bounded point where gathered evidence becomes the actual attributed response.
+
+**Cost:** Additional latency and provider-specific compatibility work.
+
+## 9. Separate public technical review from product authority
+
+**Decision:** Maintain a synthetic environment and publish a curated architecture path without copying production data, credentials, or the complete source tree into the portfolio.
+
+**Why:** Reviewers need relationally realistic evidence, not production access. The canonical source repository remains available for implementation review; the portfolio explains the product and architecture without becoming a second, stale source mirror or an operational/security dump.
+
+**Cost:** Synthetic fixtures and a separate deployment require maintenance, and the portfolio must be kept aligned with the source as the implementation evolves.
+
+## Decision criteria
+
+Across these choices, Flip optimizes for:
+
+- visible and correct authorship;
+- server-enforced authorization;
+- durable provenance and correction;
+- coherent failure and recovery;
+- one canonical product state;
+- model/provider replaceability;
+- client convergence;
+- reviewability without private-data exposure.
+
+Feature count is not the optimization target.
+
+## Revisit discipline
+
+Architecture should change when evidence changes: measured database or queue limits, explicit offline conflict requirements, independent regulatory boundaries, route evaluation, artifact workload isolation, or a material change in how the public source and portfolio review path are organized.
+
+A change should preserve the original decision record rather than rewriting history. The ADRs explain why the current choice was correct under the constraints that produced it.

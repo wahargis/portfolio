@@ -1,12 +1,14 @@
-flowchart TD
-    subgraph PROD_PATH["Production deployment"]
-        REL["Deploy automation"] --> RUNNER["Hosted runner"]
-        RUNNER --> DRIFT["Live build drift check"]
-        DRIFT --> REDEPLOY["Guarded host redeploy"]
-        REDEPLOY --> PROD["Production host: flip.engineering"]
-    end
-    subgraph DEMO_PATH["Technical demo deployment"]
-        BETA["Demo deployment path"] --> TUNNEL["Demo tunnel"]
-        TUNNEL --> DEMO["Demo host: flip.tech-demo.dev"]
-        DEMO --> CHECK["Health check after deploy"]
-    end
+flowchart TB
+    SRC["Shared source, migrations, domain contracts, and scenario definitions"]
+    SRC --> PROD["Product environment"]
+    SRC --> SYN["Synthetic technical environment"]
+    SRC --> CI["CI / ephemeral integration environment"]
+    SRC --> DEV["Local development"]
+    PROD --> PDATA[("Private product database and storage")]
+    PROD --> PSEC["Independent secrets, sessions, queues, providers"]
+    SYN --> SDATA[("Versioned synthetic data")]
+    SYN --> SSEC["Independent secrets, sessions, queues, providers"]
+    CI --> EDATA[("Ephemeral fixtures")]
+    DEV --> LDATA[("Developer-owned local data")]
+    PDATA -. never shared .-> SDATA
+    PSEC -. never shared .-> SSEC

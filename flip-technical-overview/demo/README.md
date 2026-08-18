@@ -1,41 +1,137 @@
-# Technical Demo Scenarios
+# Flip architecture scenarios
 
-Open <https://flip.tech-demo.dev>, sign in with a stable demo account, and work through the scenarios below. The demo is a separate environment with synthetic data and capped credentials; it is not production.
+The synthetic technical environment is intended to make architectural behavior inspectable without production data. These scenarios focus on product contracts rather than scripted reviewer choreography.
 
-## Environment rules
+Product reference: <https://flip.engineering>  
+Synthetic technical environment: <https://flip.tech-demo.dev>
 
-1. **Synthetic seed data only.** The demo contains versioned synthetic seed data. No production data is copied, sampled, or derived into the demo.
-2. **Reproducible reset.** The demo is resettable from its versioned seed set on demand. A reset returns all rooms, threads, messages, citations, and accounts to the seeded state.
-3. **Stable demo accounts.** Reviewers use stable demo accounts created from the seed set. Demo accounts are not real users and do not work against production.
-4. **Capped credentials.** The demo uses separate credentials with capped limits. Production provider keys and production database credentials are never referenced by demo configuration.
-5. **Persistent banner.** The demo UI shows a persistent technical-demo banner so reviewers always know they are not in production.
-6. **Explicit demo profile.** Web and desktop clients select the demo environment explicitly; production remains the default.
+Endpoint availability is not required to use the case study; the expected state transitions are documented below.
 
-## Scenario 1: Retrieval, external search, and citations
+## Scenario 1 — Current-information answer with citations
 
-1. Open the demo host and sign in with a stable demo account.
-2. Start a chat in a seeded room whose AI participant has synthesis enabled.
-3. Ask a question that requires current external information (for example, a question about a public documented event).
-4. The AI participant should run source discovery and external search, pass results through staged retrieval, and use a read tool as a structured tool call.
-5. Confirm the response includes quote-verified citations and that the source ledger shows the sources behind the message.
+### Request
 
-Expected result: the reply cites external sources with verifiable quotes, and no production data appears.
+Ask an AI participant a question that requires current external evidence and at least two sources.
 
-## Scenario 2: Chat-to-forum synthesis with source-message provenance
+### Inspect
 
-1. In a seeded room, hold a short chat exchange that reaches a decision or plan.
-2. Trigger synthesis from the chat.
-3. Confirm a forum thread is created with synthesis as its source type.
-4. Confirm the new thread records the source discussion and source message that initiated the synthesis.
-5. Open the source ledger for the synthesis result and confirm the lineage is visible.
+1. The user invokes an explicit AI identity.
+2. The runtime exposes search and source-reading tools.
+3. Search results are followed by direct page reads.
+4. Source records/citations are minted before the final answer.
+5. The final reply contains rendered citation links or a source ledger.
+6. Tool/provider failure is described honestly rather than replaced by fabricated evidence.
 
-Expected result: the forum thread is durably linked back to the exact chat message that produced it.
+### Architecture pages
 
-## Scenario 3: Prior decision plus later evidence retrieval
+- [Agent Runtime](../docs/03-agent-runtime.md)
+- [Retrieval, Search, and Tools](../docs/04-retrieval-search-and-tools.md)
+- [Model Routing and Inference](../docs/07-model-routing-and-inference.md)
 
-1. Use a seeded prior decision stored as a forum thread (created by an earlier synthesis).
-2. Ask the AI participant to re-examine that decision against a later public source.
-3. Confirm the system retrieves both the prior decision and the later evidence.
-4. Confirm the response explains the relationship between the prior decision and the later evidence, with citations for the new source and a link back to the prior thread.
+## Scenario 2 — Authorization-scoped internal retrieval
 
-Expected result: the system demonstrates retrieval over both internal provenance and external sources, and explains how the new evidence relates to the old decision.
+### Request
+
+Ask about prior discussion in a room or forum the current user can read. Compare with a room the user cannot read, where the synthetic role model permits this test.
+
+### Inspect
+
+1. The worker derives actor and origin-community scope from product state.
+2. Internal search receives trusted scope outside model arguments.
+3. Readable content is returned with product-native identifiers.
+4. Missing or denied scope produces no cross-community results.
+5. The final answer links to accessible content only.
+
+### Architecture pages
+
+- [Product and Problem](../docs/01-product-and-problem.md)
+- [Retrieval, Search, and Tools](../docs/04-retrieval-search-and-tools.md)
+- [Quality, Evaluation, and Operations](../docs/09-evaluation-testing-and-operations.md)
+
+## Scenario 3 — Chat-to-forum curation
+
+### Request
+
+Use a seeded chat exchange containing a coherent decision or explanation and invoke or observe its curation into forum structure.
+
+### Inspect
+
+1. The source messages and participants remain identifiable.
+2. The durable forum result is attributed as sourced/curated, not presented as if the AI authored the participants’ statements.
+3. Structural bridge text is distinguishable from source content.
+4. The forum artifact links back to the originating chat.
+5. Feedback or recuration state is visible where the scenario includes it.
+
+### Architecture pages
+
+- [Synthesis and Provenance](../docs/05-synthesis-and-provenance.md)
+- [System Architecture](../docs/02-system-architecture.md)
+
+## Scenario 4 — Structured data or artifact
+
+### Request
+
+Ask for a chart, rich-data view, document analysis, or configured media artifact.
+
+### Inspect
+
+1. The AI invokes a typed tool rather than embedding an invented artifact in prose.
+2. The product creates a durable artifact/request identity.
+3. The UI distinguishes pending, completed, and failed state.
+4. A completed asynchronous result can trigger one continuation turn.
+5. Inputs, source records, and the conversation attachment remain linked.
+
+### Architecture pages
+
+- [Retrieval, Search, and Tools](../docs/04-retrieval-search-and-tools.md)
+- [Agent Runtime](../docs/03-agent-runtime.md)
+- [Data, Realtime, and Clients](../docs/06-data-realtime-and-clients.md)
+
+## Scenario 5 — Realtime convergence
+
+### Request
+
+Open the same synthetic room or forum in two client sessions, then create a message/reply or reaction.
+
+### Inspect
+
+1. The initiating client may display optimistic state.
+2. The server authorizes and commits the mutation.
+3. Durable synchronization delivers the canonical record.
+4. The initiating client reconciles rather than duplicating it.
+5. Ephemeral typing/presence remains separate from durable message state.
+6. Reconnect rebuilds from server truth.
+
+### Architecture pages
+
+- [Data, Realtime, and Clients](../docs/06-data-realtime-and-clients.md)
+- [Quality, Evaluation, and Operations](../docs/09-evaluation-testing-and-operations.md)
+
+## Scenario 6 — Controlled failure
+
+A technically credible demo should include failure state.
+
+Possible synthetic conditions:
+
+- external source unavailable;
+- one tool times out;
+- model endpoint unavailable;
+- artifact provider returns terminal failure;
+- invalid citation/output is rejected;
+- curation linkback fails after forum creation.
+
+Inspect whether the product preserves the durable state that did succeed, labels the failed stage, avoids duplicate effects, and gives the user an honest next state.
+
+## Expected evidence
+
+A scenario is convincing when a reviewer can inspect:
+
+- the durable product object;
+- authorship and source relationships;
+- citation/artifact identities;
+- visible lifecycle state;
+- actor/community authorization outcome;
+- realtime convergence;
+- a failure or correction path.
+
+A polished model answer alone is not sufficient evidence of the architecture.

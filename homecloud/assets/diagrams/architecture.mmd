@@ -1,53 +1,53 @@
 flowchart TD
-    subgraph clients["Clients"]
-        UI["Operator dashboard<br/>chat, research, memory, infrastructure"]
-        API["Agent API and MCP<br/>external tools and dispatchers"]
+    subgraph interfaces["Applications and operators"]
+        APP["Flip / APIs / interactive clients"]
+        AGENT["Autonomous and interactive agent work"]
+        OPS["Operator / MCP / connectors"]
     end
 
-    subgraph app["Application layer"]
-        EXEC["Agent execution<br/>autonomous / interactive / plan-only"]
-        CTX["Context management<br/>token budgeting, RAG, memory retrieval"]
-        ROUTE["Model routing<br/>provider selection, round-robin, failover"]
-        POOL["Supervised model pool"]
-        TOOLS["Tool registry<br/>built-in and runtime tools"]
-        SANDBOX["Sandboxed tool execution"]
-        CHECK["Checkpoints<br/>session snapshots and rollback"]
+    subgraph runtime["HomeCloud runtime"]
+        EXEC["Execution lifecycle<br/>admission · phases · checkpoints · recovery"]
+        CONTEXT["Durable context<br/>retrieval · task memory · selected knowledge"]
+        TOOL["Owned execution<br/>sandbox · tools · artifacts · cleanup"]
+        ROUTER["Inference control<br/>profile · priority · affinity · capacity"]
+        EXEC --> CONTEXT
+        EXEC --> TOOL
+        EXEC --> ROUTER
     end
 
-    subgraph services["Supervised platform services"]
-        DB[("Database + vector storage")]
-        HEALTH["Health checks"]
-        M1["Primary model service<br/>reserved GPU pair"]
-        M2["Research model service<br/>research GPU"]
-        M3["Secondary model service<br/>on-demand GPU"]
-        SCHED["GPU scheduler + claim registry"]
+    subgraph services["Supervised services"]
+        DB[("PostgreSQL + pgvector")]
+        POOL["Healthy model endpoints and checkout slots"]
+        SCHED["GPU claims and workload scheduler"]
+        SANDBOX["Sandbox/process supervision"]
+        TELEMETRY["Health · throughput · lifecycle evidence"]
     end
 
-    subgraph hw["Hardware"]
-        G0["GPU0<br/>NVIDIA V100 32GB"]
-        G1["GPU1<br/>NVIDIA V100 32GB"]
-        G2["GPU2<br/>NVIDIA V100 32GB"]
-        G3["GPU3<br/>NVIDIA V100 32GB"]
+    subgraph research["Lower-priority research workloads"]
+        PROGRAM["Program / agent search"]
+        VERIFY["Compilation · tests · profiling"]
+        CUDA["CUDA optimization trials"]
     end
 
-    UI --> EXEC
-    API --> EXEC
-    EXEC --> CTX
-    EXEC --> ROUTE
-    ROUTE --> POOL
-    POOL --> M1
-    POOL --> M2
-    POOL --> M3
-    EXEC --> SANDBOX
-    EXEC --> CHECK
-    CTX --> DB
-    CHECK --> DB
-    TOOLS --> SANDBOX
-    HEALTH --> M1
-    HEALTH --> M2
-    HEALTH --> M3
-    SCHED --> HEALTH
-    M1 --> G0
-    M1 --> G1
-    M2 --> G2
-    M3 --> G3
+    subgraph hardware["Heterogeneous local hardware"]
+        V100["4 × V100 32 GB<br/>NVLink pool · 128 GB"]
+        A100["A100 Drive 32 GB<br/>separate accelerator"]
+        REMOTE["Optional compatible remote endpoints"]
+    end
+
+    APP --> EXEC
+    AGENT --> EXEC
+    OPS --> EXEC
+    CONTEXT --> DB
+    TOOL --> SANDBOX
+    ROUTER --> POOL
+    EXEC --> TELEMETRY
+    PROGRAM --> EXEC
+    VERIFY --> TOOL
+    CUDA --> SCHED
+    POOL --> SCHED
+    SCHED --> V100
+    SCHED --> A100
+    ROUTER --> REMOTE
+    SANDBOX --> V100
+    SANDBOX --> A100

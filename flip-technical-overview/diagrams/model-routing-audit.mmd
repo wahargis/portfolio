@@ -1,12 +1,13 @@
 flowchart LR
-    APP["Application settings (provider, key, reasoning params)"] --> KEYS["Encrypted provider credentials"]
-    ROOM["Room AI configuration (model, limits)"] --> LLM["Model routing client"]
-    KEYS --> LLM
-    LLM --> P["Supported LLM providers"]
-    VIDEO["Video request"] --> VROUTER["Deterministic media router"]
-    VROUTER --> VCAPS["Provider capability selection"]
-    VCAPS --> VPROV["Media provider"]
-    LLM --> AUDIT["Call audit log"]
-    P --> AUDIT
-    VROUTER --> AUDIT
-    AUDIT --> OPS["Operational audit records"]
+    RUNTIME["Product runtime: context, tools, terminal contract"] --> POLICY["Route policy"]
+    POLICY --> MATCH{"Capability and policy match"}
+    MATCH --> ADAPTER["Provider adapter"]
+    ADAPTER --> HOSTED["Hosted endpoint"]
+    ADAPTER --> LOCAL["Local / HomeCloud endpoint"]
+    HOSTED --> NORMAL["Normalized content, tool calls, usage, errors"]
+    LOCAL --> NORMAL
+    NORMAL --> RUNTIME
+    ADAPTER --> CIRCUIT["Health, circuit, and bounded fallback"]
+    CIRCUIT --> POLICY
+    RUNTIME --> AUDIT["Durable reply/artifact + operational correlation"]
+    POLICY --> AUDIT

@@ -1,12 +1,16 @@
 flowchart LR
-    Q["User question / synthesis trigger"] --> SD["Source discovery (ranking + domain groups)"]
-    SD --> SEARCH["Search provider with circuit breaker"]
-    SEARCH --> RETR["Staged retrieval"]
-    RETR --> READ["Read tools"]
-    READ --> GUARD["URL safety filter"]
-    GUARD --> PAGES["Web pages / archived captures"]
-    PAGES --> MINT["AI-minted citations"]
-    MINT --> VERIFY["Quote verification + citation identity"]
-    VERIFY --> LEDGER["Reader-facing source ledger"]
-    VERIFY --> OUTPUT["Synthesis output with citations"]
-    OUTPUT --> API["Public source-ledger surface"]
+    Q["User question"] --> KIND{"External, internal, document, or structured data?"}
+    KIND --> EXT["Search / direct source discovery"]
+    KIND --> INT["Actor-scoped product retrieval"]
+    KIND --> DOC["Document / PDF extraction"]
+    KIND --> DATA["Typed data provider"]
+    EXT --> READ["Read actual source"]
+    INT --> EVIDENCE["Authorized records + identifiers"]
+    DOC --> EVIDENCE
+    DATA --> EVIDENCE
+    READ --> EVIDENCE
+    EVIDENCE --> SELECT["Select supporting passage / records"]
+    SELECT --> MINT["Persist source + citation identity"]
+    MINT --> DRAFT["Model composes claim with citation token"]
+    DRAFT --> VERIFY["Validate identity, visibility, and quote support"]
+    VERIFY --> REPLY["Reply + reader-facing source ledger"]
