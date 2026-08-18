@@ -2,7 +2,7 @@
 
 **A real-time community platform that turns live conversation into durable, attributable knowledge and supports AI participants as governed product actors.**
 
-Flip combines chat, forums, background curation, direct AI participation, retrieval, rich artifacts, and web/native clients in one product model. Its central engineering problem is not “add a chatbot.” It is how to let humans and AI work inside the same social system without losing authorship, permissions, provenance, or product reliability.
+Flip combines chat, forums, background curation, direct AI participation, retrieval, structured data, generated artifacts, and web/native clients in one product model. Its central engineering problem is not “add a chatbot.” It is how to let humans and AI work inside the same social system without losing authorship, permissions, provenance, or product reliability.
 
 <img src="diagrams/system-context.svg" alt="Flip system context diagram" width="900" />
 
@@ -13,7 +13,7 @@ Chat and forums solve opposite parts of the same problem:
 - chat is immediate, contextual, and socially fluid, but important knowledge disappears into the stream;
 - forums are durable, searchable, and structured, but they do not capture the full path by which a group reached a conclusion.
 
-Flip keeps both. A conversation can remain live in chat while selected material becomes a durable forum artifact linked back to its source. AI can assist that process, participate directly in a room, research external information, produce cited artifacts, and invoke product actions—but only through server-defined capability and authorization boundaries.
+Flip keeps both. A conversation can remain live in chat while selected material becomes a durable forum artifact linked back to its source. AI can assist that process, participate directly in a room, research external information, create cited artifacts, and invoke product actions—but only through server-defined capability and authorization boundaries.
 
 ## Two distinct AI paths
 
@@ -24,7 +24,7 @@ The architecture separates two behaviors that are often incorrectly described as
 | **Conversation curation** | Identify topic-coherent material in chat and organize it into durable forum structure. | Preserves user-authored words and source-message identity; AI adds bounded structural context rather than silently rewriting participants. | Forum thread/replies with source links, curation metadata, and feedback/recuration state. |
 | **AI participation** | Let an explicit AI identity answer, research, create artifacts, react, or take an allowed product action. | AI-authored output is visibly attributed to the AI participant and persisted through the same product state model as other content. | Chat reply, forum reply, citation ledger, chart, document/image/video artifact, poll, or other permitted effect. |
 
-This distinction is fundamental. Curation protects human authorship; direct participation makes AI authorship explicit.
+Curation protects human authorship; direct participation makes AI authorship explicit.
 
 ## Capability model
 
@@ -52,7 +52,7 @@ This distinction is fundamental. Curation protects human authorship; direct part
 - isolated tool dispatch and honest failure envelopes;
 - typed lifecycle/telemetry and durable response state;
 - continuation and recovery paths for long-running artifact workflows;
-- separate capability catalogs for chat, forum, curation, personal, and game contexts.
+- separate capability catalogs for chat, forum, curation, personal, enrichment, and specialized contexts.
 
 ### Retrieval, research, and evidence
 
@@ -109,7 +109,7 @@ Flip is a single Phoenix application with explicit domain contexts rather than a
 7. **Background jobs are idempotent or uniqueness-constrained where duplicate user-visible effects would be harmful.**
 8. **The server remains authoritative for permissions and durable writes; client optimism is reconciled with committed state.**
 9. **Provider failure can degrade an AI capability without corrupting the core chat/forum product.**
-10. **Private implementation details are not required to understand the public architecture.**
+10. **The portfolio explanation remains readable without duplicating the complete source tree or exposing deployment secrets.**
 
 ## Product references
 
@@ -146,6 +146,6 @@ The architecture documentation stands independently of endpoint availability and
 
 Rendered diagrams are indexed in [diagrams/README.md](diagrams/README.md). Public architectural decisions are summarized in [adr/README.md](adr/README.md). A capability-oriented walkthrough is in [demo/README.md](demo/README.md).
 
-## Publication boundary
+## Source and portfolio boundary
 
-The commercial implementation is private. This repository documents product semantics, architecture, selected interfaces, sanitized flows, engineering decisions, and limitations. It excludes private source, data, credentials, prompt/persona content, abuse thresholds, and unnecessary operational internals.
+The canonical implementation is available in the public [Flip repository](https://github.com/wahargis/flip). This portfolio case study does not mirror the entire source tree; it selects the product semantics, architecture, lifecycles, decisions, and limitations needed for review. Production data, credentials, private deployment state, prompt/persona configuration, abuse thresholds, and host-specific secrets remain outside the portfolio.

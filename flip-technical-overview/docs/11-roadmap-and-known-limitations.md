@@ -102,9 +102,9 @@ Durable client synchronization supports reconnect and caching, but not every mut
 
 Bounds, tools, and validation reduce failure impact; they do not make model reasoning deterministic. The system must retain honest uncertainty and user correction paths.
 
-### Private implementation
+### Portfolio scope
 
-The architecture is implementation-informed, but the commercial source is not published here. Reviewers can assess the public system model and synthetic workflows; they cannot independently reproduce every source-level claim from this repository alone.
+The canonical source is public at <https://github.com/wahargis/flip>. This portfolio does not duplicate every implementation module, test, migration, provider adapter, or issue history. Source-level reproduction and implementation review belong in the source repository; this case study provides the stable architecture and product path through it.
 
 ## Next milestones by outcome
 

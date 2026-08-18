@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
   <title id="title">AI systems portfolio architecture</title>
-  <desc id="desc">Four independently useful planes: Flip product, Project Manager knowledge, Baton fleet orchestration, and HomeCloud compute, connected by narrow integration contracts.</desc>
+  <desc id="desc">Four independently useful systems: Flip product, Project Manager long-horizon knowledge, Baton cross-harness fleet orchestration, and HomeCloud self-hosted runtime and compute.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
@@ -18,55 +18,55 @@
   </defs>
   <rect class="bg" width="1200" height="760"/>
 
-  <text x="60" y="55" class="title">Product, knowledge, fleet orchestration, and compute</text>
-  <text x="60" y="84" class="body">Independent systems with explicit authority boundaries and composable interfaces</text>
+  <text x="60" y="55" class="title">Product, project memory, fleet orchestration, and runtime</text>
+  <text x="60" y="84" class="body">Independent systems with narrow, optional integration contracts</text>
 
   <rect class="box" x="70" y="125" width="480" height="215"/>
-  <text x="100" y="160" class="label">PRODUCT PLANE</text>
+  <text x="100" y="160" class="label">COMMUNITY PRODUCT</text>
   <text x="100" y="197" class="title">Flip</text>
-  <text x="100" y="229" class="subtitle">Human collaboration + governed AI participation</text>
-  <text x="100" y="263" class="body">chat · forum · curation · retrieval · artifacts</text>
-  <text x="100" y="288" class="body">authorship · permissions · provenance · clients</text>
+  <text x="100" y="229" class="subtitle">Human collaboration + AI participation</text>
+  <text x="100" y="263" class="body">chat · forum · curation · retrieval · tools</text>
+  <text x="100" y="288" class="body">provenance · artifacts · real-time/native clients</text>
   <text x="100" y="319" class="caption">Owns users, content, permissions, and product semantics</text>
 
   <rect class="box" x="650" y="125" width="480" height="215"/>
-  <text x="680" y="160" class="label">KNOWLEDGE PLANE</text>
+  <text x="680" y="160" class="label">LONG-HORIZON PROJECT STATE</text>
   <text x="680" y="197" class="title">Project Manager</text>
   <text x="680" y="229" class="subtitle">Evidence-aware institutional memory</text>
-  <text x="680" y="263" class="body">typed evidence · hypotheses · contradictions</text>
-  <text x="680" y="288" class="body">causal decisions · phases · session continuity</text>
-  <text x="680" y="319" class="caption">Owns project belief, rationale, and next-action state</text>
+  <text x="680" y="263" class="body">typed evidence graph · DAG · belief revision</text>
+  <text x="680" y="288" class="body">causal decisions · review · session continuity</text>
+  <text x="680" y="319" class="caption">Owns project evidence, rationale, and next-action state</text>
 
   <rect class="box" x="70" y="435" width="480" height="215"/>
-  <text x="100" y="470" class="label">FLEET-ORCHESTRATION PLANE</text>
+  <text x="100" y="470" class="label">CROSS-HARNESS FLEET ORCHESTRATION</text>
   <text x="100" y="507" class="title">Baton</text>
-  <text x="100" y="539" class="subtitle">Cross-harness fleet driver</text>
-  <text x="100" y="573" class="body">runs · waves · workflows · messaging · telemetry</text>
-  <text x="100" y="598" class="body">steering · shared context · recovery · result harvest</text>
-  <text x="100" y="629" class="caption">Owns delegation and live coordination among harness sessions</text>
+  <text x="100" y="539" class="subtitle">One orchestrator driving full coding harnesses</text>
+  <text x="100" y="573" class="body">Goals/Plans · exact routes · persistent workers</text>
+  <text x="100" y="598" class="body">waves · workflows · messaging · steering · shared context</text>
+  <text x="100" y="629" class="caption">Owns the fleet application and cross-vendor orchestration model</text>
 
   <rect class="box" x="650" y="435" width="480" height="215"/>
-  <text x="680" y="470" class="label">COMPUTE / RUNTIME PLANE</text>
+  <text x="680" y="470" class="label">SELF-HOSTED RUNTIME AND COMPUTE</text>
   <text x="680" y="507" class="title">HomeCloud</text>
-  <text x="680" y="539" class="subtitle">Self-hosted inference and agent runtime</text>
+  <text x="680" y="539" class="subtitle">Local inference and recoverable agent execution</text>
   <text x="680" y="573" class="body">model pools · GPU slots · scheduling · sandboxes</text>
   <text x="680" y="598" class="body">RAG · memory · compaction · checkpoints · evaluation</text>
-  <text x="680" y="629" class="caption">Owns model capacity, execution isolation, and recovery</text>
+  <text x="680" y="629" class="caption">Owns local model capacity, runtime isolation, and recovery</text>
 
   <path class="dash" d="M550 232 C590 232 610 232 650 232"/>
-  <text x="560" y="215" class="caption">durable research artifacts</text>
+  <text x="560" y="215" class="caption">product findings / durable references</text>
 
   <path class="dash" d="M310 340 C310 377 310 398 310 435"/>
-  <text x="326" y="390" class="caption">directed development work</text>
+  <text x="326" y="390" class="caption">source work / product engineering</text>
 
   <path class="dash" d="M550 542 C590 542 610 542 650 542"/>
-  <text x="558" y="525" class="caption">worker / inference capacity</text>
+  <text x="558" y="525" class="caption">local seats / model / sandbox capacity</text>
 
   <path class="dash" d="M890 435 C890 393 890 382 890 340"/>
-  <text x="908" y="390" class="caption">selected findings / handoffs</text>
+  <text x="908" y="390" class="caption">findings / decisions / handoffs</text>
 
   <path class="dash" d="M470 340 C540 395 620 405 710 435"/>
-  <text x="508" y="410" class="caption">model endpoint</text>
+  <text x="508" y="410" class="caption">provider-compatible inference</text>
 
-  <text x="70" y="711" class="caption">Dashed arrows are optional integration contracts. No system absorbs another system’s authority.</text>
+  <text x="70" y="711" class="caption">Dashed arrows are optional composition points; each project remains independently deployable.</text>
 </svg>
