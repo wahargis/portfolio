@@ -1,15 +1,15 @@
 # AI systems portfolio
 
-**Product, knowledge, control, and compute systems for long-running AI-assisted work.**
+**Product, knowledge, fleet-orchestration, and compute systems for long-running AI-assisted work.**
 
-This portfolio documents four independently useful systems that address different failure modes in applied AI engineering:
+This portfolio documents four independently useful systems built around different problems:
 
-- **Flip** turns live community conversation into durable knowledge while supporting bounded, tool-using AI participants.
-- **Project Manager** gives long-running research and engineering programs a typed evidence graph, causal decision record, and computed next actions.
-- **Baton** places a deterministic control plane around probabilistic coding agents, including isolation, steering, recovery, and independent verification.
-- **HomeCloud** supplies self-hosted inference, GPU-aware scheduling, sandboxed execution, memory, and research infrastructure on local hardware.
+- **Flip** turns live community conversation into durable knowledge while supporting governed AI participation inside the product.
+- **Project Manager** preserves the evolving evidence, beliefs, decisions, and next actions of long-running research and engineering programs.
+- **Baton** lets one full coding harness direct a heterogeneous fleet of other full-session harnesses, with live messaging, telemetry, mid-run steering, shared coordination state, and durable result handoff.
+- **HomeCloud** turns local accelerators into supervised inference and agent infrastructure with scheduling, isolation, context continuity, and recovery.
 
-They are not presented as one monolith. They are a coherent set of architectural layers with explicit ownership boundaries and composable interfaces.
+The systems can work together, but they are not presented as one invented master platform. Each owns a distinct architectural problem and exposes narrow integration boundaries.
 
 ![Portfolio system architecture](assets/portfolio-system.svg)
 
@@ -17,66 +17,64 @@ They are not presented as one monolith. They are a coherent set of architectural
 
 | Plane | System | Primary problem | Architectural center |
 |---|---|---|---|
-| **Product** | [Flip](flip-technical-overview/README.md) | Live conversation is valuable but transient; generic assistants do not become accountable product participants merely by calling an LLM. | Phoenix/PostgreSQL product domains, real-time sync, background synthesis, governed AI reply runtime, retrieval, tools, provenance, and web/native clients. |
-| **Knowledge** | [Project Manager](project-manager/README.md) | Long-running work loses hypotheses, evidence, contradictions, decision rationale, and session continuity. | Rust domain core, typed evidence graph, dependency DAG, truth maintenance, SQLite, and shared CLI/MCP/web surfaces. |
-| **Control** | [Baton](baton/README.md) | Full coding agents are capable but probabilistic; subprocess wrappers do not provide lifecycle authority, reliable steering, or trustworthy adoption. | Deterministic coordinator, durable event truth, declarative workflows, exact routes/scopes, isolated worktrees, unified surfaces, and fresh-worktree verification. |
-| **Compute** | [HomeCloud](homecloud/README.md) | Local models and autonomous workloads need supervision, fair GPU access, isolation, context continuity, and recoverable execution. | Elixir/OTP supervision, local model pools, slot-aware inference routing, GPU scheduling, sandboxed agents, RAG/memory, checkpoints, and evaluation workloads. |
+| **Product** | [Flip](flip-technical-overview/README.md) | Live conversation is valuable but transient, while AI participation introduces authorship, permission, evidence, and durability problems that a chatbot endpoint does not solve. | One product authority for chat, forum, curation, AI participants, provenance, artifacts, and synchronized clients. |
+| **Knowledge** | [Project Manager](project-manager/README.md) | Long projects lose hypotheses, contradictory evidence, decision rationale, and continuity when represented as task lists or transcripts. | A typed evidence graph and dependency model that computes what the project believes and what should happen next. |
+| **Fleet orchestration** | [Baton](baton/README.md) | Vendor coding harnesses are powerful but isolated; one harness cannot ordinarily direct several others as persistent, observable, steerable workers. | A run/wave/workflow application over full-harness adapters, live communication and steering, shared coordination state, and reliable lifecycle plumbing. |
+| **Compute / runtime** | [HomeCloud](homecloud/README.md) | Local models and autonomous workloads need supervised endpoints, fair GPU access, isolation, recoverable execution, and durable context. | Elixir/OTP supervision around inference slots, workload scheduling, agent sandboxes, memory, checkpoints, and research workloads. |
 
-## What distinguishes the portfolio
+## What the work demonstrates
 
-### AI reasoning is not system authority
+### Model reasoning is useful without being made system authority
 
-Models propose, interpret, synthesize, and decide within bounded product roles. Plain code owns permissions, state transitions, concurrency, deadlines, process lifecycle, evidence retention, and irreversible effects.
+The projects put models in roles where judgment is valuable while keeping the surrounding system responsible for durable semantics:
 
-That division appears differently in each system:
+- Flip owns identity, permissions, authorship, citations, and product effects.
+- Project Manager owns the project’s evidence relationships and belief state.
+- Baton leaves planning and intervention to the orchestrator harness while a non-model coordinator makes fleet commands, lifecycle, and shared state dependable.
+- HomeCloud owns capacity, endpoint health, sandbox lifecycle, and recovery around local inference.
 
-- Flip exposes only the tools permitted by the user, community, surface, and deployment configuration.
-- Project Manager stores beliefs as typed, revisable evidence rather than treating generated prose as settled truth.
-- Baton re-derives worker results in a fresh environment before allowing adoption or integration.
-- HomeCloud derives concurrency from live inference capacity and runs tool-using agents in owned sandboxes.
+### Durable state preserves meaning, not just output
 
-### Durable state carries meaning
+The systems retain the relationships needed to understand and continue work:
 
-Each system persists more than messages or task status:
+- Flip links durable forum knowledge, AI replies, citations, and artifacts to their sources and authors.
+- Project Manager links experiments, findings, hypotheses, constraints, and decisions through explicit evidence relations.
+- Baton retains run/wave identity, worker interaction, progress, shared notes, result artifacts, recovery state, and orchestration decisions across full harness sessions.
+- HomeCloud preserves task state, checkpoints, retrieved documents, memory, research trials, and infrastructure state across process boundaries.
 
-- Flip retains source-message links, forum provenance, AI artifacts, citations, and product state.
-- Project Manager persists experiments, findings, hypotheses, decisions, constraints, literature, sessions, and typed relationships.
-- Baton records commands, lifecycle events, interaction state, result pins, verification evidence, and resource ownership.
-- HomeCloud persists task state, checkpoints, documents, memory, learned facts, skills, knowledge-graph relationships, and research results.
+### Interfaces project one domain model
 
-### Multiple interfaces share one domain model
+Web, native, CLI, MCP, embedded, and automation surfaces are not treated as separate products with divergent semantics. Where several surfaces exist, they project the same underlying authority and lifecycle.
 
-CLI, MCP, web, native, and automation surfaces are not separate products with divergent semantics. They project the same underlying authority wherever the implementation supports more than one interface.
+### Evidence is designed into the workflow
 
-### Verification precedes trust
-
-The portfolio favors evidence that can be independently inspected or re-derived: database constraints, typed state machines, bounded tool envelopes, immutable source links, fresh-worktree tests, compilation, deterministic test execution, and hardware-backed profiling.
+The portfolio favors evidence that survives beyond a model response: source-message relationships, exact citations, typed findings, durable event records, git artifacts, fresh-environment checks, compilation, deterministic tests, and hardware-backed measurements.
 
 ## System relationships
 
-The systems can be deployed independently. Their useful composition points are intentionally narrow:
+The useful connections are narrow and asymmetric:
 
-- Flip can route inference to a remote provider or a HomeCloud-hosted OpenAI-compatible endpoint.
-- Baton can dispatch coding or research work to local or remote full-session harnesses, including infrastructure backed by HomeCloud.
-- Project Manager can receive durable findings, decisions, constraints, and handoffs from human or agent workflows.
-- HomeCloud can host models and execution sandboxes without owning product semantics, research truth, or source-control adoption policy.
+- Flip can route inference to a hosted endpoint or a HomeCloud-hosted compatible endpoint without giving the inference layer product authority.
+- Baton can drive local or remote full-session harnesses, including workers backed by HomeCloud capacity, without reducing those harnesses to raw model calls.
+- Selected Baton run results can become Project Manager findings, decisions, or constraints; raw fleet telemetry does not automatically become project truth.
+- Project Manager can preserve the rationale around work performed in Flip, Baton, or HomeCloud without owning their runtime behavior.
 
-See [Portfolio Architecture](PORTFOLIO_ARCHITECTURE.md) for the responsibility map, integration contracts, and deliberate non-goals. The [portfolio notice](NOTICE.md) defines the publication and licensing boundary.
+See [Portfolio Architecture](PORTFOLIO_ARCHITECTURE.md) for responsibility boundaries and composition contracts. The [portfolio notice](NOTICE.md) defines the publication and licensing boundary.
 
 ## Review paths
 
-**Three minutes:** read this page and the first screen of each case study.
+**Three minutes:** read this page and the opening sections of each case study.
 
-**Fifteen minutes:** follow the architecture, execution lifecycle, and status sections in the four case studies.
+**Fifteen minutes:** follow the principal architecture and one representative lifecycle in each project.
 
-**Deep review:** use the Flip technical chapters, the Project Manager knowledge model, the Baton trust model, and the HomeCloud platform/research boundary.
+**Deep review:** use the Flip technical chapters, Project Manager evidence model, Baton fleet-driver architecture, and HomeCloud platform/research boundary.
 
 ## Publication boundary
 
-This repository is a reviewer-facing architecture portfolio. It publishes product semantics, system boundaries, sanitized workflows, implementation-informed diagrams, engineering decisions, and honest maturity statements. It does not mirror private commercial source, credentials, private data, model prompts, host-specific configuration, or internal operational thresholds.
+This repository publishes product semantics, architecture, sanitized workflows, engineering decisions, diagrams, maturity boundaries, and limitations. It does not publish production data, credentials, proprietary prompts, host-specific configuration, or private implementation merely to make the documentation look exhaustive.
 
-Project-specific availability and licensing differ:
+Project availability differs:
 
-- Project Manager has a public source repository linked from its case study.
-- Flip, Baton, and the broad HomeCloud implementation are documented here without publishing their private implementation.
-- Supporting clients and adapters are folded into the relevant flagship narrative rather than presented as additional flagship systems.
+- Project Manager and Baton have public source repositories linked from their case studies.
+- Flip and the broad HomeCloud implementation are documented here without mirroring private commercial or host-specific source.
+- Supporting clients, adapters, and tools are explained inside the flagship system they serve rather than inflated into additional flagship projects.
