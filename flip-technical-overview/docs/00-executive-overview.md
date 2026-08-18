@@ -2,129 +2,65 @@
 
 ## System in one paragraph
 
-Flip is a real-time community product that combines chat, threaded forums, background conversation curation, and explicit AI participants. Humans can converse at chat speed; durable knowledge can be organized into forum structure without erasing the source conversation; and AI can research, answer, create artifacts, and take permitted actions through a bounded server-side runtime. PostgreSQL is the transactional source of truth, Oban runs asynchronous workflows, Phoenix provides the web and realtime server, Electric synchronizes durable client state, and provider-compatible inference keeps product semantics independent of one model vendor.
+Flip is a community product in which live chat, durable forum discussion, conversation curation, and explicit AI participants share one identity, permission, provenance, and client state model. Humans can talk at chat speed; valuable discussion can become searchable forum knowledge without erasing its source; and AI can research, answer, create artifacts, or perform permitted actions as an attributed product actor.
 
-## The engineering problem
+## The architectural problem
 
-A conventional chatbot integration usually assumes:
+A conventional assistant integration assumes:
 
 ```text
-user prompt -> model response -> render text
+prompt -> model -> text
 ```
 
-That is insufficient inside a multi-user product. A production participant must be constrained by:
+Inside Flip, the model is participating in a multi-user stateful system. A useful answer depends on who invoked it, which community and room the request belongs to, what the actor may read, which capabilities are admitted, what external evidence supports the answer, and what durable effect the product should commit.
 
-- who invoked it;
-- what community and room the request belongs to;
-- what content that actor may read;
-- which tools are available in that surface;
-- what effects require product authorization;
-- how current information is sourced and cited;
-- how duplicate jobs are prevented;
-- what happens when a tool, provider, or long-running artifact fails;
-- how the result becomes durable product state;
-- how other clients learn about the state change.
+The same is true of curation. “Summarize this chat” is not enough when the durable result must preserve participant authorship, source navigation, correction history, and forum identity.
 
-Flip treats those as first-class product architecture.
+Flip therefore treats model use as one stage inside product-owned workflows rather than an alternate backend.
 
-## Four product loops
+## Three design problems define the system
 
-### 1. Human conversation
+### Preserve the path from conversation to knowledge
 
-A user writes in chat or forum. The server applies membership, authorization, content, and rate constraints; commits the durable record; and distributes the update through the appropriate realtime path.
+Chat and forums remain different interaction models, but they share data and provenance. The curation path can reorganize eligible discussion into a forum artifact while retaining the source messages and authors that produced it. Readers get durable structure without a fabricated standalone authorship story.
 
-### 2. Conversation curation
+### Make AI a governed participant
 
-Eligible chat material is selected, grouped by topic, and mapped into forum structure. User-authored text remains linked to source messages. Structural bridge text, placement, deduplication, and linkback are generated under a separate synthesis workflow.
+An AI participant has an explicit identity and bounded product role. Flip selects context, computes the capability catalog, enforces internal visibility, isolates tools, records citations and artifacts, and validates the terminal reply before persistence. The model interprets and composes; the product owns authority and lifecycle.
 
-### 3. AI participation
+### Keep asynchronous and client state coherent
 
-A mention, reply, scheduled action, or product-specific event enqueues an AI turn. The runtime assembles bounded context, computes the tool catalog, routes a model request, executes permitted tools, records citations/artifacts, obtains a terminal draft, and persists an attributed AI response.
-
-### 4. Artifact continuation
-
-Some tools produce asynchronous work—such as media generation or multi-clip workflows. The immediate turn records a durable request and later terminal events can re-enter a bounded AI continuation so the participant can interpret the result in product context.
-
-These loops share identity, permissions, content, and provenance but have different authorship and lifecycle rules.
+Curation, research, generated media, and continuation can outlive an HTTP request. Oban gives those workflows durable identity and retry state. PostgreSQL remains canonical. Electric synchronizes recoverable client projections; channels carry ephemeral interaction. A provider or client disconnect cannot become an excuse to publish state that never committed.
 
 ## Architectural center of gravity
 
-Flip is a modular monolith rather than a microservice mesh. Product domains remain explicit, but they share:
+Flip is a modular Phoenix monolith with one PostgreSQL authority. This keeps cross-domain transactions, authorization, source relationships, jobs, search, and client synchronization coherent. It also creates internal complexity that must be managed through real domain APIs and decomposition of large orchestration modules.
 
-- one PostgreSQL transaction boundary;
-- one authorization model;
-- one PubSub system;
-- one Oban job system;
-- direct foreign-key relationships between source conversation and durable knowledge;
-- one release and migration path.
+The system can scale by Phoenix nodes, worker roles, storage, database tuning/replication, and workload isolation before the product semantics need to be split across services.
 
-This is deliberate. Splitting chat, forum, synthesis, and AI state into independent services would make provenance and cross-domain consistency harder without solving a demonstrated scaling problem.
+## The product’s two AI authorship contracts
 
-## Data and state classes
-
-| State class | Examples | Primary mechanism |
+| Workflow | What the model may do | What the product must preserve |
 |---|---|---|
-| **Transactional durable state** | users, memberships, messages, threads, replies, votes, citations, artifacts, job records | PostgreSQL/Ecto |
-| **Asynchronous workflow state** | synthesis run, AI reply, recuration, artifact generation, recovery | Oban + PostgreSQL |
-| **Durable client synchronization** | messages, threads, settings, read models | Electric shapes / HTTP mutations |
-| **Ephemeral realtime state** | typing, presence, transient progress | Phoenix channels/PubSub |
-| **External evidence** | web pages, documents, data series, media provider output | tool-specific records and provenance |
-| **Model conversation envelope** | selected context, tool calls/results, terminal draft | bounded runtime state, then durable result |
+| **Conversation curation** | Identify topics, order material, choose a destination, and add bounded bridge context. | Human words, participant identities, eligible source set, source links, correction lineage. |
+| **AI participation** | Compose a new answer, research, select admitted tools, and propose permitted effects. | Explicit AI identity, actor/community scope, evidence, artifact/action identity, terminal lifecycle. |
 
-Confusing these state classes leads to common design defects: trying to persist typing through the main data model, treating a background job as a chat message, trusting the client as mutation authority, or retaining model context as if it were product provenance.
+This distinction is more important than any individual model or tool.
 
-## AI runtime boundary
+## Why the architecture is reviewable
 
-The runtime is intentionally split into code-owned stages:
+The implementation expresses product correctness in durable structures and deterministic boundaries:
 
-1. detect and normalize the trigger;
-2. derive actor/community authorization scope;
-3. reserve uniqueness/concurrency capacity;
-4. assemble product and conversation context;
-5. compute the capability catalog;
-6. call the selected provider;
-7. parse and validate tool calls;
-8. execute tools in isolated tasks;
-9. append structured results and citations;
-10. repeat under explicit control bounds;
-11. force or repair terminal composition when needed;
-12. validate user-visible output;
-13. persist the attributed reply and artifacts;
-14. publish product updates and telemetry;
-15. recover or disclose terminal failure honestly.
+- relational source and authorship identities;
+- server-side authorization and catalog computation;
+- isolated, typed tool/effect dispatch;
+- durable citations and artifacts;
+- explicit job uniqueness and terminal state;
+- client reconciliation with canonical transactions;
+- provider adapters behind a product-owned inference contract.
 
-The model can choose among admitted tools. It cannot expand its own catalog or bypass product authorization.
+Model quality still requires evaluation and human correction. The architecture makes those failures visible and containable rather than claiming to remove them.
 
-## Trust and provenance
+## Suggested review path
 
-Flip has several provenance systems because “source” means different things in different workflows:
-
-- **conversation provenance:** which chat messages and participants produced a forum artifact;
-- **citation provenance:** which quote or document passage supports an AI-authored claim;
-- **artifact provenance:** which request, tool call, provider result, and continuation produced an artifact;
-- **action provenance:** which actor, AI participant, room, and product event caused an effect;
-- **operational provenance:** which job attempt, model route, and recovery path produced the durable outcome.
-
-The public architecture emphasizes the first four. Sensitive thresholds and private telemetry details remain outside the portfolio.
-
-## Product differentiators
-
-1. **Chat and forum are one data product, not linked external services.**
-2. **Curation and AI authorship are different workflows with different guarantees.**
-3. **AI tools include product-native actions, internal retrieval, external research, structured data, and media—not only web search.**
-4. **Authorization scope follows tool execution into child tasks and fails closed when absent.**
-5. **Artifacts and citations are durable objects, not decorations embedded in a model response.**
-6. **Provider compatibility allows local or hosted inference without moving product authority into the inference layer.**
-7. **The same product model supports web, desktop, and mobile projections.**
-
-## Review path
-
-For a technically representative review:
-
-1. read [System Architecture](02-system-architecture.md);
-2. trace [Agent Runtime](03-agent-runtime.md);
-3. compare the two paths in [Synthesis and Provenance](05-synthesis-and-provenance.md);
-4. inspect the tool/authorization model in [Retrieval, Search, and Tools](04-retrieval-search-and-tools.md);
-5. review [Status and Limitations](11-roadmap-and-known-limitations.md).
-
-Deployment separation and quality mechanics are supporting material, not the primary product story.
+Read [System Architecture](02-system-architecture.md), [AI Participant Runtime](03-agent-runtime.md), and [Curation, Authorship, and Provenance](05-synthesis-and-provenance.md) for the core system. Use [Capability Plane](04-retrieval-search-and-tools.md), [Client Convergence](06-data-realtime-and-clients.md), and [Model Routing](07-model-routing-and-inference.md) for the deeper execution boundaries. [Status and Limitations](11-roadmap-and-known-limitations.md) states where the current implementation remains under pressure.
