@@ -1,95 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1320" height="900" viewBox="0 0 1320 900" role="img" aria-labelledby="title desc">
-  <title id="title">HomeCloud architecture</title>
-  <desc id="desc">Clients and APIs connect to an Elixir and Phoenix application with an execution engine, context and memory, tools and model routing. Supervised platform services provide PostgreSQL, local inference slots, GPU scheduling, sandboxes, and telemetry on four V100 GPUs. Research workloads are separated from the operating platform core.</desc>
+  <title id="title">HomeCloud runtime architecture</title>
+  <desc id="desc">Applications and agents enter a HomeCloud execution lifecycle that coordinates durable context, owned sandboxes, inference routing, supervised services, lower-priority research, and heterogeneous local hardware.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-    </marker>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
-      .group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}
-      .research{fill:#fff;stroke:#646b75;stroke-width:2;stroke-dasharray:8 6;rx:14}
-      .t{font:700 26px Arial,sans-serif;fill:#17191d}.h{font:700 17px Arial,sans-serif;fill:#20242a}
-      .b{font:14px Arial,sans-serif;fill:#454b55}.l{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
-      .a{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
-      .d{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
+      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}.research{fill:#fff;stroke:#646b75;stroke-width:2;stroke-dasharray:8 6;rx:14}
+      .title{font:700 26px Arial,sans-serif;fill:#17191d}.head{font:700 17px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.small{font:12px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}.dash{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
     </style>
   </defs>
   <rect class="bg" width="1320" height="900"/>
-  <text x="55" y="50" class="t">HomeCloud: supervised local inference and recoverable agent execution</text>
+  <text x="55" y="50" class="title">HomeCloud: supervised inference and recoverable local AI execution</text>
 
-  <rect class="group" x="55" y="85" width="1210" height="115"/>
-  <text x="80" y="113" class="l">CLIENTS AND INTERFACES</text>
-  <rect class="box" x="90" y="135" width="250" height="45"/><text x="150" y="164" class="h">Phoenix / LiveView</text>
-  <rect class="box" x="385" y="135" width="250" height="45"/><text x="454" y="164" class="h">HTTP / streaming</text>
-  <rect class="box" x="680" y="135" width="250" height="45"/><text x="772" y="164" class="h">MCP</text>
-  <rect class="box" x="975" y="135" width="250" height="45"/><text x="1038" y="164" class="h">Connectors / tools</text>
+  <rect class="group" x="55" y="85" width="1210" height="105"/>
+  <text x="80" y="115" class="label">APPLICATIONS AND OPERATORS</text>
+  <rect class="box" x="90" y="132" width="310" height="42"/><text x="145" y="160" class="head">Flip / APIs / interactive clients</text>
+  <rect class="box" x="505" y="132" width="310" height="42"/><text x="553" y="160" class="head">Autonomous and interactive agents</text>
+  <rect class="box" x="920" y="132" width="310" height="42"/><text x="982" y="160" class="head">Operator / MCP / connectors</text>
 
-  <path class="a" d="M660 200 L660 245"/>
+  <path class="arrow" d="M660 190 L660 235"/>
 
-  <rect class="group" x="55" y="245" width="850" height="340"/>
-  <text x="80" y="275" class="l">ELIXIR / OTP APPLICATION CORE</text>
+  <rect class="group" x="55" y="235" width="850" height="300"/>
+  <text x="80" y="267" class="label">HOMECLOUD RUNTIME</text>
+  <rect class="box" x="85" y="300" width="370" height="100"/>
+  <text x="110" y="332" class="head">Execution lifecycle</text><text x="110" y="358" class="body">admission · phases · checkpoints · recovery</text>
+  <rect class="box" x="500" y="300" width="370" height="100"/>
+  <text x="525" y="332" class="head">Inference control</text><text x="525" y="358" class="body">profile · priority · affinity · live capacity</text>
+  <rect class="box" x="85" y="430" width="370" height="80"/>
+  <text x="110" y="462" class="head">Durable context</text><text x="110" y="488" class="body">retrieval · task memory · selected knowledge</text>
+  <rect class="box" x="500" y="430" width="370" height="80"/>
+  <text x="525" y="462" class="head">Owned execution</text><text x="525" y="488" class="body">sandbox · tools · artifacts · cleanup</text>
 
-  <rect class="box" x="85" y="305" width="370" height="115"/>
-  <text x="110" y="337" class="h">Execution engine</text>
-  <text x="110" y="363" class="b">autonomous · interactive · plan-only</text>
-  <text x="110" y="386" class="b">DAG · validation repair · cancellation</text>
-  <text x="110" y="409" class="b">checkpoints · lifecycle telemetry</text>
+  <rect class="research" x="950" y="235" width="315" height="300"/>
+  <text x="975" y="267" class="label">RESEARCH WORKLOADS</text>
+  <text x="975" y="315" class="head">Program and agent search</text>
+  <text x="975" y="343" class="body">candidate trials under scheduler policy</text>
+  <text x="975" y="392" class="head">Code and CUDA evaluation</text>
+  <text x="975" y="420" class="body">compile · test · correctness · profile</text>
+  <text x="975" y="482" class="small">Consumers of the runtime, not the runtime’s authority</text>
+  <path class="dash" d="M950 385 L905 385"/>
 
-  <rect class="box" x="500" y="305" width="370" height="115"/>
-  <text x="525" y="337" class="h">Context and memory</text>
-  <text x="525" y="363" class="b">documents · embeddings · task memory</text>
-  <text x="525" y="386" class="b">facts · skills · knowledge graph</text>
-  <text x="525" y="409" class="b">budgeting · refresh · compaction</text>
+  <path class="arrow" d="M660 535 L660 580"/>
+  <rect class="group" x="55" y="580" width="1210" height="145"/>
+  <text x="80" y="612" class="label">SUPERVISED SERVICES</text>
+  <rect class="box" x="85" y="640" width="215" height="60"/><text x="112" y="676" class="head">PostgreSQL + pgvector</text>
+  <rect class="box" x="325" y="640" width="215" height="60"/><text x="357" y="676" class="head">Model pool + slots</text>
+  <rect class="box" x="565" y="640" width="215" height="60"/><text x="601" y="676" class="head">GPU claims + scheduler</text>
+  <rect class="box" x="805" y="640" width="215" height="60"/><text x="847" y="676" class="head">Sandbox supervision</text>
+  <rect class="box" x="1045" y="640" width="190" height="60"/><text x="1081" y="676" class="head">Health + telemetry</text>
 
-  <rect class="box" x="85" y="450" width="370" height="105"/>
-  <text x="110" y="482" class="h">Tool and sandbox plane</text>
-  <text x="110" y="508" class="b">files · shell · git · tests · browser</text>
-  <text x="110" y="531" class="b">media · research · dynamic registry</text>
-
-  <rect class="box" x="500" y="450" width="370" height="105"/>
-  <text x="525" y="482" class="h">Inference control</text>
-  <text x="525" y="508" class="b">instance pool · priority · affinity</text>
-  <text x="525" y="531" class="b">profile match · throughput · health</text>
-
-  <rect class="research" x="950" y="245" width="315" height="340"/>
-  <text x="975" y="275" class="l">RESEARCH WORKLOADS</text>
-  <text x="975" y="318" class="h">Program search</text>
-  <text x="975" y="343" class="b">candidate trials · tree search</text>
-  <text x="975" y="385" class="h">Code evaluation</text>
-  <text x="975" y="410" class="b">compile · tests · verifier rewards</text>
-  <text x="975" y="452" class="h">CUDA optimization</text>
-  <text x="975" y="477" class="b">correctness · binary analysis</text>
-  <text x="975" y="500" class="b">profiling · baseline comparison</text>
-  <text x="975" y="542" class="b">Runs below platform policy and capacity</text>
-
-  <path class="d" d="M950 415 L905 415"/>
-
-  <path class="a" d="M660 585 L660 630"/>
-
-  <rect class="group" x="55" y="630" width="1210" height="165"/>
-  <text x="80" y="660" class="l">SUPERVISED PLATFORM SERVICES</text>
-  <rect class="box" x="85" y="690" width="215" height="75"/>
-  <text x="117" y="720" class="h">PostgreSQL + pgvector</text>
-  <text x="112" y="744" class="b">durable state and retrieval</text>
-
-  <rect class="box" x="325" y="690" width="215" height="75"/>
-  <text x="384" y="720" class="h">Model endpoints</text>
-  <text x="353" y="744" class="b">health · drain · adopted services</text>
-
-  <rect class="box" x="565" y="690" width="215" height="75"/>
-  <text x="612" y="720" class="h">GPU scheduler</text>
-  <text x="589" y="744" class="b">claims · queues · priorities</text>
-
-  <rect class="box" x="805" y="690" width="215" height="75"/>
-  <text x="861" y="720" class="h">Sandboxes</text>
-  <text x="833" y="744" class="b">owned execution and cleanup</text>
-
-  <rect class="box" x="1045" y="690" width="190" height="75"/>
-  <text x="1084" y="720" class="h">Operations</text>
-  <text x="1069" y="744" class="b">health · telemetry · reaping</text>
-
-  <path class="a" d="M660 795 L660 835"/>
-  <rect class="box" x="330" y="835" width="660" height="48"/>
-  <text x="420" y="866" class="h">Current hardware: 4 × NVIDIA V100 32 GB (128 GB aggregate VRAM)</text>
+  <path class="arrow" d="M660 725 L660 770"/>
+  <rect class="group" x="125" y="770" width="1070" height="105"/>
+  <text x="150" y="802" class="label">HETEROGENEOUS LOCAL HARDWARE</text>
+  <rect class="box" x="160" y="820" width="365" height="38"/><text x="208" y="846" class="head">4 × V100 32 GB · NVLink pool · 128 GB</text>
+  <rect class="box" x="555" y="820" width="300" height="38"/><text x="603" y="846" class="head">A100 Drive 32 GB · separate</text>
+  <rect class="box" x="885" y="820" width="275" height="38"/><text x="925" y="846" class="head">Optional compatible remote route</text>
 </svg>
