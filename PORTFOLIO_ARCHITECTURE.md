@@ -1,11 +1,11 @@
 # Portfolio architecture
 
-The portfolio covers four distinct engineering planes. The useful organizing principle is not “four AI projects”; it is **four forms of authority that an AI-enabled system needs**:
+The portfolio covers four distinct engineering planes. The organizing principle is not “four AI projects”; it is four different kinds of system responsibility:
 
-1. a product authority over users, content, permissions, and durable experience;
-2. a knowledge authority over evidence, beliefs, decisions, and research continuity;
-3. a control authority over agent lifecycle, resource ownership, verification, and adoption;
-4. a compute authority over model capacity, execution isolation, scheduling, and recovery.
+1. **product authority** over users, content, permissions, authorship, and durable experience;
+2. **knowledge authority** over evidence, beliefs, decisions, and research continuity;
+3. **fleet-orchestration authority** over delegation, live coordination, steering, and handoff among full coding harnesses;
+4. **compute authority** over model capacity, execution isolation, scheduling, and recovery.
 
 ## Responsibility map
 
@@ -13,16 +13,18 @@ The portfolio covers four distinct engineering planes. The useful organizing pri
 |---|---:|---:|---:|---:|
 | Human-facing collaboration product | **Owns** | Does not own | Does not own | Does not own |
 | Chat, forum, identity, moderation, product permissions | **Owns** | Does not own | Does not own | Does not own |
-| AI participation inside a product context | **Owns** | Supports context | Controls external workers | Hosts models/execution |
-| Research evidence and belief revision | Links sources | **Owns** | Emits execution evidence | Produces candidate evidence |
-| Project phases and computed next work | Does not own | **Owns** | Executes declared work | Supplies capacity |
-| Full coding-agent process lifecycle | Does not own | Does not own | **Owns** | May host processes |
-| Worktree isolation and source adoption | Does not own | Records decisions | **Owns** | Supplies sandboxes |
-| Model serving and GPU allocation | Consumes endpoints | Consumes endpoints | Selects routes | **Owns** |
-| Agent sandbox and runtime checkpointing | Product-level jobs | Session records | Worker lifecycle | **Owns** |
-| Verification of code changes before adoption | Product CI | Records findings | **Owns policy** | Supplies evaluators |
+| AI participation inside a product context | **Owns** | Supports context | Does not own | Hosts inference |
+| Research evidence and belief revision | Links sources | **Owns** | Produces candidate run evidence | Produces candidate experiment evidence |
+| Project phases and computed next work | Does not own | **Owns** | Executes delegated work | Supplies capacity |
+| Cross-harness delegation and parallel workflows | Does not own | Does not own | **Owns** | May host workers |
+| Worker messaging, attention, telemetry, and steering | Does not own | Does not own | **Owns** | Exposes runtime signals |
+| Full coding-harness session lifecycle | Does not own | Does not own | **Owns** | May host processes/sandboxes |
+| Shared in-run coordination and result harvest | Does not own | Long-horizon graph | **Owns** | Supplies storage/execution primitives |
+| Model serving and GPU allocation | Consumes endpoints | Consumes endpoints | Selects worker routes | **Owns** |
+| Agent sandbox and runtime checkpointing | Product-level jobs | Session records | Worker/run recovery | **Owns execution environment** |
+| Verification of code changes | Product CI | Records findings | Supports fleet decisions and integration | Supplies evaluators/capacity |
 
-“Owns” means the system defines the canonical state and invariants for that concern. A neighboring system may expose data or capacity but does not redefine those semantics.
+“Owns” means the system defines the canonical state and invariants for that concern. A neighboring system may supply capacity or receive a handoff without redefining those semantics.
 
 ## Composition model
 
@@ -34,115 +36,123 @@ Human communities
        |                                  ^
        | product artifacts                |
        v                                  |
-Project Manager <---- durable handoff ----+---- HomeCloud
+Project Manager <---- selected handoff ---+---- HomeCloud
        ^                                  |
-       | findings / decisions             | execution capacity
+       | findings / decisions             | worker + inference capacity
        |                                  v
        +------------------------------- Baton
-                         verified agent work
+                    orchestrated harness work
 ```
 
-The arrows are integration contracts, not evidence that every deployment must wire all four systems together.
+The arrows are optional integration contracts. They do not imply that every deployment wires all four systems together.
 
 ### Flip and HomeCloud
 
-Flip uses provider-compatible inference boundaries. A local HomeCloud endpoint can therefore replace or supplement a hosted provider without changing the product’s chat, forum, permissions, synthesis, or provenance model.
+Flip uses a provider-compatible inference boundary. A HomeCloud endpoint can replace or supplement a hosted provider without changing Flip’s chat, forum, permission, curation, provenance, or artifact model.
 
-The contract is deliberately asymmetric:
+The boundary is asymmetric:
 
-- Flip decides the product context, tool catalog, actor scope, response persistence, and user-visible behavior.
-- HomeCloud decides which model instance receives the request, how capacity is scheduled, and how local inference is supervised.
-- Neither system should infer the other’s authority from a model response.
+- Flip decides product context, admitted tools, actor scope, response persistence, and user-visible behavior.
+- HomeCloud decides which healthy local endpoint and GPU capacity serve the request.
+- Neither system derives authority from a model response.
 
 ### Baton and HomeCloud
 
-Baton treats a worker as a controllable full-session harness with declared capabilities and lifecycle semantics. HomeCloud can supply local models, sandboxes, and GPU capacity, but Baton remains responsible for:
+Baton’s unit of delegation is a **full coding harness session**, not a raw model completion. HomeCloud can supply local inference, sandboxes, and execution capacity, but Baton remains the fleet driver:
 
-- exact worker route and scope;
-- launch identity and resource ownership;
-- command/event ordering;
-- steering and interaction state;
-- result capture;
-- independent verification;
-- adoption or integration policy.
+- it chooses and starts worker seats;
+- sends briefs and follow-up messages;
+- observes liveness and progress;
+- answers blocking questions;
+- interrupts or steers workers mid-run;
+- coordinates parallel waves and declared workflows;
+- preserves shared run state and result artifacts;
+- decides how work is harvested, reviewed, or integrated.
 
-This prevents compute availability from becoming implicit control authority.
+HomeCloud makes workers and models available. Baton makes them operate as a directed fleet.
 
 ### Baton and Project Manager
 
-Baton’s event log answers “what happened during this run?” Project Manager’s evidence graph answers “what should the project continue to believe, why, and what follows?”
+Baton coordinates work at run and workflow tempo. Its event ledger, task state, shared notes, worker messages, and artifacts answer: **what is the fleet doing, what is blocked, and what did it produce?**
 
-A durable handoff can promote selected run outputs into:
+Project Manager operates at project and research tempo. Its evidence graph answers: **what should the project continue to believe, why, and what follows?**
 
-- experiments and findings;
-- hypotheses or contradiction edges;
-- causal decisions;
-- constraints;
+A selected Baton handoff can become:
+
+- an experiment and findings;
+- a supported or contradicted hypothesis;
+- a decision and its rationale;
+- a constraint;
 - phase progress;
-- session summaries.
+- a session summary.
 
-The boundary matters. Raw worker telemetry is not automatically institutional knowledge, and Project Manager does not become a process supervisor.
+Raw worker chatter and telemetry are not automatically institutional knowledge, and Project Manager does not become Baton's worker supervisor.
 
 ### Flip and Project Manager
 
-Flip preserves product-native provenance: source messages, threads, replies, citations, artifacts, and user feedback. Project Manager can hold a more explicit research model when a community workflow needs hypotheses, experiments, decisions, or constraints. It does not replace the social product’s own content model.
+Flip preserves product-native provenance: source messages, threads, replies, citations, artifacts, and participant feedback. Project Manager can hold a more explicit research model when a community workflow needs hypotheses, experiments, decisions, or constraints. It does not replace Flip’s social content or authorization model.
 
 ## Cross-cutting architecture principles
 
-### 1. Bounded agency
+### 1. Model judgment is bounded by system-owned authority
 
-A model sees only the tools and state relevant to the current actor, surface, and task. The code path—not the prompt—owns the final allowlist and effect boundary.
+A model may plan, interpret, synthesize, route, or intervene. Code and durable state own permissions, lifecycle, concurrency, resource identity, and irreversible effects.
 
 ### 2. Closed lifecycle vocabularies
 
-Important state transitions use explicit enums, typed records, or constrained schemas. Free-form narration can explain a transition; it cannot substitute for one.
+Important state transitions use explicit states, typed records, or constrained schemas. Free-form narration can explain a transition; it cannot substitute for one.
 
 ### 3. One authority, several projections
 
-Where a system offers CLI, MCP, web, native, or embedded interfaces, those interfaces project one domain model. A new surface must not quietly create a second interpretation of commands, status, or permissions.
+Where a system offers CLI, MCP, web, native, resident, or embedded interfaces, those interfaces project one domain model. A new surface must not quietly create a second interpretation of commands, state, or permissions.
 
-### 4. Durable evidence over self-report
+### 4. Preserve evidence at the boundary where it matters
 
-Workers and models may report completion, confidence, or findings. Trust is established through preserved source links, database constraints, independent checks, fresh environments, deterministic evaluators, or explicit human review.
+Flip preserves source and authorship relationships. Project Manager preserves epistemic causality. Baton preserves run, interaction, artifact, and coordination evidence. HomeCloud preserves infrastructure and execution evidence.
 
 ### 5. Isolation before autonomy
 
-Long-running work is given owned processes, worktrees, containers, slots, checkpoints, and cleanup obligations before it is given wider autonomy.
+Long-running work receives owned sessions, worktrees, containers, slots, checkpoints, and cleanup obligations before it receives wider autonomy.
 
-### 6. Local-first without local-only coupling
+### 6. Full harnesses remain first-class
 
-HomeCloud demonstrates self-hosted inference and controlled local execution. The other systems retain provider-compatible boundaries so the architecture does not depend on one machine, model family, or deployment topology.
+Baton does not erase vendor harness behavior behind a lowest-common-denominator model API. Harness-native tools, context management, sessions, approvals, and control surfaces are capabilities to negotiate and compose.
 
-### 7. Research modules do not masquerade as platform guarantees
+### 7. Local-first does not mean local-only coupling
 
-Experimental search, optimization, and evaluation techniques are labeled separately from the runtime capabilities they exercise. A research workload may be technically substantial without being part of the production contract.
+HomeCloud demonstrates self-hosted inference and execution. The other systems retain compatible boundaries so the architecture does not depend on one machine, model family, or deployment topology.
+
+### 8. Research modules do not masquerade as platform guarantees
+
+Experimental optimization and evaluation techniques are labeled separately from the operating contracts they exercise. A technically substantial research workload is not automatically a production guarantee.
 
 ## Supporting systems
 
 ### Flip client
 
-The native/web client layer belongs to Flip’s product architecture. Its concerns include React/TypeScript presentation, real-time synchronization, desktop packaging, mobile packaging, optimistic state, offline behavior, notifications, and endpoint selection. It is documented under Flip rather than promoted as a separate flagship.
+The web/native client layer belongs to Flip’s product architecture. It carries synchronization, optimistic interaction, offline semantics, desktop/mobile packaging, notifications, and endpoint configuration. It is not a separate flagship system.
 
 ### HomeCloud tools
 
-Dispatch adapters, assistant plugins, and collaboration tooling connect external harnesses to HomeCloud and informed the later Baton control-plane work. They are supporting integration surfaces, not a fifth platform plane.
+Dispatch adapters, assistant plugins, and collaboration tooling connect external harnesses to HomeCloud and informed Baton's cross-harness control work. They are supporting integration surfaces rather than a fifth architecture plane.
 
 ## Public documentation contract
 
 The portfolio should remain detailed about:
 
-- product aims and user-visible behavior;
-- component and data boundaries;
+- the problem and user outcome each system exists to address;
+- architecture and authority boundaries;
 - state models and invariants;
-- execution lifecycles;
-- trust, recovery, and failure semantics;
+- representative execution and failure lifecycles;
+- trust, recovery, and integration semantics;
 - implemented versus experimental capability;
-- meaningful architectural tradeoffs.
+- meaningful tradeoffs and rejected alternatives.
 
 It should remain restrained about:
 
-- private source structure where disclosure adds no architectural value;
-- credentials, host paths, private data, and exact operational thresholds;
+- private source structure where it adds no architectural understanding;
+- credentials, host paths, private data, and security-sensitive thresholds;
 - internal campaign history, issue-number inventories, and implementation diaries;
-- self-authored novelty claims or metrics without a reproducible evidence package;
-- demo reset procedures and reviewer choreography repeated across multiple pages.
+- exhaustive feature/module/type catalogs without explanatory value;
+- self-authored novelty or metric claims without a reproducible evidence package;
+- repeated demo reset instructions and reviewer choreography.
