@@ -1,78 +1,118 @@
 # 10 — Architecture Decisions
 
-This page summarizes the product’s consequential choices. Individual public ADRs provide the stable rationale for the most important decisions.
+## The decisions are organized around product integrity
 
-## Decision table
+Flip’s architecture is not a collection of fashionable technologies. Its major choices follow from three product requirements:
 
-| Decision | Rationale | Cost / tradeoff |
-|---|---|---|
-| **Combine chat and forum in one product** | Live exchange and durable knowledge are one lifecycle; shared identity/provenance enables direct transition. | Larger product surface and more cross-domain invariants. |
-| **Use a modular Phoenix monolith** | Shared transactions, authorization, PubSub, jobs, and migrations are more valuable than service isolation at current scale. | Requires disciplined contexts and can produce large modules if boundaries erode. |
-| **Keep PostgreSQL canonical** | Strong relational provenance, full-text search, Oban state, and synchronization from one durable store. | Database scaling and migration discipline become central. |
-| **Use Oban for asynchronous workflows** | Durable retries, uniqueness, scheduling, and inspection without an external message broker. | Background throughput depends on database health and careful job contracts. |
-| **Separate curation from AI participation** | Human authorship preservation and AI-authored answers require different integrity rules. | Two lifecycle models and more explicit UI/content types. |
-| **Make AI identity explicit** | Users should know when content is AI-authored and which configured participant produced it. | Persona/model/configuration state must remain coherent across surfaces. |
-| **Compute tool catalogs server-side** | Prompt instructions are not authorization; the code must decide which capabilities exist. | Catalog logic and parity tests become substantial. |
-| **Propagate trusted actor/community scope into tool tasks** | Internal retrieval must preserve product permissions even under asynchronous dispatch. | Scope plumbing must be explicit through every execution path. |
-| **Fail closed for internal retrieval** | Missing scope should never become global search. | Some recoverable misconfiguration produces empty results instead of best-effort behavior. |
-| **Persist citations and artifacts as objects** | Evidence and generated outputs need durable identity, validation, lifecycle, and UI. | Additional schemas and cleanup/retention obligations. |
-| **Use different realtime paths for durable and ephemeral state** | Electric suits recoverable records; channels suit presence/typing and transient progress. | Clients must coordinate several transports and reconnection semantics. |
-| **Keep server-authoritative mutations** | Product permissions and invariants must not be delegated to local client state. | Offline mutation requires queues and reconciliation rather than direct local writes. |
-| **Use provider-compatible inference boundaries** | Models and providers should be replaceable without changing product semantics. | Adapters must normalize incompatible tool/stream/finish behavior. |
-| **Reserve a terminal composition stage** | A tool-using model can otherwise finish with internal intent or protocol markup instead of a user reply. | Extra latency/token cost and provider-specific compatibility work. |
-| **Separate product and synthetic technical environments** | Architecture can be reviewed without private data or credentials. | Additional deployment/seed maintenance. |
-| **Publish architecture, not private source** | Reviewers can assess design without exposing commercial implementation and deployment internals. | Some claims cannot be independently code-reviewed from this repository alone. |
+1. live conversation and durable knowledge must remain connected;
+2. AI participation must not erase authorship or bypass permissions;
+3. asynchronous and model-driven work must still converge on one inspectable product state.
+
+The public ADRs preserve the stable rationale. This page shows how the choices fit together.
+
+## 1. Chat and forum are one product lifecycle
+
+**Decision:** Keep live rooms and durable threaded discussion in one product and one identity/provenance model.
+
+**Why:** Chat captures the social and causal path of a discussion; forums make the result searchable and extendable. Separating them into unrelated products would make the transition manual and provenance fragile.
+
+**Cost:** Flip must maintain two interaction models and the cross-domain rules that connect them.
+
+**Rejected alternative:** “Summarize the chat into a post.” A summary alone loses participant wording, reply structure, source navigation, and correction history.
+
+## 2. Use a modular Phoenix monolith with PostgreSQL authority
+
+**Decision:** Keep product domains in one Phoenix application, one migration path, one authorization model, and one canonical PostgreSQL database. Use Oban for durable asynchronous work.
+
+**Why:** Message-to-forum provenance, AI replies, citations, artifacts, linkback, notifications, and client synchronization all benefit from shared identities and transactions. An external message broker or early service split would add network failure and eventual consistency before a demonstrated need.
+
+**Cost:** The application can accumulate large contexts and workers. Boundary tests and refactoring discipline are mandatory.
+
+**Revisit when:** A domain demonstrates an independent scaling, regulatory, release, or team-ownership requirement that outweighs distributed consistency cost.
+
+## 3. Separate curation from AI authorship
+
+**Decision:** Model conversation curation and direct AI participation as different workflows and content semantics.
+
+**Why:** Curation should preserve human words and source identity while changing structure. An AI reply is new composition and must be attributed to the AI participant. One generic “synthesis” path makes authorship ambiguous.
+
+**Cost:** Two lifecycle models, explicit content types, and more provenance-aware UI.
+
+**Rejected alternative:** Rely on a prompt saying “do not rewrite users.” Product integrity must survive model error and therefore requires durable source relationships.
+
+## 4. Keep the capability plane server-authoritative
+
+**Decision:** Compute the available tool catalog from surface, feature state, actor/community authorization, object context, and provider availability. Pass trusted scope into child tool tasks and fail closed for protected retrieval.
+
+**Why:** Prompt instructions are not permission enforcement. Internal search, product actions, and provider-backed effects need the same authorization and audit guarantees as ordinary user commands.
+
+**Cost:** Catalog coherence, effect classification, scope propagation, and parity tests become substantial engineering work.
+
+**Rejected alternative:** Give the model a generic database or CRUD tool. That would bypass domain validation, idempotency, and product-specific effect lifecycles.
+
+## 5. Persist evidence and artifacts outside model prose
+
+**Decision:** Citations, source records, charts, generated media, polls, and asynchronous requests receive durable product identities and lifecycle state.
+
+**Why:** A token or URL embedded only in a model response cannot be validated, deduplicated, permissioned, retried, continued, or rendered reliably. Durable objects make evidence and effects inspectable after the model context is gone.
+
+**Cost:** More schemas, storage, cleanup, retention, and UI state.
+
+**Rejected alternative:** Treat generated output as opaque markdown attachments. That hides pending/failure state and loses causal inputs.
+
+## 6. Split durable synchronization from ephemeral realtime
+
+**Decision:** Use server-authoritative commands for mutations, Electric for recoverable durable projections, and Phoenix channels/PubSub for presence, typing, and transient progress.
+
+**Why:** Durable messages and artifacts need replay and reconnect; ephemeral interaction does not. One websocket stream cannot provide both semantics cleanly.
+
+**Cost:** Clients coordinate several transports and must test ordering and reconnection explicitly.
+
+**Rejected alternative:** Let the client own a local product database and sync later by default. Membership, moderation, and cross-user conflicts remain server-authoritative; offline mutation must be specified per command.
+
+## 7. Keep models and providers replaceable
+
+**Decision:** Place model routing and provider adapters behind a product-owned request, tool, evidence, and terminal-composition contract.
+
+**Why:** Chat, curation, research, documents, and media have different execution needs, and provider APIs change. Product identity and permissions should not change when a route changes or local inference replaces a hosted endpoint.
+
+**Cost:** Adapters must normalize incompatible streaming, tool-call, finish, forced-tool, and error behavior. Routes require surface-specific evaluation.
+
+**Rejected alternative:** Choose one “best model” for every feature. A route strong at long research may be unsuitable for low-latency chat or structured curation.
+
+## 8. Reserve an explicit terminal composition step
+
+**Decision:** Distinguish working/tool rounds from the user-visible reply and validate the terminal draft before persistence.
+
+**Why:** Tool-using models can end with internal intent, hidden protocol, or an incomplete draft. The product needs a bounded point where gathered evidence becomes the actual attributed response.
+
+**Cost:** Additional latency and provider-specific compatibility work.
+
+## 9. Separate public technical review from product authority
+
+**Decision:** Maintain a synthetic environment and publish architecture, scenarios, decisions, and limitations without copying production data, credentials, or private source.
+
+**Why:** Reviewers need relationally realistic evidence, not production access. A public architecture portfolio should be technically meaningful without becoming a source or security dump.
+
+**Cost:** Synthetic fixtures and a separate deployment require maintenance, and not every source-level claim is independently reproducible here.
 
 ## Decision criteria
 
-The decisions optimize for:
+Across these choices, Flip optimizes for:
 
-1. **authorship integrity;**
-2. **authorization correctness;**
-3. **durable provenance;**
-4. **recoverability under asynchronous failure;**
-5. **model/provider replaceability;**
-6. **one canonical product state;**
-7. **reviewability without private-data exposure.**
+- visible and correct authorship;
+- server-enforced authorization;
+- durable provenance and correction;
+- coherent failure and recovery;
+- one canonical product state;
+- model/provider replaceability;
+- client convergence;
+- reviewability without private-data exposure.
 
-Raw feature count is not the optimization target.
+Feature count is not the optimization target.
 
-## Rejected simplifications
+## Revisit discipline
 
-### “Just summarize chat into a post”
+Architecture should change when evidence changes: measured database or queue limits, explicit offline conflict requirements, independent regulatory boundaries, route evaluation, artifact workload isolation, or a deliberate public-source strategy.
 
-Rejected because it loses participant wording, message identity, reply structure, and reader navigation to the source.
-
-### “Give the model a database tool”
-
-Rejected because model-selected SQL or generic CRUD cannot express product authorization, idempotency, audit, and effect-specific workflows safely.
-
-### “Use one websocket for everything”
-
-Rejected because durable synchronized records and ephemeral presence have different replay, offline, and consistency requirements.
-
-### “Let the client write the local database and sync later”
-
-Rejected as a universal model because membership, moderation, and cross-user conflict semantics remain server-authoritative. Selected offline queues can be added per command.
-
-### “One best model for all AI features”
-
-Rejected because curation, low-latency reply, tool use, long documents, structured planning, and multimodal tasks have different route requirements.
-
-### “Move every domain into a service”
-
-Rejected until scaling or team ownership justifies distributed consistency and duplicated operational boundaries.
-
-## Revisit triggers
-
-An architectural decision should be revisited when evidence changes:
-
-- product scale makes one PostgreSQL/Oban topology insufficient;
-- client offline mutation requirements become explicit and conflict semantics are defined;
-- a domain requires independent release or regulatory isolation;
-- a provider-neutral standard eliminates meaningful adapter complexity;
-- curation quality requires a separate specialized model service;
-- artifact/media workloads need a dedicated execution plane;
-- public source release becomes compatible with commercial and security boundaries.
-
-Revisit does not mean erase the original rationale. The ADR record should preserve why the prior choice was correct under prior constraints.
+A change should preserve the original decision record rather than rewriting history. The ADRs explain why the current choice was correct under the constraints that produced it.
