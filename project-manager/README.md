@@ -1,171 +1,53 @@
 # Project Manager
 
-**Evidence-aware institutional memory and research control for long-running human and agent projects.**
+Project Manager is a system for **keeping long-running research and engineering work intellectually coherent across sessions**.
 
-Project Manager (`pm`) addresses a specific failure mode: a long project cannot be represented faithfully as a list of tasks or a transcript. Over weeks of work, the project accumulates experiments, findings, hypotheses, decisions, constraints, literature, contradictions, and abandoned branches. Without a typed substrate, agents restart without orientation, beliefs drift, contradictory findings coexist, and decisions become detached from the evidence that caused them.
+Most project tools are good at remembering what tasks exist. They are much worse at remembering why a project changed direction, which experiment invalidated an assumption, whether a decision is still supported, or what an incoming agent should trust after weeks of accumulated work. For AI-assisted projects this becomes especially acute: every new session can generate a plausible narrative, but plausibility is not continuity.
 
-Project Manager stores that work as a small, typed evidence graph backed by SQLite. A single Rust domain core serves a command-line interface, an MCP server, and an embedded web dashboard.
+Project Manager treats the project itself as a durable evidence structure rather than as a backlog plus chat history.
 
 ![Project Manager architecture](assets/architecture.svg)
 
-## Architectural thesis
+## The design problem
 
-A useful long-horizon memory system must answer four different questions:
+The system was built around a practical observation: useful project memory has several different kinds of state that should not be collapsed into prose.
 
-1. **What exists?** Typed nodes retain projects, phases, experiments, findings, decisions, hypotheses, principles, constraints, research notes, literature, feedback, and sessions.
-2. **Why is it believed?** Typed edges preserve production, support, contradiction, derivation, citation, dependency, and supersession relationships.
-3. **What should happen next?** A dependency DAG selects actionable phases by impact and detects stalled execution.
-4. **What changed since the last session?** Session and temporal context produce a computed orientation rather than relying on an old prose handoff.
+A hypothesis is not a finding. A finding is not a decision. A decision is not merely the latest task status. A contradiction should be able to weaken or suspend what follows from it. A dependency should affect what can be done next. A handoff should be derivable from current project state rather than manually rewritten after every session.
 
-## Knowledge model
+Project Manager therefore gives experiments, findings, hypotheses, decisions, constraints, phases, literature, and sessions distinct semantics and links them through typed relationships. The important part is not the number of record types; it is that the project can reason over those distinctions.
 
-### Node types
+## What that changes in practice
 
-| Type | Role | State carried |
-|---|---|---|
-| `Project` | Top-level program or nested effort. | Active, paused, or archived state; aliases and optional parent. |
-| `Phase` | Executable unit in the project plan. | Dependency edges, impact, execution status. |
-| `Experiment` | A concrete investigation. | Pending/pass/fail/inconclusive status, result, notes, optional hypothesis. |
-| `Finding` | Empirical observation. | Confidence and belief status; provenance to upstream work. |
-| `Decision` | A selected course of action. | Mandatory rationale plus confidence and belief status. |
-| `Hypothesis` | A testable prediction. | Proposed/testing/confirmed/refuted lifecycle and evaluation criteria. |
-| `Principle` | Reusable guidance. | Scope and active/superseded/refined state. |
-| `Constraint` | A hard operating boundary. | Domain, severity, measured value, and optional expiry. |
-| `Research` | Longer-form investigation or reflection. | Work status and project relationship. |
-| `LiteratureEntry` | External reference. | URL or identifier, venue/year, findings, reading status. |
-| `FeedbackEntry` | Explicit correction or confirmation. | Feedback category and target relationship. |
-| `Session` | Cross-session continuity record. | Start/end time, summary, active experiment. |
+Consider a research effort where an early experiment supports an approach, two later findings contradict it, and a design decision was originally justified by the first result. In an ordinary issue tracker, all four objects still exist but their relationship is implicit. A new agent can easily read the old decision and continue executing it.
 
-### Edge types
+In Project Manager, the contradiction is part of the project model. The decision retains its rationale and evidence links, downstream work can become questionable or blocked, and the next-session briefing can surface the conflict directly. The goal is not automatic scientific judgment; it is to make changes of belief explicit enough that a human or agent cannot casually paper over them.
 
-The graph uses a polymorphic edge table. Any compatible node can connect through relations including:
+This same principle drives phase planning. The system computes actionable work from dependencies and current state rather than assuming the original task order remains correct after the evidence changes.
 
-`ProducedBy`, `Informed`, `Supports`, `Contradicts`, `Supersedes`, `DependsOn`, `RelatedTo`, `CitedIn`, `Contains`, `DerivedFrom`, `TestedBy`, `ViolatedBy`, `BranchesFrom`, and `ConvergesInto`.
+## Architecture
 
-The graph is not merely a visualization layer. Edges affect retrieval, confidence, belief status, contradiction analysis, dependency execution, and structural audits.
+The implementation is intentionally compact: a Rust domain core over SQLite, exposed through CLI, MCP, and an embedded web interface.
 
-## Execution and truth-maintenance engines
+The important architectural choice is that those interfaces are projections of the same model. The MCP server does not get a simplified “agent version” of project state, and the dashboard does not maintain a separate interpretation of progress. The same constraints, graph relationships, and review logic apply regardless of who is interacting with the project.
 
-### Dependency DAG
+The graph supports both execution structure and evidentiary structure. Dependency edges answer what can happen next; support, contradiction, derivation, and supersession edges answer why the current project state looks the way it does. Retrieval can then use both text and graph neighborhood instead of returning isolated snippets.
 
-Phases form a directed acyclic graph. The engine:
+## Session continuity
 
-- validates and topologically orders phase dependencies;
-- excludes blocked or completed work;
-- selects the highest-impact actionable phases;
-- detects repeated failure and stagnation;
-- gives CLI, MCP, and web views the same computed next action.
+The strongest use case is agent or human re-entry after context has been lost.
 
-The project therefore does not depend on an agent remembering the original plan after the evidence has changed.
+A session can begin by reconstructing the current state of the project: which phase is actually actionable, which hypotheses remain unresolved, which findings materially changed direction, which constraints are active, and which decisions are recent or contested. That orientation comes from the durable graph. A prose handoff can still be generated for convenience, but it is a view over the state rather than the state itself.
 
-### Belief revision
+This is the central difference between Project Manager and “memory” implemented as transcript retrieval. It stores the project’s evolving epistemic structure, not merely the words previously produced about the project.
 
-Findings, decisions, and hypotheses carry both confidence and belief status. `Supports` and `Contradicts` edges update the target’s evidentiary state. Strong contradiction can suspend the affected node and its downstream dependents instead of leaving incompatible beliefs simultaneously active.
+## Engineering tradeoffs
 
-This is a deliberately bounded truth-maintenance mechanism, not a claim that confidence arithmetic replaces scientific judgment. It makes contradiction explicit and reviewable.
+SQLite is a deliberate choice. The project is meant to be easy to embed in local agent workflows, inspect directly, migrate deterministically, and use without operating a separate service. The workload is structurally rich but not high-throughput enough to justify distributed storage.
 
-### Causal decisions
+Likewise, the truth-maintenance logic is intentionally bounded. Confidence and contradiction propagation are useful for surfacing when the project’s own evidence no longer agrees with itself; they are not presented as a substitute for human scientific judgment or a universal probabilistic reasoning framework.
 
-A decision must include a non-empty `why`. The data model and interfaces encourage links from a decision to the findings, experiments, constraints, or prior decisions that caused it. A decision record is therefore more than a timestamped label.
+## Current maturity
 
-### Graph health
+The core model, dependency planning, evidence relationships, contradiction/review logic, retrieval, session continuity, CLI, MCP, and dashboard are implemented. Current work is focused on making causal traversal and newer operations more consistent across interfaces rather than expanding the ontology for its own sake.
 
-The analysis layer can surface:
-
-- contradictions and competing branches;
-- orphan findings, decisions, hypotheses, and literature;
-- stale or expired constraints;
-- phases with repeated inconclusive work;
-- missing causal links;
-- structural graph defects;
-- branch and convergence relationships.
-
-Repair operations remain explicit. Detection does not silently rewrite the graph.
-
-## Retrieval and session continuity
-
-Project Manager provides text and graph-assisted retrieval. Search scores can combine textual relevance, evidence weight, graph connectivity, and recency. Context retrieval groups results by type and expands nearby relationships so an agent sees the evidence around a match rather than an isolated sentence.
-
-At session start, the system can assemble:
-
-- active projects and phases;
-- highest-impact unblocked work;
-- pending experiments;
-- untested or contradicted hypotheses;
-- recent findings and decisions;
-- expiring constraints;
-- relevant neighborhood context.
-
-At session end, it can preserve a durable summary and active-work pointer. The graph remains canonical; the handoff is a projection of it.
-
-## One core, three surfaces
-
-| Surface | Role |
-|---|---|
-| **CLI** | Fast, scriptable project manipulation, review, retrieval, and handoff. |
-| **MCP stdio server** | Agent-native access to the same project, evidence, graph, review, repair, and session operations. |
-| **Embedded web dashboard** | Human inspection of projects, graph state, execution status, and structural health. |
-
-The surfaces share the Rust domain model and SQLite store. MCP is not a parallel implementation with weaker constraints, and the dashboard does not own separate state.
-
-## Representative workflow
-
-```text
-1. Activate project
-2. Define phases and dependency edges
-3. Record an experiment
-4. Add a finding produced by that experiment
-5. Link the finding as supporting or contradicting a hypothesis
-6. Record a decision and its rationale
-7. Run project review for contradictions, orphans, staleness, and stagnation
-8. Compute the next actionable phase
-9. End the session with a graph-derived handoff
-```
-
-A minimal CLI sequence:
-
-```bash
-pm project activate atlas
-pm phase atlas add "Map retrieval gaps" --impact 40
-pm phase atlas add "Test topic briefings" --impact 80
-pm next atlas
-
-pm exp atlas add "Evaluate retrieval recall" --phase 1 --status pass
-pm finding atlas add "Topic-scoped briefings recovered omitted context" --experiment 1
-pm hyp atlas add "Topic briefings improve next-action selection" --phase 2 --finding 1
-pm dec atlas add "Adopt topic-scoped briefing" \
-  --why "The retrieval experiment improved recall with low operating complexity."
-
-pm review atlas
-pm handoff atlas
-```
-
-## Implementation structure
-
-| Layer | Responsibility |
-|---|---|
-| Rust CLI and MCP adapters | Parse commands and protocol calls into domain operations. |
-| Typed store and migrations | Enforce schema, lifecycle, uniqueness, and temporal rules. |
-| DAG engine | Dependency validation, ordering, next-phase selection, stagnation. |
-| Knowledge-graph engine | Traversal, neighborhoods, structural analysis, typed edges. |
-| Analysis layer | Confidence, contradiction, orphan, and review logic. |
-| SQLite | Portable, durable project state with versioned migrations. |
-| Embedded web server | Readable dashboard over the same store. |
-
-## Status
-
-| State | Capability |
-|---|---|
-| **Shipped** | Typed knowledge store and migrations; project/phase/experiment/evidence objects; DAG execution; confidence and belief state; support/contradiction propagation; contradiction/orphan/staleness review; text and graph-assisted retrieval; CLI; MCP; embedded dashboard. |
-| **In progress** | Richer causal-backbone traversal, closer CLI parity for newer operations, and project-scoped retrieval polish. |
-| **Planned / experimental** | More automatic transition and review-gate orchestration, richer long-horizon context assembly, and additional migration tooling for older project data. |
-
-## Relationship to the other systems
-
-- Project Manager can retain selected evidence and decisions produced by Baton-controlled work, but it does not supervise workers.
-- It can record experiments run on HomeCloud, but it does not schedule GPUs or own sandboxes.
-- It can preserve research objects referenced from Flip, but it does not replace Flip’s social content and permission model.
-
-## Source
-
-The implementation is available in the public [Project Manager repository](https://github.com/wahargis/project-manager) under its repository license.
+The public source is available in the [Project Manager repository](https://github.com/wahargis/project-manager).
