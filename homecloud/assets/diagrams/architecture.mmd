@@ -1,51 +1,53 @@
 flowchart TD
-    subgraph clients["Clients and interfaces"]
-        UI["Phoenix / LiveView"]
-        API["HTTP / streaming"]
-        MCP["MCP"]
-        CONN["Connectors and tools"]
+    subgraph interfaces["Applications and operators"]
+        APP["Flip / APIs / interactive clients"]
+        AGENT["Autonomous and interactive agent work"]
+        OPS["Operator / MCP / connectors"]
     end
 
-    subgraph core["Elixir / OTP application core"]
-        EXEC["Execution engine<br/>autonomous · interactive · plan-only<br/>DAG · validation repair · checkpoints"]
-        CTX["Context and memory<br/>documents · embeddings · task memory<br/>facts · skills · knowledge graph · compaction"]
-        TOOLS["Tool and sandbox plane<br/>files · shell · git · tests · browser<br/>media · research · dynamic registry"]
-        ROUTE["Inference control<br/>instance pool · priority · affinity<br/>profile match · throughput · health"]
+    subgraph runtime["HomeCloud runtime"]
+        EXEC["Execution lifecycle<br/>admission · phases · checkpoints · recovery"]
+        CONTEXT["Durable context<br/>retrieval · task memory · selected knowledge"]
+        TOOL["Owned execution<br/>sandbox · tools · artifacts · cleanup"]
+        ROUTER["Inference control<br/>profile · priority · affinity · capacity"]
+        EXEC --> CONTEXT
+        EXEC --> TOOL
+        EXEC --> ROUTER
     end
 
-    subgraph research["Research workloads"]
-        SEARCH["Program search<br/>candidate trials · tree search"]
-        EVAL["Code evaluation<br/>compile · tests · verifier rewards"]
-        CUDA["CUDA optimization<br/>correctness · binary analysis · profiling"]
-    end
-
-    subgraph services["Supervised platform services"]
+    subgraph services["Supervised services"]
         DB[("PostgreSQL + pgvector")]
-        MODELS["Model endpoints<br/>health · drain · adopted services"]
-        SCHED["GPU scheduler<br/>claims · queues · priorities"]
-        SANDBOX["Owned sandboxes<br/>execution · cleanup · recovery"]
-        OPS["Operations<br/>health · telemetry · reaping"]
+        POOL["Healthy model endpoints and checkout slots"]
+        SCHED["GPU claims and workload scheduler"]
+        SANDBOX["Sandbox/process supervision"]
+        TELEMETRY["Health · throughput · lifecycle evidence"]
     end
 
-    subgraph hardware["Current hardware"]
-        GPUS["4 × NVIDIA V100 32 GB<br/>128 GB aggregate VRAM"]
+    subgraph research["Lower-priority research workloads"]
+        PROGRAM["Program / agent search"]
+        VERIFY["Compilation · tests · profiling"]
+        CUDA["CUDA optimization trials"]
     end
 
-    UI --> EXEC
-    API --> EXEC
-    MCP --> EXEC
-    CONN --> TOOLS
-    EXEC --> CTX
-    EXEC --> TOOLS
-    EXEC --> ROUTE
-    SEARCH --> EXEC
-    EVAL --> EXEC
-    CUDA --> EXEC
-    CTX --> DB
-    ROUTE --> MODELS
-    ROUTE --> SCHED
-    TOOLS --> SANDBOX
-    EXEC --> OPS
-    MODELS --> GPUS
-    SCHED --> GPUS
-    SANDBOX --> GPUS
+    subgraph hardware["Heterogeneous local hardware"]
+        V100["4 × V100 32 GB<br/>NVLink pool · 128 GB"]
+        A100["A100 Drive 32 GB<br/>separate accelerator"]
+        REMOTE["Optional compatible remote endpoints"]
+    end
+
+    APP --> EXEC
+    AGENT --> EXEC
+    OPS --> EXEC
+    CONTEXT --> DB
+    TOOL --> SANDBOX
+    ROUTER --> POOL
+    EXEC --> TELEMETRY
+    PROGRAM --> EXEC
+    VERIFY --> TOOL
+    CUDA --> SCHED
+    POOL --> SCHED
+    SCHED --> V100
+    SCHED --> A100
+    ROUTER --> REMOTE
+    SANDBOX --> V100
+    SANDBOX --> A100
