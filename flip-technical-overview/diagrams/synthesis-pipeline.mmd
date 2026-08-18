@@ -1,14 +1,14 @@
 flowchart TD
-    TRIGGER["Chat message / room config"] --> ENABLE{synthesis enabled?}
-    ENABLE -->|no| SKIP["No synthesis"]
-    ENABLE -->|yes| JOB["Background AI job"]
-    JOB --> LOOP["Bounded gather phase"]
-    LOOP --> TOOLS["Governed tools (search / read)"]
-    TOOLS --> SOURCES["Sources + citations collected"]
-    SOURCES --> TERMINAL["Terminal phase: final plan"]
-    TERMINAL --> PLAN["Curation plan / synthesis text"]
-    PLAN --> PERSIST["Persist forum thread or reply"]
-    PERSIST --> LINK["Link to source messages"]
-    LINK --> CITE["Attach quote-verified citations"]
-    CITE --> LEDGER["Write source ledger entries"]
-    LEDGER --> DONE["Synthesis visible with provenance"]
+    CHAT["Eligible chat conversation"] --> SELECT["Select source messages and relationships"]
+    SELECT --> PLAN["Model-assisted topic and destination plan"]
+    PLAN --> VALIDATE{"Valid source set, authorship, destination, and duplicate state?"}
+    VALIDATE -->|no| REPAIR["Repair or defer to review"]
+    REPAIR --> PLAN
+    VALIDATE -->|yes| APPLY["Transactional forum create / append / merge"]
+    APPLY --> SOURCE["Persist source-message and participant relationships"]
+    SOURCE --> BRIDGE["Add bounded structural bridge context"]
+    BRIDGE --> LINK["Asynchronous linkback to source conversation"]
+    LINK --> FEEDBACK["Participant feedback and correction"]
+    FEEDBACK --> RECURATE{"Recuration warranted?"}
+    RECURATE -->|yes, bounded| PLAN
+    RECURATE -->|no| DURABLE["Durable forum knowledge with inspectable provenance"]

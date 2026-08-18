@@ -1,93 +1,151 @@
 # Flip — Technical Overview
 
-Flip is a real-time community product built around a simple product thesis: **conversation should be able to stay live without becoming disposable**.
+**A real-time community platform that turns live conversation into durable, attributable knowledge and supports AI participants as governed product actors.**
 
-Chat is where people actually work things out. Forums are where useful knowledge becomes discoverable and durable. Most products force a choice between those interaction models or bolt one onto the other. Flip treats them as two states of the same community knowledge system, with AI used to help bridge the gap without obscuring who said what or how a conclusion was reached.
+Flip combines chat, forums, background curation, direct AI participation, retrieval, rich artifacts, and web/native clients in one product model. Its central engineering problem is not “add a chatbot.” It is how to let humans and AI work inside the same social system without losing authorship, permissions, provenance, or product reliability.
 
 <img src="diagrams/system-context.svg" alt="Flip system context diagram" width="900" />
 
-## The product problem
+## Product thesis
 
-The interesting part of Flip is not that it contains an AI assistant. It is that AI is inserted into an existing multi-user product where authorship, permissions, provenance, and durable state already matter.
+Chat and forums solve opposite parts of the same problem:
 
-That changes the design substantially.
+- chat is immediate, contextual, and socially fluid, but important knowledge disappears into the stream;
+- forums are durable, searchable, and structured, but they do not capture the full path by which a group reached a conclusion.
 
-A model cannot simply be handed the whole database because it wants more context. It cannot turn a user’s words into its own summary and still claim the same provenance. It cannot invoke a product action because a prompt told it that the action is allowed. And a generated answer that cites current information has to preserve enough evidence for another user to understand where that information came from.
+Flip keeps both. A conversation can remain live in chat while selected material becomes a durable forum artifact linked back to its source. AI can assist that process, participate directly in a room, research external information, produce cited artifacts, and invoke product actions—but only through server-defined capability and authorization boundaries.
 
-Flip is built around those constraints.
+## Two distinct AI paths
 
-## Two different uses of AI
+The architecture separates two behaviors that are often incorrectly described as one “agent.”
 
-The most important distinction in the system is between **curation** and **participation**.
+| Path | Purpose | Authorship rule | Result |
+|---|---|---|---|
+| **Conversation curation** | Identify topic-coherent material in chat and organize it into durable forum structure. | Preserves user-authored words and source-message identity; AI adds bounded structural context rather than silently rewriting participants. | Forum thread/replies with source links, curation metadata, and feedback/recuration state. |
+| **AI participation** | Let an explicit AI identity answer, research, create artifacts, react, or take an allowed product action. | AI-authored output is visibly attributed to the AI participant and persisted through the same product state model as other content. | Chat reply, forum reply, citation ledger, chart, document/image/video artifact, poll, or other permitted effect. |
 
-Curation helps move useful discussion from chat into durable forum structure. The AI can identify topics, organize source material, and provide limited structural context, but the resulting artifact remains connected to the original conversation and preserves human authorship.
+This distinction is fundamental. Curation protects human authorship; direct participation makes AI authorship explicit.
 
-Participation is different. An AI identity can answer a question, conduct research, create an artifact, or take a permitted product action. In that case the output is explicitly AI-authored and enters the product as such.
+## Capability model
 
-Those two paths are deliberately separate because conflating them creates exactly the ambiguity the product is trying to avoid: did the system reorganize what people said, or did the AI say something new?
+### Human collaboration
 
-## AI as a governed product actor
+- real-time rooms, message threads, reactions, pins, typing, presence, read state, uploads, GIFs, and search;
+- threaded forums organized by community and topic, with voting, bookmarks, tags, nested discussion, and multiple sort modes;
+- notifications, identity, membership, settings, moderation, and audit surfaces;
+- shared source records across chat, forum, synthesis, and artifacts.
 
-A direct AI reply is handled as a product transaction, not as a raw model call.
+### Conversation-to-knowledge synthesis
 
-The server determines who invoked the AI, which community the request belongs to, what internal content that actor may access, which external or product-native tools make sense in that context, and what effects are actually authorized. The model chooses within that admitted surface; it does not define the surface itself.
+- scheduled or requested room crawling;
+- topic grouping and forum placement;
+- source-message and participant preservation;
+- deduplication, merge, linkback, and recuration;
+- structured participant feedback and bounded retry/manual-review behavior;
+- durable provenance from generated forum structure back to the source conversation.
 
-This is especially important for internal retrieval. A community assistant becomes a data-leak mechanism if “search the conversation” is implemented as a global semantic query. Flip carries the invoking actor and community scope into retrieval and fails closed when that scope is missing.
+### Governed AI participant runtime
 
-The same principle applies to actions. The AI may decide that creating a poll, generating an artifact, or performing another product action would help, but the effect still passes through server-side domain rules.
+- explicit trigger detection and deduplicated background execution;
+- room/community/persona/model configuration;
+- bounded iterative tool use and controlled terminal composition;
+- isolated tool dispatch and honest failure envelopes;
+- typed lifecycle/telemetry and durable response state;
+- continuation and recovery paths for long-running artifact workflows;
+- separate capability catalogs for chat, forum, curation, personal, and game contexts.
 
-## Durable provenance rather than decorative citations
+### Retrieval, research, and evidence
 
-Flip treats provenance as product state.
+- external search, webpage reading, historical snapshots, and source comparison;
+- internal chat/forum retrieval constrained to the invoking actor and community;
+- document and PDF reading;
+- quote-backed citations and reader-facing source records;
+- structured market, economic, policy, environmental, conflict, R&D, and supply-chain data where configured;
+- chart and rich-data rendering;
+- research-session state for multi-step investigation.
 
-For a synthesized forum artifact, provenance means preserving the relationship to source messages and participants. For an AI-authored answer, provenance may mean a quote-backed web or document citation. For a generated artifact, it means preserving the request and result relationship so that the artifact is not just an opaque attachment emitted by a provider.
+### Artifact and media workflows
 
-Those records outlive the model context that created them. That is the useful distinction between evidence and prose that merely looks sourced.
+- persisted structured artifacts rather than embedding every result in prose;
+- chart and rich-data artifacts;
+- document and image understanding;
+- image generation/editing;
+- video generation/editing and chained clip workflows;
+- media search and verification surfaces;
+- polls and product-native interactive artifacts.
 
-## Architecture
+### Clients and synchronization
+
+- Phoenix web experience and real-time channels;
+- React/TypeScript client architecture;
+- Electric-backed synchronization for durable data;
+- native desktop packaging and system integrations;
+- mobile packaging from the shared client codebase;
+- explicit distinction between durable synchronized state and ephemeral presence/typing state.
+
+## Architectural shape
 
 <img src="diagrams/service-container-map.svg" alt="Flip service and container architecture diagram" width="900" />
 
-Flip is implemented as a modular Phoenix application over PostgreSQL rather than as a collection of microservices. Chat, forum, synthesis, identity, authorization, background AI work, and provenance share transactional relationships that are more valuable than artificial service separation at the project’s current scale.
+| Layer | Responsibilities |
+|---|---|
+| **Clients** | Web/native presentation, optimistic interaction, durable sync, ephemeral channels, local caching, notifications. |
+| **Product contexts** | Accounts, authorization, chat, forum, synthesis, notifications, media/artifacts, settings, billing/support, audit. |
+| **AI runtime** | Triggering, context assembly, model routing, tool catalogs, isolated dispatch, citations, terminal composition, recovery. |
+| **Asynchronous work** | Synthesis, linkback, recuration, AI replies, artifact jobs, maintenance, scheduled enrichment. |
+| **Data** | PostgreSQL transactional state, search indexes, source/provenance relationships, job state, synchronization shapes. |
+| **External capability** | Provider-compatible model endpoints, web/data/document/media services, optional self-hosted inference. |
 
-Oban owns durable asynchronous work such as synthesis and AI turns. Phoenix channels handle ephemeral interaction such as presence and typing. Electric is used where native clients need durable synchronized state. Those mechanisms are intentionally different because the state they carry has different semantics.
+Flip is a single Phoenix application with explicit domain contexts rather than a distributed microservice collection. PostgreSQL and Oban provide transactional and asynchronous coordination; Phoenix PubSub/channels and Electric provide different real-time paths for different state classes.
 
-The client does not become an alternate source of truth simply because it can work optimistically. Durable writes remain server-authoritative and are reconciled back to the client.
+## Key invariants
 
-## Why the AI runtime is bounded
-
-Tool-using models are useful precisely because they can decide how to gather information or construct a response. The surrounding runtime exists to stop that flexibility from turning into undefined system behavior.
-
-A turn has explicit lifecycle and resource bounds. Tool calls are checked against the server-computed capability set and executed in isolated tasks. Tool failures are returned as structured failures the model can reason about rather than crashing the whole reply path or encouraging the model to invent missing results. Long-running artifact workflows can persist state and continue after asynchronous completion instead of holding one model call open indefinitely.
-
-The important architectural idea is not a particular round limit or provider. It is that the model’s autonomy is contained inside a product-owned execution envelope.
-
-## What a reviewer should take away
-
-Flip demonstrates a product architecture in which AI is neither a cosmetic chatbot nor an all-powerful backend. It participates in a social system with the same seriousness given to any other privileged actor: explicit identity, scoped access, constrained effects, durable provenance, failure handling, and clear authorship.
-
-The chat/forum synthesis problem is what gives those choices practical meaning. The product is trying to preserve how communities actually reach knowledge, not merely generate more text about it.
+1. **Human words are not silently rewritten during curation.**
+2. **AI-authored content is explicitly attributed.**
+3. **Internal retrieval is constrained by the invoking actor and origin community and fails closed without scope.**
+4. **Tool availability is computed server-side from the current surface, actor, community, feature configuration, and provider availability.**
+5. **Tools return structured, model-visible failures rather than crashing the reply worker or inviting fabrication.**
+6. **Durable artifacts and citations have identities independent of model prose.**
+7. **Background jobs are idempotent or uniqueness-constrained where duplicate user-visible effects would be harmful.**
+8. **The server remains authoritative for permissions and durable writes; client optimism is reconciled with committed state.**
+9. **Provider failure can degrade an AI capability without corrupting the core chat/forum product.**
+10. **Private implementation details are not required to understand the public architecture.**
 
 ## Product references
 
-- <https://flip.engineering>
-- <https://flip.tech-demo.dev> — separate synthetic technical environment
+- Product: <https://flip.engineering>
+- Synthetic technical environment: <https://flip.tech-demo.dev>
 
 <figure>
   <img src="assets/flip.engineering.png" alt="Flip product screenshot" width="760" />
+  <figcaption>Flip product surface: live conversation and durable community structure.</figcaption>
 </figure>
 
-## Deeper architecture
+<figure>
+  <img src="assets/flip.tech-demo.dev.png" alt="Flip technical environment screenshot" width="760" />
+  <figcaption>Separate synthetic environment used to exercise public architecture scenarios.</figcaption>
+</figure>
 
-The detailed pages below cover the implementation where it is useful to understand a design decision rather than to enumerate features:
+The architecture documentation stands independently of endpoint availability and does not rely on production data or credentials.
 
-- [System architecture](docs/02-system-architecture.md)
-- [Agent runtime](docs/03-agent-runtime.md)
-- [Retrieval, search, and tools](docs/04-retrieval-search-and-tools.md)
-- [Synthesis and provenance](docs/05-synthesis-and-provenance.md)
-- [Data, realtime, and clients](docs/06-data-realtime-and-clients.md)
-- [Model routing and inference](docs/07-model-routing-and-inference.md)
-- [Architecture decisions](docs/10-architecture-decisions.md)
-- [Status and limitations](docs/11-roadmap-and-known-limitations.md)
+## Documentation by question
 
-The implementation is private; this portfolio publishes the architecture and engineering reasoning rather than private source, credentials, prompt content, or internal operating detail.
+| Question | Page |
+|---|---|
+| What is the product and why are chat, forum, curation, and AI participation combined? | [00 — Executive Overview](docs/00-executive-overview.md), [01 — Product and Problem](docs/01-product-and-problem.md) |
+| What are the components, domain boundaries, data stores, and main flows? | [02 — System Architecture](docs/02-system-architecture.md) |
+| How is an AI turn triggered, bounded, executed, recovered, and persisted? | [03 — Agent Runtime](docs/03-agent-runtime.md) |
+| What can the AI retrieve or do, and how are tools authorized and evidenced? | [04 — Retrieval, Search, and Tools](docs/04-retrieval-search-and-tools.md) |
+| How does chat become durable forum knowledge without erasing authorship? | [05 — Synthesis and Provenance](docs/05-synthesis-and-provenance.md) |
+| How do PostgreSQL, Electric, channels, web, desktop, and mobile divide responsibility? | [06 — Data, Realtime, and Clients](docs/06-data-realtime-and-clients.md) |
+| How are model/provider choices separated from product semantics? | [07 — Model Routing and Inference](docs/07-model-routing-and-inference.md) |
+| What differs between product and synthetic technical deployments? | [08 — Deployment Topology](docs/08-production-and-demo-topology.md) |
+| How are claims tested and failures made inspectable? | [09 — Quality, Evaluation, and Operations](docs/09-evaluation-testing-and-operations.md) |
+| Why were the central architectural choices made? | [10 — Architecture Decisions](docs/10-architecture-decisions.md) |
+| What is implemented, constrained, or still evolving? | [11 — Status and Limitations](docs/11-roadmap-and-known-limitations.md) |
+
+Rendered diagrams are indexed in [diagrams/README.md](diagrams/README.md). Public architectural decisions are summarized in [adr/README.md](adr/README.md). A capability-oriented walkthrough is in [demo/README.md](demo/README.md).
+
+## Publication boundary
+
+The commercial implementation is private. This repository documents product semantics, architecture, selected interfaces, sanitized flows, engineering decisions, and limitations. It excludes private source, data, credentials, prompt/persona content, abuse thresholds, and unnecessary operational internals.

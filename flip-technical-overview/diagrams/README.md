@@ -1,17 +1,31 @@
-# Diagrams
+# Diagram index
 
-This directory contains Mermaid sources (`.mmd`) and rendered SVG/PNG assets for the Flip public architecture overview.
+The diagrams answer architectural questions. SVG is the canonical reviewer format and Mermaid source is retained beside it. Raster previews are generated during review but are not versioned, preventing stale PNG copies from diverging from the source diagram.
 
-## Diagram index
+| Diagram | Question answered |
+|---|---|
+| [System context](system-context.svg) | Who interacts with Flip and which external systems are outside its authority? |
+| [Service/container map](service-container-map.svg) | How do clients, product contexts, asynchronous jobs, data, sync, and providers fit together? |
+| [AI reply lifecycle](agent-execution-sequence.svg) | How does a product trigger become one bounded, durable AI reply? |
+| [Governed tool execution](governed-tool-execution.svg) | Where are catalog admission, trusted scope, isolation, authorization, and effects enforced? |
+| [Retrieval, source discovery, and citation](retrieval-source-citation-flow.svg) | How does a discovered source become verified evidence in a user-facing reply? |
+| [Chat-to-forum synthesis](synthesis-pipeline.svg) | How is human conversation organized into durable forum structure with source provenance? |
+| [Web/native realtime flow](client-synchronization.svg) | How do HTTP commands, durable synchronization, and ephemeral channels divide responsibility? |
+| [Model routing and audit](model-routing-audit.svg) | How is model/provider choice isolated from product semantics and failure handling? |
+| [Product/synthetic inference topology](deployment-topology.svg) | How do separate environments share architecture without sharing authority or data? |
+| [CI and quality gates](ci-quality-gates.svg) | Which deterministic, client, security, and evaluation evidence supports release confidence? |
 
-| Source | Rendered SVG | Rendered PNG | View |
-|---|---|---|---|
-| `system-context.mmd` | `system-context.svg` | `system-context.png` | Users, web/desktop clients, server, data, AI, external sources |
-| `service-container-map.mmd` | `service-container-map.svg` | `service-container-map.png` | Deployment services, client paths, external services, hosts |
-| `agent-execution-sequence.mmd` | `agent-execution-sequence.svg` | `agent-execution-sequence.png` | Bounded agent run from queued job to terminal result |
-| `retrieval-source-citation-flow.mmd` | `retrieval-source-citation-flow.svg` | `retrieval-source-citation-flow.png` | Source discovery through citations and ledger |
-| `synthesis-pipeline.mmd` | `synthesis-pipeline.svg` | `synthesis-pipeline.png` | Chat trigger through persisted synthesis with provenance |
-| `client-synchronization.mmd` | `client-synchronization.svg` | `client-synchronization.png` | Live sync and in-memory client behavior |
-| `deployment-topology.mmd` | `deployment-topology.svg` | `deployment-topology.png` | Production and demo topology |
-| `governed-tool-execution.mmd` | `governed-tool-execution.svg` | `governed-tool-execution.png` | Tool allowlist, authorization scope, URL guard, isolated dispatch |
-| `model-routing-audit.mmd` | `model-routing-audit.svg` | `model-routing-audit.png` | Model provider routing, media routing, call audit |
+## Reading order
+
+1. System context
+2. Service/container map
+3. AI reply lifecycle
+4. Governed tool execution
+5. Chat-to-forum synthesis
+6. Web/native realtime flow
+
+The remaining diagrams support specialized review.
+
+## Scope
+
+These are conceptual, implementation-informed diagrams. They intentionally omit private hostnames, credentials, provider keys, exact abuse thresholds, private data, and low-value operational detail.

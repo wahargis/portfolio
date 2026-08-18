@@ -1,29 +1,23 @@
 sequenceDiagram
     autonumber
-    participant JOB as Background job scheduler
-    participant W as AI worker
-    participant L as Bounded loop
-    participant D as Isolated dispatch
-    participant T as Tool layer
-    participant M as LLM provider
+    participant E as Product event
+    participant J as Durable job
+    participant R as AI runtime
+    participant M as Model route
+    participant T as Governed tools
+    participant P as Product contexts
 
-    JOB->>W: start bounded AI job
-    W->>L: run synthesis loop under round, time, and token limits
-    loop Gather phase
-        L->>M: call with advertised tools
-        M-->>L: tool calls
-        L->>L: verify call is allowed for this context
-        L->>D: dispatch approved call
-        D->>T: execute with authorization scope and timeout
-        T-->>D: tool result
-        D-->>L: isolated result (crash or timeout contained)
+    E->>J: enqueue once with causal identity
+    J->>R: actor/community scope + trigger
+    R->>R: assemble context and capability catalog
+    loop Working rounds under deadline
+        R->>M: messages + admitted tools
+        M-->>R: assistant content or tool calls
+        R->>T: validate and dispatch with trusted scope
+        T-->>R: result, citation, artifact, or honest failure
     end
-    alt Terminal phase
-        L->>M: request final plan
-        M-->>L: plan result
-        L-->>W: terminal result
-    else Limit reached
-        L->>L: enter finish mode
-        L-->>W: forced terminal or non-retryable timeout
-    end
-    W-->>JOB: complete or bounded stop
+    R->>M: terminal composition / bounded repair
+    M-->>R: attributed user-facing draft
+    R->>R: validate output and evidence identities
+    R->>P: persist reply, citations, artifacts, and lifecycle
+    P-->>J: durable completion or explicit failure

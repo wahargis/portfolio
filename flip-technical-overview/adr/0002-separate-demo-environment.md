@@ -1,22 +1,29 @@
-# Separate Demo Environment
+# ADR 0002 — Separate synthetic technical environment
 
-The production host `https://flip.engineering` serves real users and authorized production data. A technical demo must be reviewable without exposing real data, real accounts, production credentials, or production resources.
+- **Status:** Accepted
+- **Decision scope:** Public technical review
 
-## Principle
+## Context
 
-The technical demo runs as a separate environment on `https://flip.tech-demo.dev`.
+A public architecture scenario is useful only if it exercises the real product contracts. Giving reviewers production access or copying production data would create privacy and security risk.
 
-| Concern | Production | Technical demo |
-|---|---|---|
-| Host | `flip.engineering` | `flip.tech-demo.dev` |
-| Data | Authorized production | Versioned synthetic seed data |
-| Resources | Production resources | Separate resources |
-| Credentials | Production routing | Separate capped credentials |
-| Accounts | Real users | Stable demo accounts |
-| Reset | Normal retention | Reproducible reset |
-| Client target | Default production | Explicit demo profile |
-| UI | Canonical product | Persistent technical-demo banner |
+## Decision
 
-## Expected effect
+Maintain a separate synthetic technical environment that shares the product architecture and migration history but has independent:
 
-Reviewers can exercise retrieval, search, tools, citations, chat-to-forum synthesis, and relationship explanations without touching production. Production and demo cannot accidentally share data, credentials, or accounts, and the demo remains an explicit profile rather than the default client target.
+- database and storage;
+- credentials and secrets;
+- sessions and administrative state;
+- provider configuration;
+- queues and realtime namespaces;
+- synthetic fixtures.
+
+Public scenario documentation describes expected product transitions without publishing reset credentials or operational secrets.
+
+## Consequences
+
+The environment requires fixture and deployment maintenance. It provides inspectable provenance, authorization, AI/tool, artifact, and synchronization scenarios without relying on private data.
+
+## Revisit when
+
+A fully local reproducible public distribution becomes preferable to a hosted synthetic environment.
