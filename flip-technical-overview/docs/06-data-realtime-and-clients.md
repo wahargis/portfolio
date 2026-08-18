@@ -1,206 +1,103 @@
-# 06 — Data, Realtime, and Clients
+# 06 — Data, Realtime, and Client Convergence
 
-## One product, several state-delivery mechanisms
+## The client problem is one state, not one codebase
 
-Flip supports server-rendered web interaction and a React/TypeScript client architecture used for native desktop and mobile packaging. The difficult problem is not drawing the same screens twice; it is ensuring that every client observes one authoritative product state while still feeling immediate.
+Flip has a Phoenix web experience and a React/TypeScript client used for native desktop and mobile packaging. The architectural problem is not reproducing screens across frameworks. It is ensuring that every client observes and changes one authoritative product state while remaining responsive under latency, reconnect, background execution, and permission changes.
 
-<img src="../diagrams/client-synchronization.svg" alt="Web and native realtime data flow" width="900" />
+<img src="../diagrams/client-synchronization.svg" alt="Web and native state synchronization" width="900" />
 
-## Canonical data model
+## Four state classes
 
-PostgreSQL remains authoritative for durable product state:
+| State class | Examples | Authority and delivery |
+|---|---|---|
+| **Durable product state** | messages, threads, votes, memberships, citations, artifacts, settings | PostgreSQL is canonical; clients receive authorized projections. |
+| **Durable asynchronous state** | AI jobs, curation runs, pending media, linkback, retries | Oban/PostgreSQL own lifecycle; clients observe the resulting records and progress. |
+| **Ephemeral realtime state** | typing, presence, transient progress | Phoenix channels/PubSub; loss during disconnect is acceptable. |
+| **Local interaction state** | drafts, open panels, optimistic placeholders | Client-owned until an authoritative command succeeds. |
 
-- accounts, sessions, and memberships;
-- rooms, messages, replies, reactions, pins, and read state;
-- forums, threads, replies, votes, bookmarks, and tags;
-- synthesis runs, source relationships, feedback, and linkback;
-- AI replies, citations, artifacts, and continuation state;
-- notifications, settings, support/billing records, and audit events;
-- Oban jobs and terminal workflow state.
+Every client feature should identify its state class explicitly. Most duplicate-message, stale-permission, and reconnect defects begin when durable, ephemeral, and local state are mixed implicitly.
 
-Clients may cache or optimistically project these records. They do not become an alternate system of record.
+## Commands and synchronization have different jobs
 
-## Three realtime paths
+A user mutation is an explicit server command. The server authenticates the actor, applies domain authorization and validation, commits a transaction, and returns the canonical result or identity.
 
-### 1. Electric synchronization
-
-Electric shape streams are used for durable state that clients must replicate and recover:
-
-- selected room/message views;
-- forum threads and replies;
-- settings and read models;
-- records required for offline or reconnect behavior.
-
-A shape is a server-authorized projection, not arbitrary database access. The client subscribes to the minimum relevant dataset and applies changes to its local state.
-
-### 2. Phoenix channels and PubSub
-
-Channels carry ephemeral or highly interactive events:
-
-- typing;
-- presence;
-- targeted transient progress;
-- low-latency notifications;
-- specialized room/thread events that do not need durable replication.
-
-A client that disconnects can tolerate losing a typing event. It cannot tolerate losing a committed message.
-
-### 3. HTTP commands
-
-Mutations with product semantics remain explicit server commands:
-
-- send/edit/delete message;
-- create/reply/vote/bookmark;
-- update settings;
-- invoke an AI or artifact workflow;
-- perform moderation or support actions.
-
-The server validates authorization and returns a transaction identity or durable result that client optimism can reconcile against.
-
-## Optimistic mutation and reconciliation
-
-A responsive client may render a pending local change before the server transaction arrives through synchronization.
+Electric then synchronizes the durable records a client is authorized to observe. Phoenix channels carry the state that is valuable immediately but does not need replay.
 
 ```text
-user action
-  -> client creates optimistic item with local identity
-  -> HTTP command reaches server
-  -> server authorizes and commits
-  -> response returns canonical identity / transaction marker
-  -> Electric change arrives
-  -> client reconciles optimistic and canonical record
+client intent
+  -> HTTP / domain command
+  -> authorization + transaction
+  -> canonical identity
+  -> Electric durable projection
+
+presence / typing / transient progress
+  <-> Phoenix channel
 ```
 
-Required behaviors:
+Electric is not arbitrary database access. Shape authorization determines the minimum product records a client may synchronize. A client cache cannot widen membership or visibility.
 
-- accepted mutations converge without duplicate rows;
-- rejected mutations visibly roll back;
-- reconnect does not reapply a completed command;
-- client-generated identities cannot override server identity or ownership;
-- permission changes invalidate stale local affordances;
-- ordering remains stable under delayed sync.
+## Optimism must converge on transaction identity
 
-## Data ownership
+A responsive client can render a pending message before the round trip completes:
 
-| Concern | Client | Server |
-|---|---:|---:|
-| Draft input and local UI state | Owns | Does not need |
-| Optimistic placeholder | Temporary | Does not trust |
-| Durable message/thread | Caches | **Owns** |
-| Membership and authorization | Displays | **Owns** |
-| Presence/typing | Emits/projected | Coordinates |
-| AI job request | Requests | **Owns admission and lifecycle** |
-| Citation/artifact identity | Renders | **Owns** |
-| Feature configuration | Displays/caches | **Owns** |
-| Sync shape authorization | Requests | **Owns** |
+1. The client creates a local placeholder with a client command identity.
+2. The server accepts or rejects the command under product rules.
+3. On success, the response returns the canonical object and transaction relationship.
+4. The synchronized record arrives, possibly before or after the HTTP response.
+5. The client merges the placeholder with canonical state rather than adding a duplicate.
 
-## Web client
+Correctness is convergence under either ordering. A rejected command rolls back visibly; reconnect does not replay a command that already committed; a client-generated identifier never overrides server ownership.
 
-Phoenix LiveView is suitable for server-driven product surfaces that benefit from:
+## Web and native clients are projections over the same domains
 
-- direct use of server contexts;
-- minimal duplicated client domain logic;
-- low-latency PubSub updates;
-- administrative and operational interfaces;
-- progressive enhancement through JavaScript hooks.
+Phoenix LiveView can use server contexts directly and is well suited to real-time web, administrative, and operational surfaces. The React client carries shared application state, synchronization, optimistic behavior, and native platform adapters.
 
-The web path can coexist with the React client. They are two projections over the same product contexts, not separate backends.
+Tauri and Capacitor add window, tray, notification, deep-link, secure-storage, mobile lifecycle, and distribution capabilities. They do not create a second authorization model or a client-owned database.
 
-## React/TypeScript client
+The client architecture should place product transitions in shared data/application modules rather than hiding them inside one screen or native wrapper. Platform-specific code should handle platform behavior, not redefine chat, forum, or AI lifecycle.
 
-The shared client architecture provides:
+## Offline behavior is command-specific
 
-- chat, forum, and AI/artifact views;
-- typed API boundaries;
-- Electric shape consumption;
-- optimistic mutation/reconciliation;
-- durable local state and endpoint configuration;
-- platform adapters for desktop/mobile features.
+“Offline-capable” is not a single property:
 
-The client should keep product-specific state transitions in shared data/application modules rather than coupling them to one screen or native wrapper.
+- previously synchronized content can be read from an authorized cache with a stale indicator;
+- drafts can remain local;
+- an idempotent message command may be queued with visible pending state;
+- AI research or media work requires server/provider capacity and can only be queued or rejected honestly;
+- membership and moderation changes normally require an online authoritative result;
+- presence and typing simply stop while offline.
 
-## Desktop packaging
+Flip does not claim universal offline-first writes because many cross-user conflicts and permission changes require server knowledge. Offline mutation should be added per command only after idempotency, ordering, and conflict semantics are explicit.
 
-Tauri provides a native desktop shell around the client and can integrate:
+## Permissions must flow into cached state
 
-- system tray and window lifecycle;
-- native notifications;
-- deep links;
-- secure local preferences;
-- updater and signed-release flow;
-- platform file dialogs and selected OS capabilities.
+A synchronized record is still governed by current authorization. Membership or visibility changes can invalidate data and affordances already present on a device. The client needs a revocation/rebuild path rather than assuming that anything once cached remains readable forever.
 
-The native shell does not bypass server authorization or turn the local cache into canonical state.
+This is especially important for internal AI retrieval and curated source links: a native cache must not become an alternate route to content the actor can no longer access.
 
-## Mobile packaging
+## Notifications and artifacts separate record from delivery
 
-Capacitor allows the shared React application to target iOS and Android while adding platform-specific bridges for notifications, deep links, secure storage, and lifecycle.
+A notification is a durable product record; push, PubSub, or native notification is a delivery attempt. Duplicate delivery must not create duplicate notification state.
 
-Shared code does not imply automatic parity. Mobile requires explicit handling of:
+Likewise, a large artifact is represented by durable metadata, ownership, lifecycle, and an authorized storage/provider reference. Realtime paths distribute status and identity, not the entire media object. Clients render pending, completed, failed, or unavailable state explicitly.
 
-- suspended/background execution;
-- intermittent connectivity;
-- push token lifecycle;
-- smaller memory/storage budgets;
-- platform permission prompts;
-- app-store signing and distribution;
-- large artifact/media behavior.
+## Search across clients
 
-## Offline semantics
-
-“Offline-capable” must be defined per action.
-
-| Operation | Reasonable offline behavior |
-|---|---|
-| Read previously synchronized content | Serve local cache with stale/offline indicator. |
-| Draft a message | Retain locally. |
-| Queue a mutation | Possible only with idempotent command identity and visible pending state. |
-| Invoke AI research/media | Requires server/provider capacity; queue or reject honestly. |
-| Change membership/moderation | Generally require online authoritative result. |
-| Presence/typing | Disable while offline. |
-| Open citation/artifact | Use cached metadata or state that source is unavailable. |
-
-The architecture avoids claiming full local-first write authority where conflict semantics are undefined.
-
-## Search
-
-Product search combines server-side indexes with client presentation:
-
-- chat and forum text indexes;
-- scoped filters for community, room, author, time, tags, and content type;
-- source/provenance navigation;
-- optional semantic or AI-assisted discovery;
-- pagination and stable ordering.
-
-Client-local search can improve responsiveness over synchronized content but cannot reveal records outside server-authorized shapes.
-
-## Notifications
-
-A durable notification record and its delivery channel are separate:
-
-- server creates the notification based on product state;
-- web/native clients synchronize unread state;
-- PubSub or push can alert a currently connected or backgrounded device;
-- opening/reading updates durable state;
-- duplicate delivery should not create duplicate notification records.
-
-## Attachments and artifacts
-
-Large media should not be duplicated through every realtime channel. The durable record carries metadata, ownership, lifecycle, and a storage/provider reference. Clients fetch/render the object through an authorized path and respond to lifecycle updates.
+Canonical search remains server-side because authorization, full-text indexes, source relationships, and stable ordering live there. A client can search its synchronized subset for responsiveness, but local results cannot reveal content outside authorized shapes or substitute for server-wide discovery.
 
 ## Failure and recovery
 
-| Failure | Client behavior |
+| Failure | Required client behavior |
 |---|---|
-| HTTP mutation rejected | Roll back optimistic state and show domain error. |
-| Sync stream disconnects | Reconnect from durable cursor/shape state. |
-| Channel disconnects | Restore ephemeral subscriptions; do not replay typing. |
-| Duplicate server event | Deduplicate by canonical identity/transaction. |
-| Local cache corrupt/stale | Rebuild from authorized server projection. |
-| Permission revoked | Remove inaccessible records/affordances according to policy. |
-| Artifact still pending | Render durable pending state, not a broken link. |
-| Endpoint unavailable | Keep core local UI state and present explicit connectivity status. |
+| Mutation rejected | Roll back the optimistic item and show the domain error. |
+| Sync disconnect | Reconnect from durable shape/cursor state. |
+| Channel disconnect | Restore ephemeral subscriptions without replaying typing/presence history. |
+| Duplicate or reordered events | Deduplicate by canonical identity and converge. |
+| Cache corruption or schema change | Rebuild from an authorized server projection. |
+| Permission revoked | Remove inaccessible data and affordances under policy. |
+| Artifact still pending or failed | Render its durable lifecycle rather than a broken attachment. |
+| Endpoint unavailable | Preserve local UI/drafts and present explicit connectivity state. |
 
-## Architectural constraint
+## Architectural consequence
 
-Every new client feature must identify which state class it uses: durable transaction, synchronized projection, ephemeral event, or local-only UI state. Features that mix these implicitly are the most common source of duplicate messages, stale permissions, and reconnect bugs.
+The server remains the authority, but the client is not a passive renderer. It owns responsive interaction, local drafts, optimistic projection, and platform integration. The architecture succeeds when those responsibilities produce immediacy without creating a second version of product truth.
