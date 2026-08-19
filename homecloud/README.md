@@ -17,7 +17,7 @@ The system is not defined by one model, one GPU topology, or one autonomous-agen
 | **Who it is for** | An operator or developer running local models and long-lived AI workloads on finite, heterogeneous hardware. |
 | **What the user gets** | Healthy endpoint selection, priority-aware request routing, queued workload admission, isolated agent execution, progress and failure visibility, and recovery after interruption. |
 | **What the operator controls** | Model-service lifecycle, slot capacity, workload priority, GPU claims, draining and swapping, benchmark isolation, sandbox ownership, checkpoints, and maintenance. |
-| **Primary implementation shape** | An Elixir/OTP and Phoenix application with supervised runtime services, PostgreSQL-backed state, local model pools, routing and scheduling components, agent execution, telemetry, and web/MCP-facing control surfaces. |
+| **Primary implementation shape** | An Elixir/OTP and Phoenix application with supervised runtime services, PostgreSQL-backed state, local model pools, routing and scheduling components, agent execution, telemetry, and operator-facing control surfaces. |
 | **Hardware model** | Capacity is described by model profiles, endpoints, slots, placement, and claims rather than assuming that each physical GPU is one interchangeable worker. |
 | **Source boundary** | The implementation and host operations remain private. This case study describes the stable runtime architecture without linking to the private repository or exposing host-specific secrets. |
 
