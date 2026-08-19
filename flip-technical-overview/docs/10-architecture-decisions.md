@@ -88,13 +88,13 @@ The public ADRs preserve the stable rationale. This page shows how the choices f
 
 **Cost:** Additional latency and provider-specific compatibility work.
 
-## 9. Separate public technical review from product authority
+## 9. Separate public technical review from private product authority
 
-**Decision:** Maintain a synthetic environment and publish a curated architecture path without copying production data, credentials, or the complete source tree into the portfolio.
+**Decision:** Maintain a synthetic environment and publish a curated architecture path without copying production data, credentials, or the complete private source tree into the portfolio.
 
-**Why:** Reviewers need relationally realistic evidence, not production access. The canonical source repository remains available for implementation review; the portfolio explains the product and architecture without becoming a second, stale source mirror or an operational/security dump.
+**Why:** Reviewers need relationally realistic evidence, not production access or private repository access. The private implementation remains authoritative; the portfolio exposes the product contracts, diagrams, implementation evidence, synthetic scenarios, and limitations needed for public technical review without becoming a source mirror or an operational/security dump.
 
-**Cost:** Synthetic fixtures and a separate deployment require maintenance, and the portfolio must be kept aligned with the source as the implementation evolves.
+**Cost:** Synthetic fixtures and a separate deployment require maintenance, and the public case study must remain aligned with the private implementation as it evolves.
 
 ## Decision criteria
 
@@ -107,12 +107,12 @@ Across these choices, Flip optimizes for:
 - one canonical product state;
 - model/provider replaceability;
 - client convergence;
-- reviewability without private-data exposure.
+- reviewability without private-data or private-source exposure.
 
 Feature count is not the optimization target.
 
 ## Revisit discipline
 
-Architecture should change when evidence changes: measured database or queue limits, explicit offline conflict requirements, independent regulatory boundaries, route evaluation, artifact workload isolation, or a material change in how the public source and portfolio review path are organized.
+Architecture should change when evidence changes: measured database or queue limits, explicit offline conflict requirements, independent regulatory boundaries, route evaluation, artifact workload isolation, or a material change in how source availability and the public review path are organized.
 
 A change should preserve the original decision record rather than rewriting history. The ADRs explain why the current choice was correct under the constraints that produced it.

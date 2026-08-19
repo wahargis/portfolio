@@ -89,7 +89,7 @@ The most consequential boundaries are:
 | **AI effects** | AI-authored content, citations, artifacts, and actions remain attributed and authorized. |
 | **Client projection** | Optimistic and synchronized views converge on canonical server state. |
 
-As the public implementation has grown, some modules and workers have accumulated significant scope. That is implementation pressure to decompose around these contracts, not evidence that the domains should become network services.
+As the implementation has grown, some modules and workers have accumulated significant scope. That is implementation pressure to decompose around these contracts, not evidence that the domains should become network services.
 
 ## Failure containment
 
