@@ -77,9 +77,9 @@ Durable synchronization supports caching and reconnect, but not every command ha
 
 Bounds, tools, evidence, terminal validation, and correction paths reduce the impact of failures. They do not turn model reasoning into deterministic software. Honest uncertainty and participant correction remain required product features.
 
-### The portfolio is curated, not a source mirror
+### The portfolio is curated over a private implementation
 
-The canonical implementation is public at <https://github.com/wahargis/flip>. The portfolio groups stable product contracts, architecture, and limitations for review rather than duplicating every implementation module, test, migration, provider adapter, or issue history. Source-level verification and reproduction belong in the canonical repository.
+The canonical implementation remains private. The portfolio groups stable product contracts, implementation evidence, architecture, pressure points, and limitations for public review without linking to or mirroring the private repository. The case study supports architectural evaluation but does not grant source access or reproduce every module, test, migration, provider adapter, or issue history.
 
 ## Next work by outcome
 
