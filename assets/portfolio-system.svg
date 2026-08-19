@@ -1,72 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
-  <title id="title">AI systems portfolio architecture</title>
-  <desc id="desc">Four independently useful systems: Flip product, Project Manager long-horizon knowledge, Baton cross-harness fleet orchestration, and HomeCloud self-hosted runtime and compute.</desc>
+  <title id="title">Four independent AI systems</title>
+  <desc id="desc">Flip, Project Manager, Baton, and HomeCloud are independent systems that share an engineering focus on explicit state, authority, provenance, and recovery.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-    </marker>
     <style>
-      .bg { fill: #fbfbfc; }
-      .box { fill: #ffffff; stroke: #30343b; stroke-width: 2; rx: 16; }
-      .title { font: 700 27px Arial, sans-serif; fill: #17191d; }
-      .subtitle { font: 600 18px Arial, sans-serif; fill: #30343b; }
-      .body { font: 15px Arial, sans-serif; fill: #454b55; }
-      .label { font: 700 14px Arial, sans-serif; fill: #17191d; letter-spacing: 1px; }
-      .dash { stroke: #646b75; stroke-width: 2; stroke-dasharray: 8 7; fill: none; marker-end: url(#arrow); }
-      .caption { font: 13px Arial, sans-serif; fill: #555d68; }
+      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:16}.band{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:14}
+      .title{font:700 28px Arial,sans-serif;fill:#17191d}.subtitle{font:16px Arial,sans-serif;fill:#454b55}
+      .label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 24px Arial,sans-serif;fill:#17191d}
+      .body{font:15px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}
     </style>
   </defs>
   <rect class="bg" width="1200" height="760"/>
+  <text x="60" y="54" class="title">Four independent systems; one engineering approach</text>
+  <text x="60" y="82" class="subtitle">Each project owns a different user problem and can be reviewed or deployed on its own.</text>
 
-  <text x="60" y="55" class="title">Product, project memory, fleet orchestration, and runtime</text>
-  <text x="60" y="84" class="body">Independent systems with narrow, optional integration contracts</text>
+  <rect class="box" x="65" y="120" width="510" height="225"/>
+  <text x="95" y="154" class="label">COMMUNITY PRODUCT</text>
+  <text x="95" y="195" class="head">Flip</text>
+  <text x="95" y="227" class="body">Live conversation, durable forum knowledge,</text>
+  <text x="95" y="251" class="body">and scoped AI participation in one product.</text>
+  <text x="95" y="292" class="small">Central contract: identity, audience, authorship,</text>
+  <text x="95" y="315" class="small">context, provenance, and durable publication.</text>
 
-  <rect class="box" x="70" y="125" width="480" height="215"/>
-  <text x="100" y="160" class="label">COMMUNITY PRODUCT</text>
-  <text x="100" y="197" class="title">Flip</text>
-  <text x="100" y="229" class="subtitle">Human collaboration + AI participation</text>
-  <text x="100" y="263" class="body">chat · forum · curation · retrieval · tools</text>
-  <text x="100" y="288" class="body">provenance · artifacts · real-time/native clients</text>
-  <text x="100" y="319" class="caption">Owns users, content, permissions, and product semantics</text>
+  <rect class="box" x="625" y="120" width="510" height="225"/>
+  <text x="655" y="154" class="label">PROJECT MEMORY AND CONTROL</text>
+  <text x="655" y="195" class="head">Project Manager</text>
+  <text x="655" y="227" class="body">Typed evidence, decisions, contradictions,</text>
+  <text x="655" y="251" class="body">dependencies, and cross-session orientation.</text>
+  <text x="655" y="292" class="small">Central contract: evidence relationships remain</text>
+  <text x="655" y="315" class="small">distinct from deterministic phase scheduling.</text>
 
-  <rect class="box" x="650" y="125" width="480" height="215"/>
-  <text x="680" y="160" class="label">LONG-HORIZON PROJECT STATE</text>
-  <text x="680" y="197" class="title">Project Manager</text>
-  <text x="680" y="229" class="subtitle">Evidence-aware institutional memory</text>
-  <text x="680" y="263" class="body">typed evidence graph · DAG · belief revision</text>
-  <text x="680" y="288" class="body">causal decisions · review · session continuity</text>
-  <text x="680" y="319" class="caption">Owns project evidence, rationale, and next-action state</text>
+  <rect class="box" x="65" y="385" width="510" height="225"/>
+  <text x="95" y="419" class="label">CODING-AGENT DELIVERY CONTROL</text>
+  <text x="95" y="460" class="head">Baton</text>
+  <text x="95" y="492" class="body">Validated intent, persistent harness sessions,</text>
+  <text x="95" y="516" class="body">isolated worktrees, verification, and adoption.</text>
+  <text x="95" y="557" class="small">Central contract: workers implement; the control</text>
+  <text x="95" y="580" class="small">plane retains scope and lifecycle authority.</text>
 
-  <rect class="box" x="70" y="435" width="480" height="215"/>
-  <text x="100" y="470" class="label">CROSS-HARNESS FLEET ORCHESTRATION</text>
-  <text x="100" y="507" class="title">Baton</text>
-  <text x="100" y="539" class="subtitle">One orchestrator driving full coding harnesses</text>
-  <text x="100" y="573" class="body">Goals/Plans · exact routes · persistent workers</text>
-  <text x="100" y="598" class="body">waves · workflows · messaging · steering · shared context</text>
-  <text x="100" y="629" class="caption">Owns the fleet application and cross-vendor orchestration model</text>
+  <rect class="box" x="625" y="385" width="510" height="225"/>
+  <text x="655" y="419" class="label">LOCAL AI OPERATIONS PLATFORM</text>
+  <text x="655" y="460" class="head">HomeCloud</text>
+  <text x="655" y="492" class="body">Model lifecycle, finite GPU capacity, sandboxed</text>
+  <text x="655" y="516" class="body">agents, checkpoints, research, and app services.</text>
+  <text x="655" y="557" class="small">Central contract: route and prioritize work against</text>
+  <text x="655" y="580" class="small">real infrastructure state and recoverable execution.</text>
 
-  <rect class="box" x="650" y="435" width="480" height="215"/>
-  <text x="680" y="470" class="label">SELF-HOSTED RUNTIME AND COMPUTE</text>
-  <text x="680" y="507" class="title">HomeCloud</text>
-  <text x="680" y="539" class="subtitle">Local inference and recoverable agent execution</text>
-  <text x="680" y="573" class="body">model pools · GPU slots · scheduling · sandboxes</text>
-  <text x="680" y="598" class="body">RAG · memory · compaction · checkpoints · evaluation</text>
-  <text x="680" y="629" class="caption">Owns local model capacity, runtime isolation, and recovery</text>
-
-  <path class="dash" d="M550 232 C590 232 610 232 650 232"/>
-  <text x="560" y="215" class="caption">product findings / durable references</text>
-
-  <path class="dash" d="M310 340 C310 377 310 398 310 435"/>
-  <text x="326" y="390" class="caption">source work / product engineering</text>
-
-  <path class="dash" d="M550 542 C590 542 610 542 650 542"/>
-  <text x="558" y="525" class="caption">local seats / model / sandbox capacity</text>
-
-  <path class="dash" d="M890 435 C890 393 890 382 890 340"/>
-  <text x="908" y="390" class="caption">findings / decisions / handoffs</text>
-
-  <path class="dash" d="M470 340 C540 395 620 405 710 435"/>
-  <text x="508" y="410" class="caption">provider-compatible inference</text>
-
-  <text x="70" y="711" class="caption">Dashed arrows are optional composition points; each project remains independently deployable.</text>
+  <rect class="band" x="170" y="652" width="860" height="68"/>
+  <text x="245" y="680" class="label">SHARED ENGINEERING THEMES</text>
+  <text x="245" y="706" class="body">explicit state · bounded authority · provenance · recovery · shared semantics across interfaces</text>
 </svg>

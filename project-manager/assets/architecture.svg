@@ -1,66 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="690" viewBox="0 0 1200 690" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
   <title id="title">Project Manager architecture</title>
-  <desc id="desc">CLI, MCP, and web surfaces share a Rust domain core containing project, DAG, knowledge graph, truth maintenance, review, retrieval, and session engines backed by versioned SQLite.</desc>
+  <desc id="desc">CLI, MCP, and web surfaces share a Rust application core. A typed evidence graph, separate contradiction and confidence review, and a deterministic execution DAG persist in SQLite.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-    </marker>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
-      .group{fill:#f3f4f6;stroke:#707782;stroke-width:1.5;rx:18}
-      .t{font:700 25px Arial,sans-serif;fill:#17191d}.h{font:700 17px Arial,sans-serif;fill:#20242a}
-      .b{font:14px Arial,sans-serif;fill:#454b55}.l{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
-      .a{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}.note{fill:#fff;stroke:#646b75;stroke-width:1.5;stroke-dasharray:7 6;rx:12}
+      .title{font:700 27px Arial,sans-serif;fill:#17191d}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 18px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
     </style>
   </defs>
-  <rect class="bg" width="1200" height="690"/>
-  <text x="55" y="52" class="t">Project Manager: one evidence model, three surfaces</text>
+  <rect class="bg" width="1200" height="760"/>
+  <text x="55" y="52" class="title">Project Manager: durable reasoning and deterministic execution control</text>
 
-  <rect class="group" x="55" y="85" width="1090" height="125"/>
-  <text x="80" y="112" class="l">SURFACES</text>
-  <rect class="box" x="90" y="130" width="285" height="55"/><text x="205" y="164" class="h">CLI</text>
-  <rect class="box" x="458" y="130" width="285" height="55"/><text x="552" y="164" class="h">MCP stdio</text>
-  <rect class="box" x="825" y="130" width="285" height="55"/><text x="910" y="164" class="h">Web dashboard</text>
+  <rect class="group" x="55" y="85" width="1090" height="118"/>
+  <text x="80" y="113" class="label">INTERFACES</text>
+  <rect class="box" x="90" y="132" width="285" height="48"/><text x="210" y="163" class="head">CLI</text>
+  <rect class="box" x="458" y="132" width="285" height="48"/><text x="566" y="163" class="head">MCP</text>
+  <rect class="box" x="825" y="132" width="285" height="48"/><text x="925" y="163" class="head">Web</text>
 
-  <path class="a" d="M232 185 L232 245"/>
-  <path class="a" d="M600 185 L600 245"/>
-  <path class="a" d="M968 185 L968 245"/>
+  <path class="arrow" d="M600 203 L600 245"/>
+  <rect class="group" x="55" y="245" width="1090" height="320"/>
+  <text x="80" y="275" class="label">SHARED RUST APPLICATION CORE</text>
 
-  <rect class="group" x="55" y="245" width="1090" height="300"/>
-  <text x="80" y="275" class="l">RUST DOMAIN CORE</text>
+  <rect class="box" x="85" y="305" width="310" height="155"/>
+  <text x="110" y="338" class="head">Typed evidence graph</text>
+  <text x="110" y="367" class="body">findings · experiments · decisions</text>
+  <text x="110" y="391" class="body">hypotheses · constraints · feedback</text>
+  <text x="110" y="423" class="small">support · contradiction · supersession</text>
+  <text x="110" y="446" class="small">derivation · testing · provenance</text>
 
-  <rect class="box" x="85" y="300" width="300" height="95"/>
-  <text x="110" y="330" class="h">Typed project model</text>
-  <text x="110" y="356" class="b">projects · phases · experiments</text>
-  <text x="110" y="378" class="b">findings · decisions · hypotheses</text>
+  <rect class="box" x="445" y="305" width="310" height="155"/>
+  <text x="470" y="338" class="head">Review analysis</text>
+  <text x="470" y="367" class="body">contradiction candidates</text>
+  <text x="470" y="391" class="body">numeric confidence scoring</text>
+  <text x="470" y="423" class="small">review evidence for people and agents</text>
+  <text x="470" y="446" class="small">not an automatic scheduler gate</text>
 
-  <rect class="box" x="450" y="300" width="300" height="95"/>
-  <text x="475" y="330" class="h">Dependency DAG</text>
-  <text x="475" y="356" class="b">topology · impact · next action</text>
-  <text x="475" y="378" class="b">blocking · stagnation</text>
+  <rect class="box" x="805" y="305" width="310" height="155"/>
+  <text x="830" y="338" class="head">Execution DAG</text>
+  <text x="830" y="367" class="body">phase dependencies · completion</text>
+  <text x="830" y="391" class="body">topological order · cycle checks</text>
+  <text x="830" y="423" class="small">ready phases filtered by dependencies</text>
+  <text x="830" y="446" class="small">and ordered by impact</text>
 
-  <rect class="box" x="815" y="300" width="300" height="95"/>
-  <text x="840" y="330" class="h">Evidence graph</text>
-  <text x="840" y="356" class="b">typed edges · traversal · causality</text>
-  <text x="840" y="378" class="b">branching · convergence</text>
+  <rect class="note" x="270" y="490" width="660" height="48"/>
+  <text x="326" y="520" class="body">Analysis informs review and planning; the current DAG remains deterministic and separately controlled.</text>
 
-  <rect class="box" x="85" y="425" width="300" height="95"/>
-  <text x="110" y="455" class="h">Truth maintenance</text>
-  <text x="110" y="481" class="b">confidence · belief status</text>
-  <text x="110" y="503" class="b">support · contradiction · suspension</text>
-
-  <rect class="box" x="450" y="425" width="300" height="95"/>
-  <text x="475" y="455" class="h">Review and repair</text>
-  <text x="475" y="481" class="b">orphans · staleness · expired constraints</text>
-  <text x="475" y="503" class="b">graph health · explicit repair</text>
-
-  <rect class="box" x="815" y="425" width="300" height="95"/>
-  <text x="840" y="455" class="h">Retrieval and sessions</text>
-  <text x="840" y="481" class="b">text + graph context · recency</text>
-  <text x="840" y="503" class="b">orientation · handoff · temporal state</text>
-
-  <path class="a" d="M600 545 L600 595"/>
-  <rect class="box" x="310" y="595" width="580" height="65"/>
-  <text x="523" y="624" class="h">Versioned SQLite store</text>
-  <text x="420" y="647" class="b">constraints · migrations · durable typed nodes and edges</text>
+  <path class="arrow" d="M600 565 L600 615"/>
+  <rect class="box" x="245" y="615" width="710" height="86"/>
+  <text x="510" y="649" class="head">SQLite persistence</text>
+  <text x="330" y="678" class="body">typed nodes and edges · phase state · migrations · retrieval and session records</text>
 </svg>
