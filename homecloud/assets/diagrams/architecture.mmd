@@ -1,53 +1,27 @@
-flowchart TD
-    subgraph interfaces["Applications and operators"]
-        APP["Flip / APIs / interactive clients"]
-        AGENT["Autonomous and interactive agent work"]
-        OPS["Operator / MCP / connectors"]
+flowchart TB
+    A["Requests and workloads<br/>interactive applications · connectors · agents · research · documents · media"]
+
+    subgraph C["Inference and resource control"]
+      C1["Route and admit<br/>backend · model · priority"]
+      C2["Instance pool<br/>checkout · affinity · health"]
+      C3["GPU authority<br/>claims · queues · controlled lifecycle"]
+      C4["Operations<br/>supervision · health · telemetry"]
+      C1 --> C2 --> C3
+      C4 -. observes .-> C2
+      C4 -. observes .-> C3
     end
 
-    subgraph runtime["HomeCloud runtime"]
-        EXEC["Execution lifecycle<br/>admission · phases · checkpoints · recovery"]
-        CONTEXT["Durable context<br/>retrieval · task memory · selected knowledge"]
-        TOOL["Owned execution<br/>sandbox · tools · artifacts · cleanup"]
-        ROUTER["Inference control<br/>profile · priority · affinity · capacity"]
-        EXEC --> CONTEXT
-        EXEC --> TOOL
-        EXEC --> ROUTER
+    subgraph E["Agent and research execution"]
+      E1["Context<br/>task state · retrieval"]
+      E2["Sandbox<br/>workspace · toolchains"]
+      E3["Tool loop<br/>dispatch · loop safety"]
+      E4["Checkpoint<br/>history · plan · engine state"]
+      E5["Verify and persist<br/>results · evidence · lifecycle"]
+      E1 --> E2 --> E3 --> E4 --> E5
     end
 
-    subgraph services["Supervised services"]
-        DB[("PostgreSQL + pgvector")]
-        POOL["Healthy model endpoints and checkout slots"]
-        SCHED["GPU claims and workload scheduler"]
-        SANDBOX["Sandbox/process supervision"]
-        TELEMETRY["Health · throughput · lifecycle evidence"]
-    end
+    S["Shared application services<br/>document vault · browser/search · connectors · model installation · OCR · media/cinema · UI"]
 
-    subgraph research["Lower-priority research workloads"]
-        PROGRAM["Program / agent search"]
-        VERIFY["Compilation · tests · profiling"]
-        CUDA["CUDA optimization trials"]
-    end
-
-    subgraph hardware["Heterogeneous local hardware"]
-        V100["4 × V100 32 GB<br/>NVLink pool · 128 GB"]
-        A100["A100 Drive 32 GB<br/>separate accelerator"]
-        REMOTE["Optional compatible remote endpoints"]
-    end
-
-    APP --> EXEC
-    AGENT --> EXEC
-    OPS --> EXEC
-    CONTEXT --> DB
-    TOOL --> SANDBOX
-    ROUTER --> POOL
-    EXEC --> TELEMETRY
-    PROGRAM --> EXEC
-    VERIFY --> TOOL
-    CUDA --> SCHED
-    POOL --> SCHED
-    SCHED --> V100
-    SCHED --> A100
-    ROUTER --> REMOTE
-    SANDBOX --> V100
-    SANDBOX --> A100
+    A --> C
+    C --> E
+    E --> S
