@@ -1,121 +1,84 @@
-# Portfolio Architecture and Review Guide
+# Systems Architecture Across the Portfolio
 
-This repository documents four independent systems. They share engineering concerns, but they are not presented as modules of one deployed platform and no integration between them is assumed.
+The four projects occupy different layers of AI systems engineering. They are independently deployable products, not modules of one required platform.
 
-The purpose of this page is comparative: it shows which problem each project owns, what state it treats as authoritative, and where a reviewer can verify the design in source code.
-
-## Responsibility map
-
-| Project | Primary user problem | Authoritative state | Central control boundary | Representative implementation |
+| Project | Product or operating boundary | Agent-system design | Durable state | Principal runtime surfaces |
 |---|---|---|---|---|
-| **Flip** | A community needs live conversation, durable knowledge, and useful AI participation without losing authorship, privacy, or provenance. | Accounts, membership, rooms, messages, forum objects, synthesis runs, AI activity, citations, and artifacts. | The product decides which actor may read or act, which context an AI participant receives, and what durable effect is committed. | Phoenix contexts, PostgreSQL/Ecto, Oban workflows, Channels/LiveView, client synchronization. |
-| **Project Manager** | Long-running technical work needs a durable explanation of evidence, decisions, contradictions, dependencies, and handoffs. | Typed project nodes and edges, phase state, analysis results, and retrieval/session records. | The evidence graph explains what is known; the execution DAG explains which dependency-satisfied phase can proceed. | Shared Rust core, SQLite store, graph traversal, DAG scheduling, analysis, CLI/MCP/web surfaces. |
-| **Baton** | Parallel coding-agent work needs explicit intent, scope, interaction, workspace ownership, verification, and adoption authority. | Versioned goals and plans, routes, sessions, events, interactions, workspaces, evidence, verification, and result records. | Workers may implement; Baton retains authority over admission, scope, lifecycle, verification, and publication. | Node.js control plane, persistent-session adapters, waves, real Git worktrees, verification sandboxes, result export, CLI/MCP/web. |
-| **HomeCloud** | Local AI hardware needs to become a dependable shared runtime rather than a set of manually managed model processes. | Model instances, capacity, GPU claims, queues, agent tasks, checkpoints, research state, application records, and health. | The runtime decides which inference path and hardware capacity are available, how work is prioritized, and where tools execute. | Elixir/OTP supervision, Phoenix/Ash/PostgreSQL, model adapters, GPU scheduling, sandboxes, recoverable agent execution. |
+| **Flip** | Community identity, rooms, chat, forums, media, moderation, and AI participation. | In-product AI participant runtime with explicit triggers, actor-scoped context, admitted tools, model routing, citations, artifacts, and asynchronous continuation. | Accounts, memberships, messages, threads, synthesis runs, AI activity, tool calls, citations, artifacts, and source relationships. | Phoenix web/API, LiveView, Channels, Oban, Electric-synchronized native clients. |
+| **Project Manager** | Research and technical-project planning, evidence, decisions, review, and handoff. | Structured MCP workflows externalize project memory, require causal provenance for important updates, assemble active context, and expose deterministic next work. | Projects, phases, experiments, findings, hypotheses, decisions, literature, constraints, principles, feedback, sessions, and typed edges. | Rust CLI, MCP stdio server, embedded web dashboard, versioned SQLite store. |
+| **Baton** | Persistent coding-harness coordination across providers and repositories. | Run, wave, and workflow execution across full harness sessions with routing, interaction, steering, shared context, recovery, harvesting, review, and integration. | Goals, plans, workflows, routes, sessions, events, interactions, knowledge horizons, worktrees, artifacts, evidence, and result state. | Embedded API, resident application bus, CLI, MCP, provider adapters, Git worktrees. |
+| **HomeCloud** | Local and remote inference, finite accelerator capacity, agent execution, research, and application services. | Recoverable agent runtime with context assembly, dynamic tools, model and backend routing, sandboxed execution, loop control, checkpoints, and lower-priority research work. | Model instances, GPU claims, queues, agent tasks, checkpoints, research records, tool and telemetry state, documents, and application objects. | Elixir/OTP application, Phoenix/LiveView, Ash/PostgreSQL, local model services, remote adapters, containers, connectors. |
 
-## The four systems answer different questions
+## Flip: product-owned AI behavior
 
-### Flip: what may happen inside a community product?
+Flip places AI execution inside the community product rather than behind an unrestricted assistant endpoint. The product controls:
 
-Flip owns social and product semantics. It determines identity, membership, audience, message and forum state, AI triggers, eligible context, product tools, provenance, and publication.
+- which visible user action triggers an AI turn;
+- which actor, room, reply chain, and community state are eligible context;
+- which tools and effects are admitted for the current surface;
+- how provider calls, tool results, citations, artifacts, and failures are recorded;
+- how a generated reply becomes ordinary durable message state;
+- how selected conversation enters a separate synthesis workflow and becomes a forum object with source lineage;
+- how durable changes reach web and native clients while presence and typing remain ephemeral.
 
-A model endpoint can fail without changing ordinary community authority. AI capability is one part of the product, not an alternate backend with independent access to community data.
+This project demonstrates AI product engineering at the point where model execution intersects with social identity, authorization, real-time state, background work, and publication.
 
-### Project Manager: what does the project know, and what work is ready?
+## Project Manager: external project state for long-running work
 
-Project Manager stores typed evidence and execution state across sessions. Its evidence graph can represent support, contradiction, supersession, derivation, testing, and dependency. Its DAG can order project phases and recommend dependency-satisfied work.
+Project Manager treats project continuity as an application-state problem rather than a prompt-length problem. Its typed model separates planning, execution, evidence, interpretation, and review:
 
-The current implementation keeps contradiction/confidence analysis and scheduling adjacent but distinct. Review signals can inform a person or agent changing the plan; they do not automatically act as hard scheduler gates.
+- phases and dependencies determine which work is actionable;
+- experiments produce findings;
+- findings support or contradict hypotheses and inform decisions;
+- literature, principles, constraints, research, and feedback remain connected to the work that used them;
+- sessions record the active experiment, temporal changes, and handoff state;
+- retrieval returns typed project context and graph neighborhoods rather than unstructured transcript recall;
+- review, audit, and repair surfaces expose unsupported decisions, orphaned nodes, expired constraints, contradictory evidence, and unresolved branches.
 
-### Baton: how is delegated software work controlled?
+The agent interface is intentionally stricter than raw storage access. MCP operations validate lifecycles and causal relationships before committing state, while the deterministic DAG remains independently testable.
 
-Baton starts from an approved objective and plan, selects a compatible harness/model/effort route, allocates isolated workspaces, supervises persistent sessions, handles structured human interactions, and verifies captured artifacts.
+## Baton: cross-harness fleet execution
 
-The model or coding harness owns its native reasoning loop. Baton owns the surrounding delivery contract and does not treat a worker’s completion message as acceptance evidence.
+Baton operates above vendor-native coding harnesses without reducing them to one-shot model calls. Its application model covers:
 
-### HomeCloud: how is finite AI capacity operated?
+- goal, plan, and declarative workflow construction;
+- exact harness, model, and effort routing;
+- persistent worker sessions and provider capability adapters;
+- parallel waves with member-specific scopes and progress;
+- questions, approvals, decision requests, replies, checkpoints, nudges, and recovery;
+- task-, workflow-, and project-level collaboration state;
+- isolated Git worktrees and content-addressed result materialization;
+- verification, independent review, adoption, and integration as later stages of the run lifecycle.
 
-HomeCloud manages model services and accelerator capacity for interactive requests, agents, research, and background work. It exposes capacity through supervised pools, claims, priorities, health, and routing.
+A plain-code coordinator carries event ordering, liveness, capacity, version fences, replay, and cleanup beneath the AI orchestrator. This division allows the orchestrator to plan and steer while durable execution state remains available to every control surface.
 
-Agent work is executed through an application runtime with context, tools, sandboxes, loop controls, checkpoints, and persistent results. The platform is local-first but can use remote providers where policy and capability allow.
+## HomeCloud: resource-aware AI execution
 
-## Shared engineering themes
+HomeCloud connects model and agent behavior to actual infrastructure state. Its runtime coordinates:
 
-### State is modeled at the level required for recovery
+- local and remote model profiles;
+- healthy inference instances, slot capacity, priority, and prompt-cache affinity;
+- GPU claims, workload queues, model-service lifecycle, cooldowns, and baseline return;
+- autonomous, interactive, and plan-only agent modes;
+- per-task sandboxes, durable workspaces, tool discovery, and tool execution;
+- loop and quality-regression detection;
+- phase-aware checkpoints containing message, plan, event, loop, and engine state;
+- lower-priority research, evaluation, OCR, media, connector, and maintenance workloads.
 
-Each project stores more than a transcript or log:
+The result is an application runtime rather than a collection of independently managed inference servers. Interactive requests, agents, and background programs share one supervised resource and execution model.
 
-- Flip stores product objects, audience, source relationships, workflow state, and AI activity.
-- Project Manager stores typed evidence, decisions, graph relationships, and phase state.
-- Baton stores approved intent, route, session, interaction, repository ownership, and verification evidence.
-- HomeCloud stores model capacity, claims, task state, checkpoints, and application records.
+## System boundaries
 
-The relevant question is not whether data is durable in the abstract. It is whether the system has enough state to continue correctly after the originating request, model context, provider process, or operator session has ended.
+| Boundary | Implemented relationship |
+|---|---|
+| **Flip and inference infrastructure** | Flip owns product authorization, context, tools, effects, and durable content. It can use hosted or local provider-compatible inference without depending on HomeCloud. |
+| **Project Manager and agent runtimes** | Project Manager exposes structured project state through CLI, MCP, and web interfaces. It can support human or agent work without requiring Baton or HomeCloud. |
+| **Baton and coding harnesses** | Baton coordinates full external harness sessions through adapters. Harness-specific capabilities remain visible; Baton does not assume identical controls across providers. |
+| **HomeCloud and application products** | HomeCloud supplies local-first inference and execution services. Applications retain their own domain authorization and product semantics. |
+| **Cross-project use** | Standards-based integration is possible, but the portfolio does not claim a deployed dependency graph among the four projects. |
 
-### Capability does not imply authority
+## Implementation availability
 
-Across the portfolio, a component may be technically capable of an action while still lacking authority to perform or finalize it:
-
-- A Flip AI participant can call only capabilities admitted for its product surface and actor scope.
-- A Project Manager client can query or update only the typed project operations exposed by the shared core.
-- A Baton worker may have a shell, but its repository scope and result adoption remain controller-owned.
-- A HomeCloud agent can execute tools only through its assigned runtime and workspace.
-
-### Provenance is operational data
-
-Provenance is not presented as a decorative citation field. It affects behavior:
-
-- Flip uses origin relationships to constrain access to synthesized forum content.
-- Project Manager uses typed edges to preserve why a conclusion or decision exists.
-- Baton ties a result to an approved plan, exact workspace, run lineage, and verification.
-- HomeCloud ties work to model/infrastructure state, agent lifecycle, checkpoints, and stored results.
-
-### Interfaces share semantics
-
-CLI, MCP, web, native, connector, and provider-specific surfaces should call a common application model. A new interface should not become a weaker parallel implementation of authorization, state transition, or failure behavior.
-
-### Non-determinism is bounded by deterministic systems
-
-Models contribute interpretation, planning, retrieval selection, and composition. Code retains control of identity, scope, schemas, lifecycle, persistence, resource ownership, and verification.
-
-The portfolio therefore evaluates more than response quality. It asks whether the surrounding system makes AI behavior observable, interruptible, recoverable, and safe to integrate.
-
-## Important project boundaries
-
-| Boundary | What the portfolio claims | What it does not claim |
-|---|---|---|
-| **Flip and model infrastructure** | Flip can use provider-compatible local or hosted inference. | Flip’s product authority depends on HomeCloud or any one provider. |
-| **Project Manager analysis and DAG** | Contradiction and confidence tools provide review evidence next to deterministic phase scheduling. | A belief-state change automatically blocks or rewrites the DAG. |
-| **Baton and coding harnesses** | Baton coordinates persistent native harness sessions through capability-aware adapters. | Every harness exposes identical controls, evidence, or reliability. |
-| **HomeCloud and local hardware** | HomeCloud schedules heterogeneous local capacity and can route to remote providers. | One private hardware topology defines the product or every deployment. |
-| **Cross-project use** | The projects could exchange standards-based data or services where useful. | They are currently one integrated platform or require one another to operate. |
-
-## Supporting repositories
-
-The flagship pages cover the systems above. Related repositories support their product or deployment surfaces:
-
-- Flip’s React/TypeScript native-client work belongs to the Flip product architecture.
-- HomeCloud tools and adapters connect external applications to HomeCloud services.
-- These supporting repositories are not presented as additional flagship systems merely to increase project count.
-
-## Documentation standard
-
-Portfolio documentation should let a new reader answer, in order:
-
-1. What is the product or operational capability?
-2. Who uses it, and what problem does it solve?
-3. What does a representative workflow look like?
-4. Which state and authority boundaries make that workflow reliable?
-5. Which source modules implement the important claims?
-6. What remains deliberately out of scope or not yet coupled?
-
-It should avoid:
-
-- opening with internal subsystem names before establishing the product;
-- listing frameworks or modules without explaining their consequence;
-- implying integration because two projects could exchange data;
-- converting issue history, deployment choreography, or private configuration into portfolio narrative;
-- presenting planned automation as shipped behavior;
-- using unsupported scale, novelty, maturity, or quality claims.
+Project Manager and Baton have public implementation repositories. Flip and HomeCloud remain private systems and are documented through their public case studies, architecture diagrams, source-path evidence, and synthetic or product-facing demonstrations.
 
 [← Back to portfolio](README.md)
