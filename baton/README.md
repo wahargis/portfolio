@@ -8,6 +8,23 @@ The application exposes one run model through embedded, resident, CLI, and MCP s
 
 <img src="assets/fleet-driver.svg" alt="Baton run-centric cross-harness fleet architecture" width="100%" />
 
+## Recorded multi-worker run
+
+The public repository includes a two-member specification wave executed on August 6, 2026. Both members used the exact route `deepseek / deepseek-v4-flash / high`, received distinct roles and path scopes, and ran as persistent sessions inside one wave.
+
+<img src="assets/spec-wave-example.svg" alt="Baton recorded two-member specification wave" width="100%" />
+
+The receipt preserves several states that a text-only success summary would collapse:
+
+- `waves.start` created two durable run identities;
+- both members reached `work_completed`;
+- the pending roster drained completely;
+- one content-addressed result was harvested from pin `99cbb7c664fcdd5b41b1ecacb566c70dc734399b`;
+- the other required result was absent from the harvested pins;
+- the workflow therefore ended `SPEC-WAVE-INCOMPLETE` rather than reporting success because both workers said they were done.
+
+This is the fleet application in operation: exact routes, parallel sessions, scoped work, terminal member state, result pins, a harvest contract, and an outcome derived from the complete workflow rather than from worker prose. The [run driver](https://github.com/Flip-Engineering/baton/blob/master/docs/reference/evidence/spec-waves-2026-08-06/run-spec-wave.mjs) and [durable receipt](https://github.com/Flip-Engineering/baton/blob/master/docs/reference/evidence/spec-waves-2026-08-06/spec-wave-receipt.json) are public.
+
 ## Run model
 
 A Baton run is a durable coordination object rather than a prompt and response pair. It can represent:
