@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+  <title id="title">Baton run lifecycle</title>
+  <desc id="desc">A Baton run moves from admitted objective and plan to route and worktree allocation, persistent session execution, interaction and steering, checkpoint or recovery, result capture, verification and review, adoption or integration, and resource closure.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#43506a"/></marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#2f6fed"/></marker>
+    <style>
+      .bg{fill:#f7f9fc}.group{fill:#eef3f8;stroke:#8b99ad;stroke-width:2;rx:22}.box{fill:#fff;stroke:#33415c;stroke-width:2;rx:16}
+      .blue{fill:#eef4ff;stroke:#2f6fed}.green{fill:#ecf8f3;stroke:#228b68}.amber{fill:#fff6e8;stroke:#b36b00}.purple{fill:#f4efff;stroke:#7656d6}.gray{fill:#f5f6f8;stroke:#68758b}
+      .title{font:700 34px Inter,Arial,sans-serif;fill:#182238}.subtitle{font:20px Inter,Arial,sans-serif;fill:#526077}.label{font:700 15px Inter,Arial,sans-serif;fill:#33415c;letter-spacing:1.2px}.head{font:700 22px Inter,Arial,sans-serif;fill:#1c2940}.body{font:17px Inter,Arial,sans-serif;fill:#40506a}.small{font:15px Inter,Arial,sans-serif;fill:#53627a}.mono{font:16px ui-monospace,SFMono-Regular,Consolas,monospace;fill:#33415c}
+      .line{stroke:#43506a;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.blueLine{stroke:#2f6fed;stroke-width:2.5;fill:none;marker-end:url(#arrowBlue)}.dash{stroke:#68758b;stroke-width:2;fill:none;stroke-dasharray:8 7;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="940"/>
+  <text x="70" y="60" class="title">Baton: run lifecycle and control state</text>
+  <text x="70" y="94" class="subtitle">Persistent sessions remain steerable while deterministic state records every transition and effect</text>
+
+  <rect class="box blue" x="70" y="150" width="240" height="120"/>
+  <text x="95" y="181" class="label">1 · ADMISSION</text><text x="95" y="214" class="head">Objective and plan</text><text x="95" y="241" class="small">constraints · scope · route</text><text x="95" y="262" class="small">verification profile</text>
+  <path class="blueLine" d="M310 210 L360 210"/>
+  <rect class="box blue" x="360" y="150" width="240" height="120"/>
+  <text x="385" y="181" class="label">2 · ALLOCATION</text><text x="385" y="214" class="head">Run and worktree</text><text x="385" y="241" class="small">capacity reservation</text><text x="385" y="262" class="small">exact harness session</text>
+  <path class="blueLine" d="M600 210 L650 210"/>
+  <rect class="box purple" x="650" y="150" width="240" height="120"/>
+  <text x="675" y="178" class="label">3 · PLAN</text><text x="675" y="208" class="head">Advertise plan</text><text x="675" y="233" class="head">and approve</text><text x="675" y="258" class="small">freshness · redirect · refusal</text>
+  <path class="blueLine" d="M890 210 L940 210"/>
+  <rect class="box green" x="940" y="150" width="240" height="120"/>
+  <text x="965" y="181" class="label">4 · EXECUTE</text><text x="965" y="214" class="head">Persistent turns</text><text x="965" y="243" class="small">events · progress</text><text x="965" y="264" class="small">tool work</text>
+  <path class="blueLine" d="M1180 210 L1230 210"/>
+  <rect class="box amber" x="1230" y="150" width="300" height="120"/>
+  <text x="1255" y="178" class="label">5 · INTERACT</text><text x="1255" y="208" class="head">Question / approval</text><text x="1255" y="233" class="head">or wait</text><text x="1255" y="258" class="small">answer · message · nudge · claim</text>
+
+  <path class="line" d="M1380 270 L1380 340 L1135 340 L1135 390"/>
+  <rect class="group" x="250" y="390" width="1100" height="215"/>
+  <text x="280" y="425" class="label">MID-FLIGHT CONTROL</text>
+  <rect class="box amber" x="300" y="465" width="280" height="95"/><text x="440" y="500" text-anchor="middle" class="head">Turn checkpoint</text><text x="440" y="529" text-anchor="middle" class="body">wait · nudge · claim</text>
+  <rect class="box gray" x="660" y="465" width="280" height="95"/><text x="800" y="500" text-anchor="middle" class="head">Liveness and recovery</text><text x="800" y="529" text-anchor="middle" class="body">reconnect · preserve · stop · reap</text>
+  <rect class="box green" x="1020" y="465" width="280" height="95"/><text x="1160" y="500" text-anchor="middle" class="head">Shared state</text><text x="1160" y="529" text-anchor="middle" class="body">scratch · messages · context</text>
+  <path class="line" d="M580 512 L660 512"/><path class="line" d="M940 512 L1020 512"/>
+  <path class="dash" d="M1135 390 L1060 270"/>
+
+  <path class="line" d="M800 605 L800 655"/>
+  <rect class="box green" x="120" y="655" width="260" height="115"/>
+  <text x="145" y="686" class="label">6 · CAPTURE</text><text x="145" y="719" class="head">Result Git identity</text><text x="145" y="746" class="small">deliverable commit</text><text x="145" y="767" class="small">result pin</text>
+  <path class="line" d="M380 713 L430 713"/>
+  <rect class="box amber" x="430" y="655" width="260" height="115"/>
+  <text x="455" y="686" class="label">7 · VERIFY</text><text x="455" y="719" class="head">Fresh worktree checks</text><text x="455" y="746" class="small">suite / gate</text><text x="455" y="767" class="small">verification evidence</text>
+  <path class="line" d="M690 713 L740 713"/>
+  <rect class="box purple" x="740" y="655" width="260" height="115"/>
+  <text x="765" y="686" class="label">8 · REVIEW</text><text x="765" y="719" class="head">Independent inspection</text><text x="765" y="746" class="small">immutable range</text><text x="765" y="767" class="small">review verdict</text>
+  <path class="line" d="M1000 713 L1050 713"/>
+  <rect class="box blue" x="1050" y="655" width="260" height="115"/>
+  <text x="1075" y="686" class="label">9 · ADOPT / INTEGRATE</text><text x="1075" y="719" class="head">Explicit effect</text><text x="1075" y="746" class="small">policy-gated</text><text x="1075" y="767" class="small">repository change</text>
+  <path class="line" d="M1310 713 L1360 713"/>
+  <rect class="box gray" x="1360" y="655" width="170" height="115"/>
+  <text x="1385" y="690" class="label">10 · CLOSE</text><text x="1385" y="725" class="head">Receipt</text><text x="1385" y="752" class="body">drain · reap · replay</text>
+
+  <rect class="group" x="190" y="825" width="1220" height="90"/>
+  <text x="225" y="854" class="label">AUTHORITATIVE RECORD</text>
+  <text x="225" y="881" class="body">run · members · route · worktrees · events · interactions · checkpoints · result pins</text>
+  <text x="225" y="905" class="body">verification · independent review · adoption · integration · resource closure</text>
+</svg>

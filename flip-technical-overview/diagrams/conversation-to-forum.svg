@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+  <title id="title">Flip conversation-to-forum curation lifecycle</title>
+  <desc id="desc">Eligible room messages are captured in a synthesis run, filtered, planned with a model tool loop, validated, committed through an operation ledger, and materialized as forum content with source relationships, linkback, and recuration.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#43506a"/></marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#2f6fed"/></marker>
+    <style>
+      .bg{fill:#f7f9fc}.group{fill:#eef3f8;stroke:#8b99ad;stroke-width:2;rx:22}.box{fill:#fff;stroke:#33415c;stroke-width:2;rx:16}
+      .blue{fill:#eef4ff;stroke:#2f6fed}.green{fill:#ecf8f3;stroke:#228b68}.amber{fill:#fff6e8;stroke:#b36b00}.purple{fill:#f4efff;stroke:#7656d6}.gray{fill:#f5f6f8;stroke:#68758b}
+      .title{font:700 34px Inter,Arial,sans-serif;fill:#182238}.subtitle{font:20px Inter,Arial,sans-serif;fill:#526077}.label{font:700 15px Inter,Arial,sans-serif;fill:#33415c;letter-spacing:1.2px}.head{font:700 22px Inter,Arial,sans-serif;fill:#1c2940}.body{font:17px Inter,Arial,sans-serif;fill:#40506a}.small{font:15px Inter,Arial,sans-serif;fill:#53627a}.mono{font:16px ui-monospace,SFMono-Regular,Consolas,monospace;fill:#33415c}
+      .line{stroke:#43506a;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.blueLine{stroke:#2f6fed;stroke-width:2.5;fill:none;marker-end:url(#arrowBlue)}.dash{stroke:#68758b;stroke-width:2;fill:none;stroke-dasharray:8 7;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="940"/>
+  <text x="70" y="60" class="title">Flip: conversation-to-forum curation</text>
+  <text x="70" y="94" class="subtitle">Human authorship is preserved while structure, destination, and durable forum state are created explicitly</text>
+
+  <rect class="box blue" x="70" y="145" width="270" height="155"/>
+  <text x="95" y="180" class="label">SOURCE ROOM</text>
+  <text x="95" y="212" class="head">Messages and replies</text>
+  <text x="95" y="241" class="small">authors · timestamps</text>
+  <text x="95" y="263" class="small">ancestry · membership</text>
+  <text x="95" y="285" class="small">visibility · reactions</text>
+
+  <path class="blueLine" d="M340 222 L400 222"/>
+  <rect class="box amber" x="400" y="145" width="270" height="155"/>
+  <text x="425" y="180" class="label">RUN ADMISSION</text>
+  <text x="425" y="212" class="head">Synthesis run + job</text>
+  <text x="425" y="241" class="small">atomic transaction</text>
+  <text x="425" y="263" class="small">unique run_id</text>
+  <text x="425" y="285" class="small">pending source window</text>
+
+  <path class="line" d="M670 222 L730 222"/>
+  <rect class="box" x="730" y="145" width="270" height="155"/>
+  <text x="755" y="180" class="label">CLAIM AND FILTER</text>
+  <text x="755" y="212" class="head">Eligible source set</text>
+  <text x="755" y="241" class="small">worker claim</text>
+  <text x="755" y="263" class="small">message preload · bot exclusion</text>
+  <text x="755" y="285" class="small">quality gate</text>
+
+  <path class="line" d="M1000 222 L1060 222"/>
+  <rect class="box purple" x="1060" y="145" width="270" height="155"/>
+  <text x="1085" y="180" class="label">PLAN</text>
+  <text x="1085" y="212" class="head">Bounded curation loop</text>
+  <text x="1085" y="241" class="small">topics · destinations</text>
+  <text x="1085" y="263" class="small">operations · existing threads</text>
+  <text x="1085" y="285" class="small">interaction signals</text>
+
+  <path class="line" d="M1330 222 L1380 222"/>
+  <rect class="box amber" x="1380" y="145" width="160" height="155"/>
+  <text x="1400" y="180" class="label">VALIDATE</text>
+  <text x="1400" y="212" class="head">Plan checks</text>
+  <text x="1400" y="241" class="small">source IDs</text>
+  <text x="1400" y="263" class="small">target state</text>
+  <text x="1400" y="285" class="small">duplicate state</text>
+
+  <path class="line" d="M1460 300 L1460 355 L1180 355 L1180 405"/>
+  <rect class="group" x="400" y="405" width="940" height="220"/>
+  <text x="430" y="440" class="label">TRANSACTIONAL OPERATION PROCESSOR</text>
+  <rect class="box green" x="445" y="475" width="245" height="105"/><text x="568" y="510" text-anchor="middle" class="head">Operation ledger</text><text x="568" y="540" text-anchor="middle" class="body">expected · committed</text><text x="568" y="565" text-anchor="middle" class="small">fingerprint and retry state</text>
+  <rect class="box green" x="745" y="475" width="245" height="105"/><text x="868" y="510" text-anchor="middle" class="head">Forum mutation</text><text x="868" y="540" text-anchor="middle" class="body">create · append · merge</text><text x="868" y="565" text-anchor="middle" class="small">link · skip · defer</text>
+  <rect class="box blue" x="1045" y="475" width="245" height="105"/><text x="1168" y="510" text-anchor="middle" class="head">Source relationships</text><text x="1168" y="540" text-anchor="middle" class="body">messages · participants</text><text x="1168" y="565" text-anchor="middle" class="small">origin visibility and navigation</text>
+  <path class="line" d="M690 527 L745 527"/><path class="line" d="M990 527 L1045 527"/>
+
+  <path class="line" d="M870 625 L870 665"/>
+  <rect class="box green" x="575" y="665" width="590" height="120"/>
+  <text x="605" y="700" class="label">DURABLE FORUM RESULT</text>
+  <text x="605" y="730" class="head">Thread/replies + source lineage + curation run</text>
+  <text x="605" y="757" class="small">Searchable durable discussion with source access</text>
+  <text x="605" y="779" class="small">Correction and navigation remain tied to the source room</text>
+
+  <rect class="box" x="70" y="405" width="300" height="250"/>
+  <text x="95" y="440" class="label">RUN STATE</text>
+  <text x="95" y="478" class="mono">pending</text><text x="185" y="478" class="body">queued</text>
+  <text x="95" y="512" class="mono">running</text><text x="185" y="512" class="body">claimed</text>
+  <text x="95" y="546" class="mono">completed</text><text x="205" y="546" class="small">operations committed</text>
+  <text x="95" y="586" class="mono">partial_failed</text>
+  <text x="95" y="610" class="small">reconcile; no blind replay</text>
+  <text x="95" y="640" class="mono">failed</text><text x="175" y="640" class="small">terminal without result</text>
+
+  <rect class="group" x="70" y="835" width="1470" height="70"/>
+  <text x="100" y="864" class="label">FOLLOW-UP WORK</text>
+  <text x="315" y="874" class="body">linkback to source room · participant feedback · bounded recuration · visibility/redaction propagation</text>
+  <path class="dash" d="M870 785 L870 835"/>
+</svg>

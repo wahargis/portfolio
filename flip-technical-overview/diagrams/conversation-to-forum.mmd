@@ -1,0 +1,12 @@
+flowchart LR
+  CHAT[Source room: messages, authors, replies, visibility]
+  RUN[Atomic synthesis run + Oban job]
+  FILTER[Claim, load, filter, quality gate]
+  PLAN[Bounded curation tool loop]
+  VALIDATE[Validate source IDs, destinations, duplicates]
+  LEDGER[Operation ledger: expected, committed, fingerprint]
+  FORUM[Create, append, merge, link, skip, or defer]
+  SOURCES[Persist source-message and participant relationships]
+  RESULT[Durable forum result]
+  FOLLOW[Linkback, feedback, recuration]
+  CHAT --> RUN --> FILTER --> PLAN --> VALIDATE --> LEDGER --> FORUM --> SOURCES --> RESULT --> FOLLOW
