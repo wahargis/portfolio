@@ -1,7 +1,7 @@
 # Portfolio notice
 
-This repository is a curated architecture and engineering portfolio.
+This repository contains public architecture case studies, diagrams, and selected technical evidence for the projects it documents.
 
-Source-code availability and licensing are governed by the canonical repositories linked from each project page. Nothing in this portfolio expands, replaces, or overrides those repository licenses. The portfolio prose and diagrams are provided for technical review and discussion unless a separate license states otherwise.
+Project Manager and Baton have public implementation repositories linked from their project pages. Flip and HomeCloud have private implementation repositories; their portfolio pages therefore describe selected architecture, source paths, interfaces, and operating behavior without linking to inaccessible code.
 
-The examples intentionally omit production data, credentials, private messages, host-specific secrets, proprietary prompt/persona configuration, security-sensitive thresholds, and deployment state that are not necessary to understand the architecture.
+The documentation intentionally omits production data, credentials, private messages, proprietary prompt and persona configuration, security-sensitive thresholds, and deployment state that is not required to understand the systems. Nothing in this repository expands, replaces, or overrides the licenses or access controls of any implementation repository.
