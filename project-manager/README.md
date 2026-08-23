@@ -8,6 +8,30 @@ The knowledge graph is the shared state model beneath those workflows, not the c
 
 <img src="assets/architecture.svg" alt="Project Manager research operations architecture" width="100%" />
 
+## Concrete project record
+
+The public quickstart creates a synthetic project named `atlas`. The diagram below shows the actual example objects and the result computed from them.
+
+<img src="assets/atlas-example.svg" alt="Project Manager atlas synthetic project record" width="100%" />
+
+```bash
+pm --db /tmp/atlas.db project activate atlas --alias at
+pm --db /tmp/atlas.db phase atlas add "Map retrieval gaps" --impact 40
+pm --db /tmp/atlas.db phase atlas add "Test topic briefings" --impact 80
+pm --db /tmp/atlas.db phase atlas add "Package handoff" --impact 60 --depends 1
+pm --db /tmp/atlas.db experiment add atlas 1 "Inventory current retrieval behavior"
+pm --db /tmp/atlas.db finding add atlas 1 "Retrieval misses code-symbol queries"
+pm --db /tmp/atlas.db decision add atlas 1 "Adopt trigram tokenizer" \
+  --why "Code symbols are not matched by the default tokenizer"
+```
+
+The record demonstrates the two forms of control that the system keeps separate:
+
+- the phase DAG leaves `Package handoff` blocked on Phase 1 and selects the dependency-satisfied Phase 2 as the highest-impact next work;
+- the evidence chain preserves the experiment, resulting finding, selected decision, and decision rationale inside Phase 1.
+
+The same stored state can be inspected through `pm next`, the MCP context and review operations, or the web dashboard. The interface changes; the project record and scheduling semantics do not.
+
 ## Operating model
 
 A project moves through a recurring execution and learning loop:
@@ -134,6 +158,7 @@ All three surfaces use the same Rust application and versioned SQLite store. Int
 | Public source | Implemented responsibility |
 |---|---|
 | [`README.md`](https://github.com/wahargis/project-manager/blob/main/README.md) | Complete product behavior, operating loop, interface contracts, automation boundaries, and quickstart. |
+| [`docs/quickstart.md`](https://github.com/wahargis/project-manager/blob/main/docs/quickstart.md) | The `atlas` project record shown above. |
 | [`src/store/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/store/mod.rs) | Versioned SQLite store, node and relationship types, lifecycle state, sessions, and persistence operations. |
 | [`src/dag/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/dag/mod.rs) | Topological ordering, dependency satisfaction, actionable-phase selection, impact ranking, and stagnation detection. |
 | [`src/kg/traversal.rs`](https://github.com/wahargis/project-manager/blob/main/src/kg/traversal.rs) | Bounded bidirectional graph traversal, typed neighborhoods, and phase-centered subgraphs. |
