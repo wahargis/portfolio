@@ -1,172 +1,189 @@
 # Baton
 
-> A control plane for coordinated software work across persistent coding-agent harnesses.
+Baton coordinates coding-agent work as durable runs. A run contains an approved goal, a workflow revision, task dependencies, execution waves, provider sessions, isolated worktrees, interaction requests, verification results, and adoption state.
 
-## At a glance
+[Source repository](https://github.com/Flip-Engineering/baton)
 
-| | |
+## Run lifecycle
+
+The diagram follows one run from operator request through task execution, verification, and adoption.
+
+```mermaid
+flowchart TB
+    subgraph interfaces["Operator interfaces"]
+        cli["CLI"]
+        mcp["MCP"]
+        web["Web"]
+        command["Shared application command"]
+        cli --> command
+        mcp --> command
+        web --> command
+    end
+
+    command --> run["Run R-204<br/>stable run ID and owner"]
+    run --> goal["Goal plan<br/>objective, boundaries, expected result"]
+    goal --> workflow["Workflow revision W-7<br/>task graph, route policy, verification rules"]
+
+    subgraph tasks["Dependency graph and waves"]
+        T1["T1 Inspect backend"]
+        T2["T2 Inspect client"]
+        T3["T3 Implement contract"]
+        T4["T4 Integration checks"]
+        T1 --> T3
+        T2 --> T3
+        T3 --> T4
+    end
+    workflow --> T1
+    workflow --> T2
+
+    subgraph dispatch["Coordinator and dispatch"]
+        waves["Wave driver<br/>dependencies and capacity"]
+        route["Route selection<br/>provider, harness, model, policy"]
+        lease["Lease and fence<br/>task-scoped execution owner"]
+        worktree["Isolated Git worktree"]
+        session["Resident provider session"]
+        waves --> route --> lease --> worktree --> session
+    end
+    T1 --> waves
+    T2 --> waves
+
+    subgraph worker["Agent work"]
+        context["Context program and lineage"]
+        harness["Coding harness tool loop"]
+        changes["Worktree changes and commands"]
+        interaction{"Operator input required?"}
+        result["Result bundle<br/>changes, output, diagnostics"]
+        context --> harness --> changes --> interaction
+        interaction -- no --> result
+        interaction -- yes --> request["Stored interaction request"]
+        request --> command
+        command --> harness
+    end
+    session --> context
+
+    result --> verify{"Verification and referee"}
+    verify -- accepted --> adopt["Adopt or export result<br/>record target and outcome"]
+    verify -- failed --> repair["Focused repair task"]
+    repair --> waves
+
+    ledger[("Coordination store and event ledger<br/>runs, tasks, waves, leases, sessions,<br/>worktrees, interactions, results")]
+    recovery["Recovery services<br/>replay state, recover sessions,<br/>reap leases, rebuild timeline"]
+    run --> ledger
+    waves --> ledger
+    lease --> ledger
+    session --> ledger
+    request --> ledger
+    result --> ledger
+    verify --> ledger
+    ledger --> recovery
+    recovery -. resume .-> session
+```
+
+1. An operator submits a goal through CLI, MCP, or web.
+2. Application semantics validate the command and create a run.
+3. A goal plan and workflow revision define tasks, dependencies, policies, and required results.
+4. Ready tasks are grouped into waves according to dependency and capacity state.
+5. The coordinator chooses a provider, harness, model, and execution route.
+6. Baton grants a task-scoped lease, fence, and isolated Git worktree.
+7. A resident agent session receives context, tools, messages, and interaction responses while it works.
+8. Normalized events update the run timeline and coordination state.
+9. Completed task output enters verification.
+10. Accepted output is adopted into the target branch or exported as a result bundle.
+11. Failed verification can create a repair task or return the task to execution.
+
+The operator can reconnect through another interface and continue the same run because the run state does not live only in the initiating process.
+
+## Run and workflow state
+
+A run links the principal records required to explain its current status:
+
+| Record | Stored purpose |
 |---|---|
-| **Product** | A fleet-level orchestrator that turns a software objective into scoped, supervised, verifiable work across multiple coding-agent runtimes. |
-| **Users** | Engineers and operators who want to delegate substantial repository work without losing control of intent, interaction, workspace ownership, verification, or result adoption. |
-| **Core problem** | Coding harnesses differ in session protocol, model selection, tool behavior, approvals, usage reporting, and failure modes. Parallel workers increase throughput but also increase ambiguity, conflicting writes, hidden blocking, and unverified completion. |
-| **Engineering focus** | Goal and plan contracts, capability-aware routing, persistent sessions, human-in-the-loop interactions, isolated Git worktrees, run lineage, verification, and secure result export. |
-| **Primary implementation** | Node.js control plane with CLI, MCP, and web surfaces; provider-specific persistent-session adapters; real Git worktree and verification mechanics. |
-| **Source** | [`wahargis/baton`](https://github.com/wahargis/baton) |
+| Goal plan | Approved objective, boundaries, and expected result |
+| Workflow revision | Versioned task graph and execution policy |
+| Wave | A set of tasks that can run under current dependencies and capacity |
+| Task | Unit of work, dependency state, route, lease, result, and verification status |
+| Provider session | Resident coding harness process and provider conversation state |
+| Worktree | Isolated repository workspace owned by a task |
+| Interaction request | Question, approval, credential, or other input required from an operator |
+| Event | Normalized state change used for timelines, replay, and diagnostics |
+| Result and verification | Produced artifacts and the checks applied before adoption |
+| Adoption record | How accepted work entered the target repository or export |
 
-## The product problem
+Workflow definitions are data. A workflow can be revised without replacing the complete application runtime. The interpreter applies task dependencies, policies, and stage transitions to the current run.
 
-A coding agent can often make a useful change. A software-delivery system must answer a larger set of questions:
+## Provider and harness routing
 
-- What objective and definition of done were actually approved?
-- Which constraints, effects, paths, risks, and budgets apply?
-- Which harness and model can perform the work with the required interaction semantics?
-- Can several workers operate without sharing an uncontrolled working tree?
-- Is a worker waiting, blocked on a decision, asking for approval, at a steerable checkpoint, or genuinely making progress?
-- What happens when a provider session disconnects or a controller restarts?
-- Who decides that a change is complete?
-- Which verification evidence applies to the exact artifact being adopted?
-- How is a result exported without allowing a worker to overwrite arbitrary host state?
+Baton supports several coding-agent providers and harness protocols. A route identifies the provider, harness, model, credential source, and runtime policy required for one task.
 
-Baton is built around those control questions. It does not treat orchestration as “send the same prompt to several models and concatenate the answers.” It maintains a durable relationship between intent, route, session, workspace, interaction, evidence, and result.
+The coordinator checks route liveness, provider governance, available capacity, and task requirements before dispatch. Provider-specific streams are normalized into common task events so the operator surfaces can show one run model.
 
-The coding harness remains responsible for model-native reasoning and tool use. Baton is responsible for the software-delivery contract around that work.
+Resident sessions preserve the provider's normal coding harness. Baton coordinates the session around it; it does not reduce the provider to a single text completion call.
 
-## Representative workflow
+## Worktree ownership
 
-A controlled Baton run proceeds through a sequence like this:
+Each executing task receives an isolated Git worktree and task-scoped authority. The lease and fence prevent an old or duplicated worker from continuing to write after ownership changes.
 
-1. **Define the goal.** The operator supplies an objective, definition of done, constraints, risk class, and bounded token, cost, time, and provider-turn budgets.
-2. **Approve a plan.** Work is decomposed into dependency-ordered nodes with explicit repository scope, required effects, route allowlists, and verification commands.
-3. **Validate before execution.** Baton canonicalizes and digests the goal and plan, rejects unknown fields and credential-shaped content, prevents successor goals from weakening established constraints, and verifies that paths and commands remain repository-scoped.
-4. **Select an exact route.** Harness, model, and effort are matched against provider capability cards and live route state instead of being assumed from a display name.
-5. **Allocate isolated work.** Each worker receives a Baton-owned Git worktree pinned to a known base. The brief states its immutable context, allowed paths, mutation authority, constraints, definition of done, and exact verification contract.
-6. **Supervise the persistent session.** The worker can continue over many turns. Baton distinguishes work from waiting, decisions, questions, approvals, checkpoints, and terminal state. Steering occurs at controlled interaction points rather than by replacing the session.
-7. **Capture and verify the artifact.** Changes are captured from the worker workspace and can be evaluated in a fresh verification sandbox. The worker’s statement of completion is evidence, not acceptance authority.
-8. **Publish a result deliberately.** Timelines, lineage, verification, and result artifacts can be exported through Baton-owned paths and no-replace publication mechanics.
+Worktree state is recorded with the task. Capacity management can limit the number of active worktrees, reclaim abandoned workspaces, and preserve a failed workspace for inspection or recovery.
 
-This workflow is the project’s value. It lets an engineer use capable coding agents while retaining the properties expected from a serious software-delivery process.
+Completed changes do not enter the target branch directly. They pass through result collection, verification, and adoption.
 
-## Architecture
+## Shared context and communication
 
-<img src="assets/fleet-driver.svg" alt="Baton controlled software-delivery architecture" width="1050" />
+Tasks can receive structured context through context programs and runtime calls. The context system records the data supplied to a worker, results returned by context operations, and lineage required to explain later task behavior.
 
-### 1. Intent and governance
+Workers can exchange messages through stored communication surfaces. A task can publish a finding, request information from another task, or wait for operator input. These messages remain part of the run instead of being hidden in one provider transcript.
 
-Baton represents the approved objective and plan as validated data. Goals include a definition of done, constraints, risk, and budgets. Plans include node dependencies, path scope, expected effects, permitted route tuples, and exact verification commands.
+## Verification and adoption
 
-Canonical serialization and digests give later stages a stable reference to the approved contract. Goal amendments cannot silently remove an established constraint, lower risk, or expand a budget. Secret-shaped content is rejected before it becomes durable control-plane state.
+A completed session produces a result bundle that can include changes, command output, diagnostics, and exported artifacts. Verification can run repository checks, task-specific criteria, and referee logic.
 
-This layer prevents a common orchestration failure: a prompt mutates gradually over several sessions until nobody can identify the original obligation.
+Verification is a run stage with stored results. A failed check can:
 
-### 2. Provider capability and persistent-session adapters
+- Return the task to execution.
+- Create a focused repair task.
+- Request operator input.
+- Preserve the result for inspection without adoption.
 
-Different coding harnesses expose different native behavior. Some support structured approvals, some support free-form questions, some emit reliable usage, some distinguish interrupt acknowledgment from confirmed stop, and some provide richer model-routing metadata.
+Accepted work moves through an adoption step that records the target and outcome. This separates agent completion from repository acceptance.
 
-Baton uses a shared session-shaped adapter contract while preserving those differences in capability cards. The contract covers session spawn, prompting and steering, interrupt, approval, answers, kill, and event delivery. It does not force every provider into a fictional least-common-denominator one-shot call.
+## Recovery and observability
 
-The route is an explicit tuple—harness, model, and effort—and must match a live, unambiguous capability. This makes routing inspectable and prevents a nominally valid configuration from spawning work onto an unavailable or incompatible provider path.
+The coordination store and event history record run transitions, leases, sessions, interactions, worktrees, and verification. Baton uses this data for:
 
-### 3. Supervised runs and waves
+- Rebuilding a run timeline.
+- Replaying state after a process restart.
+- Recovering provider sessions.
+- Detecting stalled routes or workers.
+- Reaping expired leases and abandoned worktrees.
+- Compacting old event history without losing current state.
+- Resuming a blocked task after operator input.
+- Showing the same run state in CLI, MCP, and web surfaces.
 
-A run can contain multiple persistent members operating over a long period. The wave driver polls state, responds to blocking interactions, steers at checkpoints, detects stalls from semantic progress rather than global event noise, and settles the wave when members reach terminal state.
+Recovery continues the existing run and task identifiers. It does not create a second disconnected run to replace the failed process.
 
-The status reducer is important. A worker waiting on another unit is not rendered as “working.” A pending decision or approval blocks automated nudge and claim behavior. A checkpoint with a claim is different from a checkpoint without one. These distinctions keep the operator’s view and the controller’s behavior aligned.
+## Control interfaces
 
-Baton also treats control acknowledgments and lifecycle events differently. An interrupt request returning successfully is not the same as evidence that the provider process has stopped. Authoritative state comes from the event stream.
+CLI, MCP, and web requests enter the same application command layer. Commands use shared validation and application semantics before they mutate coordination state.
 
-### 4. Repository isolation and ownership
+This keeps start, pause, resume, cancel, interact, inspect, verify, adopt, and export operations consistent across interfaces. Interface-specific transport code does not implement a separate run lifecycle.
 
-Workers operate in Git worktrees created under Baton-owned repository paths and pinned to a known base commit. Verification can run in a separate throwaway sandbox rather than trusting the mutable worker directory.
+## Implementation references
 
-The worktree layer includes typed errors, confined authority roots, path-escape and symlink checks, durable ownership metadata, reconciliation, cleanup, commit capture, and changed-line analysis. The purpose is not merely to avoid merge conflicts. It is to establish which controller owns which physical workspace and which artifact was actually evaluated.
-
-The provider’s tool permission is therefore not the same as repository authority. A worker may have a shell, but the brief and worktree constrain where repository mutation is valid.
-
-### 5. Verification, lineage, and result publication
-
-Baton carries the verification contract inside the plan and renders it verbatim into the worker brief. Required predecessor evidence is part of that contract. Verification can be performed against a captured artifact in a fresh sandbox, preserving the relationship between the approved plan, the exact change, and the observed result.
-
-Run timelines and lineage provide the operational history needed to understand how a result was reached. Export publication uses Baton-controlled roots, ownership checks, private permissions, exact structure, atomic no-replace behavior, and fail-closed recovery when ownership is ambiguous.
-
-This is the final authority boundary: a worker can produce an artifact, but only the controller can publish it as the result of the approved run.
-
-## Key design decisions
-
-### Preserve native harness semantics
-
-Baton standardizes control concepts without pretending all providers behave identically. Capability cards and adapter events make provider differences visible to routing and supervision.
-
-This is more reliable than normalizing every provider into a text-completion abstraction and discovering semantic differences only after a run fails.
-
-### Make goals and plans enforceable data
-
-Objective prose alone is too weak for long-running, multi-worker delivery. Scope, effects, dependencies, route allowlists, budgets, and verification are validated fields with canonical digests.
-
-The contract can therefore be checked by code at admission, dispatch, verification, and export.
-
-### Treat interaction as part of execution
-
-Questions, decisions, approvals, waits, and steerable checkpoints are not incidental messages. They determine whether a run can proceed safely. Baton models them as structured state and gives them precedence in control decisions.
-
-### Separate worker capability from lifecycle authority
-
-The worker cannot prove that its own interrupt completed, declare its own workspace adopted, or convert a partial result into successful publication. Lifecycle and result authority remain with the resident controller and its event/evidence record.
-
-### Isolate parallel work physically
-
-Separate Git worktrees reduce conflicting mutation and create a concrete unit for ownership, capture, verification, and cleanup. Parallelism is therefore bounded by available workspaces and provider capacity, not only by the number of prompts an operator can issue.
-
-### Verify the artifact, not the narrative
-
-A fluent completion message is not a test result. Baton carries the exact verification command and predecessor-evidence requirements, evaluates the captured state, and records the outcome separately from worker prose.
-
-## Failure and recovery model
-
-Baton is designed around partial and ambiguous outcomes:
-
-- **Provider interruption:** persistent sessions can emit stop, crash, or terminal events that are distinct from command acknowledgments.
-- **Blocked interaction:** decisions, questions, and approvals remain explicit and can pause automated progression.
-- **Legitimate waiting:** dependency waits are represented separately from stalls, preventing destructive “keep going” nudges.
-- **Unproductive loops:** wave policy can bound corrective nudges and require a finalization strategy rather than run indefinitely.
-- **Controller restart or residue:** ownership records, leases, reconciliation, and recovery paths avoid treating stale process state as proof of current authority.
-- **Dirty or conflicting repository state:** typed worktree and structured-merge errors fail before ambiguous adoption.
-- **Unsafe export target:** result publication validates root ownership, permissions, identity, and no-replace semantics; uncertainty fails closed.
-- **Plan drift:** canonical goal/plan references make it possible to reject execution or evidence that does not belong to the approved version.
-
-## Implementation evidence
-
-| Source | What it demonstrates |
+| Workflow area | Source |
 |---|---|
-| [`impl/src/goal-plan.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/goal-plan.mjs) | Goal and plan schemas, canonical digests, constraint-preserving amendments, budgets, route allowlists, path scope, verification contracts, and secret-shaped input rejection. |
-| [`impl/src/adapter.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/adapter.mjs) | The persistent-session adapter contract, provider capability cards, authoritative event semantics, and the scoped worker brief. |
-| [`impl/src/wave-driver.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/wave-driver.mjs) | Long-running multi-member supervision, blocking interactions, waiting, checkpoint steering, stall detection, corrective budgets, and settlement. |
-| [`impl/src/worktree.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/worktree.mjs) | Real Git worktree lifecycle, ownership confinement, capture, verification sandboxes, typed failures, reconciliation, and cleanup. |
-| [`impl/src/result-export.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/result-export.mjs) | Private result roots, ownership and process-identity checks, atomic no-replace publication, and fail-closed recovery. |
-| [`impl/src/run-timeline.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/run-timeline.mjs) | Operator-readable reconstruction of run state and progress from durable control-plane events. |
-| [`impl/src/mcp-northbound.mjs`](https://github.com/wahargis/baton/blob/master/impl/src/mcp-northbound.mjs) | The agent-facing control surface over the same underlying application semantics. |
+| Shared application behavior | [`impl/src/application-semantics.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/application-semantics.mjs) |
+| Coordinator and dispatch | [`impl/src/coordinator.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/coordinator.mjs) |
+| Durable coordination state | [`impl/src/coordination-store.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/coordination-store.mjs) |
+| Goal plans and workflow execution | [`impl/src/goal-plan.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/goal-plan.mjs) and [`impl/src/workflow-interpreter.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/workflow-interpreter.mjs) |
+| Wave execution | [`impl/src/wave-driver.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/wave-driver.mjs) |
+| Provider routing | [`impl/src/router.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/router.mjs) and [`impl/src/provider-governance.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/provider-governance.mjs) |
+| Worktree lifecycle | [`impl/src/worktree.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/worktree.mjs) |
+| Context runtime and lineage | [`impl/src/context-runtime.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/context-runtime.mjs) and [`impl/src/context-lineage.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/context-lineage.mjs) |
+| Verification and result export | [`impl/src/referee.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/referee.mjs) and [`impl/src/result-export.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/result-export.mjs) |
+| Session recovery | [`impl/src/session-recovery-supervisor.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/session-recovery-supervisor.mjs) |
+| MCP and web interfaces | [`impl/src/mcp-northbound.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/mcp-northbound.mjs) and [`impl/src/web-northbound.mjs`](https://github.com/Flip-Engineering/baton/blob/master/impl/src/web-northbound.mjs) |
 
-## What the project demonstrates
+## Scope
 
-For a general software reviewer, Baton demonstrates process control, provider abstraction without semantic erasure, event-driven lifecycle management, repository isolation, verification, durable ownership, and security-sensitive filesystem design.
-
-For an AI technical lead, it demonstrates that multi-agent effectiveness depends on more than model quality. Context, route compatibility, interaction, recovery, scope, evidence, and adoption authority determine whether agent work can be trusted inside a software process.
-
-For an engineering manager or recruiter, Baton is evidence of work at the system boundary between AI capability and software-delivery accountability: the point where a successful model response must become a controlled, reviewable, and reproducible engineering result.
-
-## Scope and boundaries
-
-- Baton is not a model provider and does not replace the native reasoning loop of each coding harness.
-- It is not a free-form swarm in which workers share an uncontrolled repository and negotiate authority through chat.
-- A common adapter does not imply identical provider capability; unsupported or ambiguous routes must remain visible.
-- A worker result is not automatically an adopted repository change.
-- This page emphasizes the control flow and engineering rationale. The repository contains substantially more internal policy, knowledge, workflow, web, MCP, deployment, and analysis machinery than is useful to enumerate here.
-
-## Review paths
-
-**Five minutes:** read **The product problem**, **Representative workflow**, and **Key design decisions**.
-
-**Twenty minutes:** continue through **Architecture**, **Failure and recovery model**, and the first five source links.
-
-**Deep review:** follow a goal and plan from validation through adapter dispatch, wave supervision, worktree capture, verification, and result export.
-
-[← Back to portfolio](../README.md) · [View source repository](https://github.com/wahargis/baton)
+Baton is an execution and coordination system for coding-agent fleets. The case study covers run state, provider sessions, worktrees, communication, verification, recovery, and operator interfaces. It does not describe the agents as independent authors with unrestricted repository authority.

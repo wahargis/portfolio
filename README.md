@@ -1,102 +1,51 @@
-# AI Systems & Data Engineering Portfolio
+# Software and AI Systems Portfolio
 
-I build systems that make AI useful inside real products and operational workflows: systems with explicit state, durable context, authorization boundaries, recoverable execution, and evidence that a person or another system can inspect.
+These case studies cover four systems I designed and implemented: a community and AI product, a research operations system, a coding-agent fleet manager, and a self-hosted AI runtime. They document user workflows, stored state, background execution, recovery, and implementation references.
 
-This portfolio presents four independent, implemented projects. Each case study begins with the user problem and a representative workflow, then follows the design into architecture and source code. The projects are not presented as a list of frameworks or model integrations; they show how I approach product definition, systems design, data modeling, reliability, and AI control.
+## Flip
 
-![Portfolio system map](assets/portfolio-system.svg)
+[![Flip production interface](flip-technical-overview/assets/flip.engineering.png)](flip-technical-overview/README.md)
 
-## Projects at a glance
+Flip is a social and creative platform. It includes communities, real-time chat, forums, Personal AI conversations, image and video generation, a searchable media library, an image editor, and self-hosted voice and video rooms.
 
-| Project | What it is | Central engineering problem | What to review |
-|---|---|---|---|
-| **[Flip](flip-technical-overview/)** | A real-time community platform in which people and AI can participate in conversation, while selected discussion can become durable forum knowledge. | Preserve conversational speed without losing useful knowledge, leaking private context, or making AI behavior opaque. | Product architecture, real-time state, cross-context authorization, durable background workflows, AI context and provenance. |
-| **[Project Manager](project-manager/)** | A project-memory and execution-control system for long-running technical work. | Keep evidence, decisions, contradictions, dependencies, and project history navigable after the original working session has ended. | Typed graph modeling, deterministic scheduling, contradiction and confidence review, retrieval, shared Rust core, CLI/MCP/web interfaces. |
-| **[Baton](baton/)** | A control plane for coordinating software work across persistent coding-agent harnesses. | Run parallel agent work without surrendering scope, interaction, verification, or repository authority to the workers themselves. | Goal and plan contracts, provider adapters, persistent-session supervision, isolated worktrees, human decision points, verification and result adoption. |
-| **[HomeCloud](homecloud/)** | A local-first AI application and operations platform for finite GPU infrastructure. | Turn heterogeneous accelerators and model services into a dependable runtime for interactive inference, agents, research, and background workloads. | Model-instance lifecycle, GPU claims and priority, sandboxed execution, checkpoint recovery, research workflows, application services. |
+A message can start a normal discussion, request a Personal AI reply, launch an image or video commission, or become source material for a cited community summary. The platform stores the user-visible request before it starts provider work. Long-running AI and media work continues through durable jobs, updates the original reply or library item, and remains recoverable after a worker restart.
 
-## What these projects have in common
+**System:** Elixir, Phoenix, PostgreSQL, Oban, Phoenix Channels, Electric synchronization, React, TypeScript, Tauri, Capacitor, object storage, local and hosted model providers.
 
-The products serve different users and are not components of one deployed system. They share an engineering approach:
+[Flip case study](flip-technical-overview/README.md) · [Live product](https://flip.engineering) · [Technical demo](https://flip.tech-demo.dev)
 
-- **Begin with the operational problem.** The architecture is organized around what a user or operator is trying to accomplish, not around the availability of a model API.
-- **Make state explicit.** Conversations, project evidence, agent runs, checkpoints, resource claims, and verification results are represented as durable state rather than inferred from logs or prompt history.
-- **Separate capability from authority.** An AI worker may be able to read, write, execute, or call tools; that does not mean it is authorized to do so everywhere or to declare its own result accepted.
-- **Preserve provenance.** Generated conclusions and artifacts remain connected to their source context, execution record, or verification evidence.
-- **Design for interruption and recovery.** Long-running work is expected to encounter retries, provider failures, process restarts, blocked decisions, and partial completion.
-- **Expose one coherent control surface over multiple implementations.** Shared cores and adapters keep CLI, MCP, web, provider, and hardware-specific paths from becoming separate products with different semantics.
+## Project Manager
 
-## Representative workflows
+Project Manager is a local-first system for technical research, experiments, decisions, and project execution. It keeps a project and phase dependency graph beside a typed evidence graph. A benchmark result can be linked to the experiment that produced it, the hypothesis it supports or challenges, the constraint that limits it, and the decision that uses it.
 
-### Flip: conversation becomes durable knowledge
+CLI, MCP, and web interfaces call the same typed operations over a SQLite store. Review commands find blocked phases, graph cycles, orphan records, unsupported decisions, contradictions, and expired facts. Repair operations update the same stored model instead of maintaining a separate reporting layer.
 
-A community member participates in a live room and can explicitly summon Flip inside that conversation. The AI receives only authorized, room-scoped context and replies as a visible participant. A useful segment of discussion can then enter a synthesis workflow that produces a durable forum artifact while preserving its origin and access constraints.
+**System:** Rust, SQLite, MCP, CLI, web interface, typed graph traversal, validation and repair services.
 
-The architectural question is not simply how to call an LLM. It is how to move information between real-time chat, asynchronous processing, and long-lived publication without losing authorship, audience, provenance, or failure state.
+[Project Manager case study](project-manager/README.md) · [Source repository](https://github.com/wahargis/project-manager)
 
-**[Read the Flip case study →](flip-technical-overview/)**
+## Baton
 
-### Project Manager: project history remains usable
+Baton coordinates coding-agent work as runs, workflows, waves, tasks, sessions, worktrees, interaction requests, results, and adoption steps. Operators can start and manage the same run through CLI, MCP, or web interfaces.
 
-A research result, design decision, failed experiment, constraint, or phase completion is recorded as a typed project object and connected to the evidence that produced or affected it. A reviewer can trace support, contradiction, supersession, dependency, and derivation rather than searching through an undifferentiated archive.
+The coordinator selects a provider and harness, grants a task-scoped lease, creates an isolated worktree, and records normalized events while the agent works. Tasks can exchange messages and context. Verification and adoption are separate run stages. The coordination store and event history support restart, replay, session recovery, and a complete run timeline.
 
-The system also maintains an execution DAG for project phases. Dependency-satisfied phases can be recommended deterministically, while contradiction and confidence analysis provide separate review signals. The distinction is deliberate: project knowledge and project scheduling interact, but they are not treated as the same data structure.
+**System:** Node.js, provider and harness adapters, durable coordination state, workflow interpreter, isolated Git worktrees, CLI, MCP, and web control surfaces.
 
-**[Read the Project Manager case study →](project-manager/)**
+[Baton case study](baton/README.md) · [Source repository](https://github.com/Flip-Engineering/baton)
 
-### Baton: parallel agent work remains controlled
+## HomeCloud
 
-An operator defines an objective, constraints, definition of done, risk, budget, route, and repository scope. Baton validates that contract, selects a compatible coding harness, starts persistent sessions in isolated worktrees, and supervises their progress. Questions, approvals, waits, checkpoints, and failures remain visible to the operator instead of being flattened into text output.
+HomeCloud is a self-hosted AI runtime for a four-GPU NVIDIA V100 node. It routes requests across local inference backends, schedules work by priority and available VRAM, and runs longer agent tasks in isolated workspaces.
 
-Worker changes are captured and verified through Baton-owned repository mechanics. The worker can propose and implement; the control plane retains authority over scope, lifecycle, verification, and publication.
+The runtime tracks backend health and recent performance before it selects an instance. The GPU scheduler handles memory admission, queue aging, and preemption. Agent tasks use a tool loop with validation, per-turn PostgreSQL checkpoints, a durable sandbox workspace, and resume support. Elixir supervisors restart failed services and keep GPU, model, job, and sandbox state observable.
 
-**[Read the Baton case study →](baton/)**
+**System:** Elixir, OTP, Phoenix, PostgreSQL, Docker, NVIDIA V100, vLLM, llama.cpp, SGLang, Ollama, MLX, health-aware routing, GPU scheduling, checkpointed agent execution.
 
-### HomeCloud: local AI becomes an operating capability
+[HomeCloud case study](homecloud/README.md)
 
-An interactive request, agent task, research job, or media workload enters a runtime that knows which model services are healthy, which GPU slots are available, and which work has priority. The platform can check out an inference instance, schedule or change a model service when the hardware is genuinely idle, execute tools in a sandbox, and checkpoint long-running agent state for recovery.
+## Project boundaries
 
-The result is not merely a local chat endpoint. It is an application platform in which inference, resource management, agent execution, research, documents, connectors, and multimodal services share one supervised runtime.
+The four projects are separate systems. Flip is the user-facing product. HomeCloud provides private local inference and agent infrastructure. Project Manager records research and project state. Baton coordinates coding-agent execution. They can be used together, but none of the case studies depends on presenting them as one combined platform.
 
-**[Read the HomeCloud case study →](homecloud/)**
-
-## How to review this portfolio
-
-| Audience | Recommended path | Questions the case studies answer |
-|---|---|---|
-| **Recruiter or hiring manager** | Read this page, then each project’s **At a glance** and **Representative workflow** sections. | What was built? Who is it for? Why is it technically and operationally non-trivial? |
-| **General IT or software interviewer** | Continue into **Architecture**, **Design decisions**, and **Failure handling**. | How are state, interfaces, permissions, retries, persistence, deployment, and maintenance handled? |
-| **AI technical lead** | Focus on **AI boundaries**, **context/provenance**, **orchestration**, **verification**, and the linked source modules. | How are model behavior and tool use constrained, observed, recovered, and integrated into a larger product? |
-| **Source-code reviewer** | Use each case study’s **Implementation evidence** table. | Which modules carry the claimed behavior, and where are the important contracts enforced? |
-
-A deeper cross-project map is available in **[Portfolio architecture](PORTFOLIO_ARCHITECTURE.md)**.
-
-## Engineering range represented
-
-Across the four projects, the implementation work includes:
-
-- Product and domain architecture for real-time communities, project intelligence, coding-agent operations, and local AI infrastructure.
-- Elixir/OTP and Phoenix supervision, asynchronous workflows, LiveView and real-time channels, PostgreSQL, and transactional state changes.
-- Rust application and persistence design, typed graph models, deterministic DAG execution, SQLite, CLI, MCP, and web interfaces.
-- Node.js orchestration, persistent provider sessions, policy validation, event-driven control, real Git worktrees, verification sandboxes, and secure result export.
-- Local inference routing, model-process lifecycle, GPU-aware scheduling, containerized tools, recoverable agent loops, evaluation, and multimodal application services.
-- Data modeling that makes evidence, authorship, provenance, access, lifecycle, and operational status queryable rather than implicit.
-
-## Evidence and scope
-
-The portfolio documentation is intentionally code-led. Descriptions are grounded in the implementation repositories and link to representative source modules rather than relying only on planning notes or architecture prose.
-
-The case studies distinguish implemented behavior from intended extensions. They do not use repository size, framework count, or speculative scale claims as substitutes for engineering value. Where two subsystems are adjacent but not yet automatically coupled, that boundary is stated directly.
-
-## Source repositories
-
-| Project | Implementation |
-|---|---|
-| Flip | [`wahargis/flip`](https://github.com/wahargis/flip) |
-| Project Manager | [`wahargis/project-manager`](https://github.com/wahargis/project-manager) |
-| Baton | [`wahargis/baton`](https://github.com/wahargis/baton) |
-| HomeCloud | [`wahargis/home-cloud`](https://github.com/wahargis/home-cloud) |
-
----
-
-**William Hargis — AI Systems & Data Engineer**
+Project Manager and Baton have public source repositories. Flip and HomeCloud are documented here through product images, system diagrams, and implementation-level case studies without publishing private production data, credentials, messages, or host configuration.
