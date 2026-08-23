@@ -1,29 +1,31 @@
 # ADR 0002 — Separate synthetic technical environment
 
 - **Status:** Accepted
-- **Decision scope:** Public technical review
+- **Decision scope:** Public technical deployment
 
 ## Context
 
-A public architecture scenario is useful only if it exercises the real product contracts. Giving reviewers production access or copying production data would create privacy and security risk.
+Flip's product contracts are best demonstrated through a running environment, but production accounts, messages, credentials, moderation authority, and operational state cannot be exposed for that purpose.
+
+A static mock-up would not exercise authorization, workflow, AI, artifact, synchronization, and failure behavior. Reusing production data or authority would create unacceptable privacy and security risk.
 
 ## Decision
 
-Maintain a separate synthetic technical environment that shares the product architecture and migration history but has independent:
+Maintain a separate synthetic technical environment that can run the product architecture and migration model while using independent:
 
-- database and storage;
-- credentials and secrets;
-- sessions and administrative state;
-- provider configuration;
+- database and file storage;
+- credentials and provider configuration;
+- account sessions and administrative state;
 - queues and realtime namespaces;
-- synthetic fixtures.
+- generated communities, conversations, documents, sources, and artifacts;
+- sanitized telemetry and failure fixtures.
 
-Public scenario documentation describes expected product transitions without publishing reset credentials or operational secrets.
+The synthetic deployment has no route to production data or administration. Public documentation describes its product types, state transitions, and isolation boundary without publishing reset credentials or operational secrets.
 
 ## Consequences
 
-The environment requires fixture and deployment maintenance. It provides inspectable provenance, authorization, AI/tool, artifact, and synchronization scenarios without relying on private data.
+The environment requires fixture, migration, and deployment maintenance. In return, product authorization, AI/tool execution, provenance, artifact lifecycle, conversation curation, client synchronization, and controlled failures can be represented through actual application state without relying on private data.
 
 ## Revisit when
 
-A fully local reproducible public distribution becomes preferable to a hosted synthetic environment.
+Revisit if a fully local reproducible distribution can provide the same application behavior and isolation more effectively than the hosted synthetic environment.
