@@ -1,196 +1,166 @@
 # Project Manager
 
-> Project memory and execution control for long-running technical work: preserve what was learned, why decisions changed, and what can proceed next.
+Project Manager is a local-first system for technical research, experiment tracking, project execution, and decision records. It stores project structure, phase dependencies, experiments, findings, hypotheses, literature, constraints, decisions, and work sessions in one typed model.
 
-## At a glance
+[Source repository](https://github.com/wahargis/project-manager)
 
-| | |
-|---|---|
-| **Product** | A local project-intelligence system that combines a typed evidence graph with a dependency-ordered execution graph. |
-| **Users** | Engineers, researchers, technical leads, and AI agents working across many sessions, experiments, decisions, and handoffs. |
-| **Core problem** | Long projects lose their reasoning history. Notes preserve text but rarely preserve what supports, contradicts, supersedes, depends on, or derives from what. Task boards preserve status but not epistemic context. |
-| **Engineering focus** | Typed graph storage, provenance, contradiction and confidence review, deterministic DAG scheduling, retrieval, session orientation, and shared behavior across CLI, MCP, and web surfaces. |
-| **Primary implementation** | Rust with SQLite-backed persistence and a shared application core exposed through multiple interfaces. |
-| **Source** | [`wahargis/project-manager`](https://github.com/wahargis/project-manager) |
+## Example workflow
 
-## The product problem
+The diagram follows a project that compares local inference runtimes for a long-context deployment.
 
-A long-running technical project accumulates more than tasks. It accumulates:
+```mermaid
+flowchart LR
+    subgraph schedule["Project and phase dependency graph"]
+        project["Project: local inference deployment"]
+        A["Phase A<br/>baseline measurements"]
+        B["Phase B<br/>runtime tests"]
+        C["Phase C<br/>failure tests"]
+        D["Phase D<br/>deployment selection"]
+        project --> A
+        A --> B
+        A --> C
+        B --> D
+        C --> D
+    end
 
-- findings whose confidence changes as new evidence arrives;
-- experiments that produce or invalidate conclusions;
-- decisions that depend on constraints and can later be superseded;
-- literature, feedback, principles, and hypotheses that affect multiple workstreams;
-- project phases whose order depends on actual prerequisites;
-- incomplete work that must be handed from one person or agent session to another.
+    subgraph experiment["Experiment and evidence"]
+        E["Experiment E-17<br/>256k-context concurrency"]
+        F42["Finding F-42<br/>Runtime B meets latency target"]
+        F43["Finding F-43<br/>Runtime A exceeds target"]
+        H9["Hypothesis H-9<br/>paged KV allocation improves concurrency"]
+        C5["Constraint C-5<br/>128 GB accelerator memory"]
+        L12["Literature L-12<br/>runtime memory model"]
+        E -->|produces| F42
+        E -->|produces| F43
+        F42 -->|supports| H9
+        F43 -->|challenges| H9
+        L12 -->|supports| H9
+    end
 
-Conventional project-management tools usually reduce this to tickets, statuses, and comments. Document systems preserve more prose, but a later reader must reconstruct the relationships manually. Prompt history is even less dependable: it is session-bound, difficult to query, and mixes observations, plans, and conclusions without durable types.
+    subgraph decision["Decision and current work"]
+        D4["Decision D-4<br/>use Runtime B for long-context tier"]
+        S31["Session S-31<br/>changed D-4 and C-5"]
+        review["Review result<br/>no phase cycle; evidence present;<br/>one expired benchmark flagged"]
+        F42 -->|supports| D4
+        F43 -->|rejects alternative| D4
+        C5 -->|constrains| D4
+        S31 -->|records changes| D4
+        D4 --> review
+    end
 
-Project Manager addresses the missing middle. It treats project knowledge as structured, connected state and project execution as a separate dependency graph. A reviewer can ask both:
+    D --> E
 
-1. **What do we believe, and why?**
-2. **What work is ready to proceed, and why?**
+    subgraph operations["Shared application operations"]
+        cli["CLI"]
+        mcp["MCP"]
+        web["Web"]
+        service["Create, link, transition, traverse,<br/>review, repair, and report"]
+        cli --> service
+        mcp --> service
+        web --> service
+    end
 
-Those questions are related, but the implementation does not pretend they are identical.
-
-## Representative workflow
-
-Consider a project in which an engineer is evaluating a new architecture:
-
-1. **Create typed project objects.** The architecture hypothesis, benchmark experiment, measured finding, constraint, decision, and implementation phase are recorded as distinct node types.
-2. **Connect the evidence.** Edges state that an experiment produced a finding, a finding supports or contradicts a hypothesis, a decision was informed by evidence, a test validates a change, or a new conclusion supersedes an older one.
-3. **Review belief quality.** Confidence scoring can evaluate numeric finding sets. Contradiction analysis identifies high-recall candidates using structural and textual signals and can prepare a second-stage natural-language-inference review.
-4. **Trace consequences.** A reviewer can traverse from a decision to its evidence, from a finding to downstream work, or from a superseded conclusion to the newer state that replaced it.
-5. **Advance execution deliberately.** Project phases are represented in a DAG. Completed dependencies unlock later phases; the current scheduler recommends dependency-satisfied candidates in impact order.
-6. **Orient the next session.** CLI, MCP, and web views can retrieve the relevant project state instead of asking a new session to rediscover the project from raw files and conversation history.
-
-The value is not that every fact becomes a graph node. The value is that load-bearing project reasoning—evidence, decisions, contradictions, dependencies, and derivations—remains inspectable after the original context has disappeared.
-
-## Two graphs with different responsibilities
-
-```text
-Evidence graph                          Execution DAG
---------------                          -------------
-Finding --supports--> Decision          Phase A -----> Phase C
-   |                    |                   \
-   +--produced_by--> Experiment              +-------> Phase D
-   |
-   +--contradicts--> Finding
-
-Explains what is known,                 Explains what work is ordered,
-where it came from, and                 which prerequisites are complete,
-what changed it.                        and which phase can proceed.
+    store[("SQLite typed store<br/>projects, phases, experiments, graph records,<br/>relationships, sessions, migrations")]
+    service --> store
+    D --> store
+    E --> store
+    D4 --> store
 ```
 
-### Evidence graph: what is known and why
+1. The project is divided into phases with explicit dependencies.
+2. A phase creates an experiment with a question, configuration, run state, and result artifacts.
+3. The experiment produces a typed finding.
+4. The finding supports or challenges a hypothesis.
+5. Literature and constraints add external evidence and operating limits.
+6. A decision cites the findings and constraints it uses.
+7. Review services check the scheduling graph and evidence graph before the next phase starts.
+8. A later session loads current state and the changes since the previous session.
 
-The evidence graph stores typed nodes such as findings, experiments, decisions, literature, phases, research items, principles, hypotheses, constraints, and feedback. Typed edges represent relationships including support, contradiction, supersession, dependency, derivation, testing, and provenance.
+The records remain connected after the experiment is complete. A user can trace a decision back to the specific benchmark, result, source, and constraint that informed it.
 
-This model allows queries that are difficult to answer from documents alone:
+## Project and phase scheduling
 
-- Which findings support this decision?
-- Which evidence was produced by this experiment?
-- What contradicts the current hypothesis?
-- What replaced an older conclusion?
-- Which downstream objects depend on a finding that changed?
-- Which tests or artifacts are attached to a phase?
+Projects can contain subprojects. Phases form a dependency graph. The scheduler uses that graph to determine which phases are ready, blocked, active, or complete.
 
-The graph is not an aesthetic visualization layer over notes. It is the project’s queryable reasoning structure.
+Dependency validation runs before a phase edge is stored. This prevents cycles from becoming normal scheduling state. Review commands can still find damaged or imported records that require repair.
 
-### Execution DAG: what can proceed and why
+A phase can reference its goals, experiments, constraints, findings, and decisions. This keeps execution status connected to the research that changed the plan.
 
-The execution DAG models phases and their prerequisites. Topological ordering detects cycles, completed phases satisfy dependencies, and ready phases can be selected deterministically.
+## Evidence graph
 
-The current implementation’s recommendation rule is intentionally concrete: it filters for dependency-satisfied phases and orders the candidates by impact. This makes the behavior explainable and testable.
+The evidence graph uses typed nodes and relationships. Important examples include:
 
-### The current coupling boundary
-
-Contradiction detection and confidence scoring are implemented as review tools. They do **not** currently act as automatic hard gates inside the phase scheduler.
-
-That distinction is important. The system can surface epistemic risk alongside execution state, and a human or agent can use that evidence when changing a plan or phase status. The portfolio does not claim that a confidence drop automatically blocks the DAG or that every contradiction is resolved without review.
-
-This is a stronger and more useful description than collapsing the two graphs into a vague claim of “self-correcting execution.” It states exactly what the implementation does and leaves a clear architectural seam for deeper policy coupling.
-
-## Architecture
-
-<img src="assets/architecture.svg" alt="Project Manager evidence, review, and execution architecture" width="1000" />
-
-### 1. Shared domain and persistence core
-
-Node types, edge types, graph operations, phase state, and persistence behavior live in a common Rust core. Interface-specific code does not redefine the project model.
-
-This reduces a common source of drift: a CLI command, an MCP tool, and a web route should not disagree about what a finding, decision, dependency, or ready phase means.
-
-### 2. Typed storage and traversal
-
-The store defines a closed vocabulary of node and edge types. The knowledge-graph engine supports direct and multi-hop traversal, filtering, and contradiction-oriented relationships.
-
-Typed relationships improve both human comprehension and machine use. An agent can request “evidence that supports this decision” rather than retrieve every nearby text fragment and infer the relationship from prose.
-
-### 3. Deterministic execution logic
-
-The DAG engine performs topological ordering, cycle detection, ready-phase selection, and stagnation checks. Recommendation remains explainable because it is based on persisted phase state, dependency completion, and impact—not on an opaque model judgment.
-
-### 4. Layered epistemic review
-
-Contradiction review begins with high-recall heuristics: negation, antonym pairs, numeric divergence, and contradiction markers can identify candidate pairs. A deeper NLI prompt can then be prepared for model-assisted review.
-
-Confidence scoring is likewise a distinct analysis surface. Numeric findings can be evaluated statistically without making every project object pretend to have a precise scalar confidence.
-
-### 5. Multiple control surfaces
-
-The system exposes project behavior through CLI, MCP, and web paths. The MCP surface is particularly relevant for coding and research agents: it gives an agent structured access to nodes, edges, dashboards, review operations, and project state without requiring the agent to scrape Markdown.
-
-The interfaces are different ways into the same project model, not separate implementations with independent semantics.
-
-## Key design decisions
-
-### Preserve relationships, not only text
-
-A document can say that one experiment changed a decision, but the relationship is difficult to query unless it is represented directly. Project Manager stores that relationship as data while retaining human-readable content on the nodes themselves.
-
-### Separate epistemic state from workflow state
-
-A finding can be uncertain while a phase is technically unblocked. A phase can be blocked even when its evidence is strong. Keeping the evidence graph and execution DAG distinct avoids turning one dimension into a misleading proxy for the other.
-
-### Use typed edges as an API contract
-
-`supports`, `contradicts`, `supersedes`, `depends_on`, `derived_from`, and related edges carry semantics that can be used consistently by the CLI, MCP clients, web views, and future policy layers.
-
-### Keep recommendations deterministic by default
-
-A scheduling rule based on completed dependencies and impact can be reproduced and explained. Model-assisted analysis is used where language interpretation is genuinely required, such as contradiction review, rather than inserted into every control decision.
-
-### Treat retrieval as project orientation
-
-Retrieval is not merely semantic search over archived prose. The useful result includes relationship and lifecycle context: what kind of object this is, how it connects to the active work, whether it has been superseded, and why it matters to the current session.
-
-## Failure and consistency concerns
-
-The project model addresses several forms of project-state decay:
-
-- **Lost rationale:** decisions remain connected to the evidence and constraints that informed them.
-- **Stale conclusions:** supersession and contradiction relationships preserve change instead of silently overwriting history.
-- **Unreproducible sequencing:** phase readiness follows a persisted dependency graph.
-- **Interface drift:** shared core logic serves CLI, MCP, and web entry points.
-- **Session amnesia:** project state can be queried independently of the conversation that created it.
-- **False automation claims:** contradiction and confidence analysis are exposed as review signals unless and until an explicit policy connects them to execution gating.
-
-## Implementation evidence
-
-| Source | What it demonstrates |
+| Record | Relationships used in the workflow |
 |---|---|
-| [`src/store/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/store/mod.rs) | The persisted node and edge vocabulary, including evidence, lifecycle, dependency, testing, contradiction, and provenance relationships. |
-| [`src/kg/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/kg/mod.rs) | Knowledge-graph traversal, filtering, multi-hop exploration, and contradiction-oriented graph operations. |
-| [`src/dag/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/dag/mod.rs) | Topological ordering, dependency satisfaction, ready-phase selection, impact ordering, and stagnation detection. |
-| [`src/analysis/contradictions.rs`](https://github.com/wahargis/project-manager/blob/main/src/analysis/contradictions.rs) | High-recall contradiction candidate generation and the handoff to deeper language-based review. |
-| [`src/analysis/confidence.rs`](https://github.com/wahargis/project-manager/blob/main/src/analysis/confidence.rs) | Numeric finding confidence analysis as a separate, reusable review capability. |
-| [`src/cli_runner.rs`](https://github.com/wahargis/project-manager/blob/main/src/cli_runner.rs) | Application-level use of the DAG and project store, including the current next-phase recommendation behavior. |
-| [`src/mcp/`](https://github.com/wahargis/project-manager/tree/main/src/mcp) | Agent-facing tools for structured project access rather than document scraping. |
+| Experiment | belongs to a project or phase; produces findings and artifacts |
+| Finding | result of an experiment; supports or challenges a hypothesis; informs a decision |
+| Hypothesis | supported or challenged by findings and literature |
+| Literature | supports, challenges, or supplies background for a claim |
+| Constraint | applies to a project, phase, experiment, or decision |
+| Decision | addresses a question and cites the evidence and limits it uses |
+| Session | records the active work context and the records changed during that work |
 
-## What the project demonstrates
+Graph traversal answers questions that a task list cannot answer directly. It can show which evidence supports a decision, which findings conflict, which constraints apply to a phase, and which records would be affected by changing a hypothesis.
 
-For a recruiter or general interviewer, Project Manager shows a clear product thesis: long technical projects need durable reasoning and handoff state, not only tasks and notes.
+## Review and repair
 
-For a software reviewer, it demonstrates domain modeling, persistence, graph algorithms, deterministic scheduling, interface reuse, and the discipline to state coupling boundaries accurately.
+Project Manager runs structured checks over stored state. These checks can report:
 
-For an AI technical lead, it demonstrates an alternative to treating prompt history or vector retrieval as complete memory. The system gives agents typed project state, provenance, contradiction candidates, confidence signals, and an execution model that can be inspected independently of model output.
+- Phase dependency cycles.
+- Blocked or dangling phases.
+- Findings without an experiment or source.
+- Decisions without supporting evidence.
+- Contradictory findings or claims.
+- Low-confidence conclusions.
+- Expired temporal facts.
+- Orphaned graph nodes or relationships.
 
-## Scope and boundaries
+Repair operations use the same typed store and validation rules as normal writes. They can attach an orphaned record, remove an invalid edge, refresh derived state, or mark a temporal fact as no longer current.
 
-- Project Manager is not intended to replace a general issue tracker for routine team administration.
-- The evidence graph is not a claim that every sentence or file should be converted into a node.
-- Contradiction heuristics generate candidates; they are not presented as infallible semantic judgments.
-- Confidence scoring is strongest for appropriate numeric finding sets and is not applied indiscriminately to qualitative evidence.
-- The current DAG scheduler does not automatically block work based on contradiction or confidence results.
-- This page describes the shared project-control architecture; it does not inventory every command, MCP tool, or web route.
+## Interfaces
 
-## Review paths
+The CLI, MCP server, and web interface expose the same application operations. They do not maintain separate project models.
 
-**Five minutes:** read **The product problem**, **Representative workflow**, and **Two graphs with different responsibilities**.
+- The CLI supports direct local work, scripts, review, and repair.
+- MCP exposes typed project, graph, session, and review operations to AI tools.
+- The web interface presents current projects, phases, graph records, and review results.
+- Dashboard operations assemble project status from the stored model.
 
-**Twenty minutes:** continue through **Architecture**, **Key design decisions**, and the first six source links.
+This allows a person, an AI client, and an automated check to update the same records without translating through free-form notes.
 
-**Deep review:** inspect the store, graph, DAG, analysis, and MCP modules together to see how the same project model is carried across interfaces.
+## Storage and transactions
 
-[← Back to portfolio](../README.md) · [View source repository](https://github.com/wahargis/project-manager)
+SQLite stores the project, graph, session, and relationship records. Mutations run through typed store methods and transaction boundaries. Migrations update the schema while preserving local project data.
+
+Validation occurs before or during writes for identifiers, relationship types, phase dependencies, and required fields. Graph traversal and review use stored identifiers instead of parsing references from prose.
+
+## Session continuity
+
+A session records the project, active objective, referenced nodes, and work completed. On the next session, Project Manager can return:
+
+- Current project and phase state.
+- Open experiments and unresolved findings.
+- Recent decisions and constraints.
+- Records changed since the previous session.
+- Review results that require action.
+
+This provides a compact restart context without asking the user or an AI tool to reconstruct the project from the full history.
+
+## Implementation references
+
+| Workflow area | Source |
+|---|---|
+| Phase dependency graph | [`src/dag/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/dag/mod.rs) |
+| Typed knowledge graph | [`src/kg/mod.rs`](https://github.com/wahargis/project-manager/blob/main/src/kg/mod.rs) |
+| Graph traversal | [`src/kg/traversal.rs`](https://github.com/wahargis/project-manager/blob/main/src/kg/traversal.rs) |
+| Confidence analysis | [`src/analysis/confidence.rs`](https://github.com/wahargis/project-manager/blob/main/src/analysis/confidence.rs) |
+| Contradiction analysis | [`src/analysis/contradictions.rs`](https://github.com/wahargis/project-manager/blob/main/src/analysis/contradictions.rs) |
+| MCP project and graph operations | [`src/mcp/nodes.rs`](https://github.com/wahargis/project-manager/blob/main/src/mcp/nodes.rs) and [`src/mcp/tools.rs`](https://github.com/wahargis/project-manager/blob/main/src/mcp/tools.rs) |
+| Review operations | [`src/mcp/review.rs`](https://github.com/wahargis/project-manager/blob/main/src/mcp/review.rs) |
+| SQLite store | [`src/store/sqlite.rs`](https://github.com/wahargis/project-manager/blob/main/src/store/sqlite.rs) |
+| Validation | [`src/validation.rs`](https://github.com/wahargis/project-manager/blob/main/src/validation.rs) |
+| Web interface | [`src/web.rs`](https://github.com/wahargis/project-manager/blob/main/src/web.rs) |
+
+## Scope
+
+Project Manager is designed for local technical work where project execution and evidence need to remain connected. It is not presented as a generic corporate ticket system. The case study focuses on typed state, research traceability, multi-interface access, validation, and repair.
