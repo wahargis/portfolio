@@ -1,31 +1,28 @@
-# Diagram index
+# Flip Diagram Index
 
-The diagrams answer architectural questions. SVG is the canonical reviewer format and Mermaid source is retained beside it. Raster previews are generated during review but are not versioned, preventing stale PNG copies from diverging from the source diagram.
+The diagrams isolate distinct parts of the product and runtime. SVG files are the rendered documents; Mermaid sources are retained beside diagrams where the source format is useful.
 
-| Diagram | Question answered |
+| Diagram | System detail |
 |---|---|
-| [System context](system-context.svg) | Who interacts with Flip and which external systems are outside its authority? |
-| [Service/container map](service-container-map.svg) | How do clients, product contexts, asynchronous jobs, data, sync, and providers fit together? |
-| [AI reply lifecycle](agent-execution-sequence.svg) | How does a product trigger become one bounded, durable AI reply? |
-| [Governed tool execution](governed-tool-execution.svg) | Where are catalog admission, trusted scope, isolation, authorization, and effects enforced? |
-| [Retrieval, source discovery, and citation](retrieval-source-citation-flow.svg) | How does a discovered source become verified evidence in a user-facing reply? |
-| [Chat-to-forum synthesis](synthesis-pipeline.svg) | How is human conversation organized into durable forum structure with source provenance? |
-| [Web/native realtime flow](client-synchronization.svg) | How do HTTP commands, durable synchronization, and ephemeral channels divide responsibility? |
-| [Model routing and audit](model-routing-audit.svg) | How is model/provider choice isolated from product semantics and failure handling? |
-| [Product/synthetic inference topology](deployment-topology.svg) | How do separate environments share architecture without sharing authority or data? |
-| [CI and quality gates](ci-quality-gates.svg) | Which deterministic, client, security, and evaluation evidence supports release confidence? |
+| **[Product and AI runtime](product-runtime.svg)** | Community surfaces, shared domains, the complete AI participant turn, conversation curation, and durable/realtime infrastructure. |
+| [System context](system-context.svg) | Members, operators, clients, providers, and systems outside Flip's product authority. |
+| [Service and container map](service-container-map.svg) | Phoenix contexts, background work, PostgreSQL, synchronization, realtime delivery, and external capabilities. |
+| [AI reply lifecycle](agent-execution-sequence.svg) | Trigger admission, context construction, model and tool rounds, evidence, terminal composition, and message publication. |
+| [Governed tool execution](governed-tool-execution.svg) | Capability selection, trusted actor scope, argument validation, effect authority, execution, and audit. |
+| [Retrieval and citation flow](retrieval-source-citation-flow.svg) | Internal, external, and document sources becoming durable evidence and citations. |
+| [Chat-to-forum synthesis](synthesis-pipeline.svg) | Source selection, synthesis state, forum publication, lineage, and feedback. |
+| [Client synchronization](client-synchronization.svg) | Commands, optimistic state, server transactions, Electric delivery, and ephemeral Channels. |
+| [Model routing and audit](model-routing-audit.svg) | Product route policy, provider adapters, failure classification, activity, and usage records. |
+| [Deployment topology](deployment-topology.svg) | Product and synthetic environments sharing application architecture without sharing data or authority. |
+| [CI and quality gates](ci-quality-gates.svg) | Deterministic domain tests, client checks, provider evaluation, security checks, and release evidence. |
 
-## Reading order
+The primary diagram is embedded in the [Flip case study](../README.md). The remaining diagrams accompany the consolidated technical documentation:
 
-1. System context
-2. Service/container map
-3. AI reply lifecycle
-4. Governed tool execution
-5. Chat-to-forum synthesis
-6. Web/native realtime flow
+- [Product and domain model](../docs/00-product-and-domain.md)
+- [System and data architecture](../docs/01-system-and-data-architecture.md)
+- [AI participant runtime](../docs/02-ai-participant-runtime.md)
+- [Retrieval, tools, and artifacts](../docs/03-retrieval-tools-and-artifacts.md)
+- [Clients and deployment](../docs/04-clients-and-deployment.md)
+- [Testing, operations, and current status](../docs/05-testing-operations-and-status.md)
 
-The remaining diagrams support specialized review.
-
-## Scope
-
-These are conceptual, implementation-informed diagrams. They intentionally omit private hostnames, credentials, provider keys, exact abuse thresholds, private data, and low-value operational detail.
+The diagrams omit production data, credentials, private hostnames, proprietary prompts and personas, exact abuse thresholds, and operational details that are not necessary to explain the architecture.

@@ -1,71 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="860" viewBox="0 0 1320 860" role="img" aria-labelledby="title desc">
-  <title id="title">HomeCloud local-first AI platform architecture</title>
-  <desc id="desc">Application requests enter a supervised runtime that routes inference, checks out healthy instances, coordinates GPU claims and workload priority, executes agent tools in sandboxes, checkpoints long-running work, and supports documents, connectors, research, and media services.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="960" viewBox="0 0 1400 960" role="img" aria-labelledby="title desc">
+  <title id="title">HomeCloud supervised AI operations architecture</title>
+  <desc id="desc">Application, connector, agent, research, document, and media requests enter a supervised Elixir runtime. Inference routing, instance capacity, GPU claims, model-service scheduling, sandboxed agent execution, context and tools, checkpoints, persistence, telemetry, and application services share one operational substrate.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}
-      .title{font:700 27px Arial,sans-serif;fill:#17191d}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 18px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .bg{fill:#f8fafc}.group{fill:#ffffff;stroke:#64748b;stroke-width:2;rx:18}.box{fill:#ffffff;stroke:#334155;stroke-width:2;rx:12}.resource{fill:#eff6ff;stroke:#1d4ed8;stroke-width:2;rx:12}.agent{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;rx:12}.ops{fill:#fff7ed;stroke:#c2410c;stroke-width:2;rx:12}.service{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:12}.state{fill:#ecfeff;stroke:#0f766e;stroke-width:2;rx:12}.title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.label{font:700 13px Arial,sans-serif;fill:#475569;letter-spacing:1.2px}.head{font:700 18px Arial,sans-serif;fill:#0f172a}.body{font:15px Arial,sans-serif;fill:#334155}.small{font:13px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}.dash{stroke:#64748b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}
     </style>
   </defs>
-  <rect class="bg" width="1320" height="860"/>
-  <text x="55" y="52" class="title">HomeCloud: local-first AI operations and application runtime</text>
+  <rect class="bg" width="1400" height="960"/>
+  <text x="55" y="52" class="title">HomeCloud: supervised local-first AI operations and agent execution</text>
+  <text x="55" y="80" class="subtitle">Application behavior is admitted against actual model, accelerator, process, and workspace state.</text>
 
-  <rect class="box" x="105" y="88" width="1110" height="88"/>
-  <text x="135" y="118" class="label">REQUESTS AND WORKLOADS</text>
-  <text x="135" y="148" class="head">interactive applications · connectors · agents · research · documents · media</text>
+  <rect class="group" x="55" y="110" width="1290" height="120"/>
+  <text x="80" y="140" class="label">REQUEST SOURCES</text>
+  <rect class="box" x="90" y="160" width="280" height="48"/><text x="150" y="191" class="head">LiveView applications</text>
+  <rect class="box" x="405" y="160" width="280" height="48"/><text x="470" y="191" class="head">Connectors, MCP, and API</text>
+  <rect class="box" x="720" y="160" width="280" height="48"/><text x="790" y="191" class="head">Agents and automation</text>
+  <rect class="box" x="1035" y="160" width="280" height="48"/><text x="1085" y="191" class="head">Research and media jobs</text>
 
-  <path class="arrow" d="M660 176 L660 220"/>
-  <rect class="group" x="65" y="220" width="1190" height="205"/>
-  <text x="90" y="250" class="label">INFERENCE AND RESOURCE CONTROL</text>
+  <path class="arrow" d="M700 230 L700 270"/>
+  <rect class="group" x="55" y="270" width="1290" height="125"/>
+  <text x="80" y="300" class="label">OTP APPLICATION AND ADMISSION</text>
+  <rect class="ops" x="90" y="325" width="385" height="48"/><text x="165" y="356" class="head">Supervision, configuration, health, and lifecycle</text>
+  <rect class="ops" x="507" y="325" width="385" height="48"/><text x="565" y="356" class="head">Workload type, priority, and capability policy</text>
+  <rect class="ops" x="925" y="325" width="385" height="48"/><text x="1005" y="356" class="head">Telemetry, audit, and degraded-state reporting</text>
 
-  <rect class="box" x="95" y="280" width="250" height="110"/>
-  <text x="120" y="312" class="head">Route and admit</text>
-  <text x="120" y="341" class="body">backend · model · priority</text>
-  <text x="120" y="365" class="body">local or remote capability</text>
+  <path class="arrow" d="M455 395 L455 435"/>
+  <path class="arrow" d="M945 395 L945 435"/>
 
-  <rect class="box" x="385" y="280" width="250" height="110"/>
-  <text x="410" y="312" class="head">Instance pool</text>
-  <text x="410" y="341" class="body">checkout · affinity · health</text>
-  <text x="410" y="365" class="body">restart and multi-slot capacity</text>
+  <rect class="group" x="55" y="435" width="640" height="300"/>
+  <text x="80" y="465" class="label">INFERENCE AND RESOURCE CONTROL</text>
+  <rect class="resource" x="90" y="500" width="270" height="82"/>
+  <text x="115" y="530" class="head">Inference router</text><text x="115" y="554" class="body">model profile · backend</text><text x="115" y="574" class="small">local or remote execution path</text>
+  <rect class="resource" x="395" y="500" width="265" height="82"/>
+  <text x="420" y="530" class="head">Instance pool</text><text x="420" y="554" class="body">checkout · affinity · health</text><text x="420" y="574" class="small">priority queue · restart · slots</text>
+  <path class="arrow" d="M360 541 L395 541"/>
+  <rect class="resource" x="90" y="625" width="270" height="82"/>
+  <text x="115" y="655" class="head">GPU claim authority</text><text x="115" y="679" class="body">ownership · locks · demand</text><text x="115" y="699" class="small">admission against real capacity</text>
+  <rect class="resource" x="395" y="625" width="265" height="82"/>
+  <text x="420" y="655" class="head">Workload scheduler</text><text x="420" y="679" class="body">idle checks · cooldown</text><text x="420" y="699" class="small">service spool and baseline return</text>
+  <path class="arrow" d="M527 582 L527 625"/><path class="arrow" d="M360 666 L395 666"/>
 
-  <rect class="box" x="675" y="280" width="250" height="110"/>
-  <text x="700" y="312" class="head">GPU authority</text>
-  <text x="700" y="341" class="body">claims · queues · idle checks</text>
-  <text x="700" y="365" class="body">controlled model lifecycle</text>
+  <rect class="group" x="730" y="435" width="615" height="300"/>
+  <text x="755" y="465" class="label">AGENT AND RESEARCH EXECUTION</text>
+  <rect class="agent" x="765" y="500" width="250" height="82"/>
+  <text x="790" y="530" class="head">Execution engine</text><text x="790" y="554" class="body">autonomous · interactive</text><text x="790" y="574" class="small">plan-only · phases · streaming</text>
+  <rect class="agent" x="1050" y="500" width="260" height="82"/>
+  <text x="1075" y="530" class="head">Context and tools</text><text x="1075" y="554" class="body">retrieval · profiles · registry</text><text x="1075" y="574" class="small">loop and validation controls</text>
+  <path class="arrow" d="M1015 541 L1050 541"/>
+  <rect class="agent" x="765" y="625" width="250" height="82"/>
+  <text x="790" y="655" class="head">Agent sandbox</text><text x="790" y="679" class="body">container · durable workspace</text><text x="790" y="699" class="small">toolchains · path validation</text>
+  <rect class="agent" x="1050" y="625" width="260" height="82"/>
+  <text x="1075" y="655" class="head">Checkpoint and verify</text><text x="1075" y="679" class="body">history · plan · loop · events</text><text x="1075" y="699" class="small">resume · result · evidence</text>
+  <path class="arrow" d="M890 582 L890 625"/><path class="arrow" d="M1015 666 L1050 666"/>
 
-  <rect class="box" x="965" y="280" width="250" height="110"/>
-  <text x="990" y="312" class="head">Operations</text>
-  <text x="990" y="341" class="body">supervision · health · telemetry</text>
-  <text x="990" y="365" class="body">configuration and degradation</text>
+  <path class="arrow" d="M700 735 L700 775"/>
+  <rect class="group" x="55" y="775" width="1290" height="135"/>
+  <text x="80" y="805" class="label">SHARED APPLICATION SERVICES AND STATE</text>
+  <rect class="service" x="90" y="835" width="280" height="50"/><text x="135" y="866" class="head">Documents, browser, search</text>
+  <rect class="service" x="405" y="835" width="280" height="50"/><text x="466" y="866" class="head">Research and evaluation</text>
+  <rect class="service" x="720" y="835" width="280" height="50"/><text x="795" y="866" class="head">OCR, image, video, audio</text>
+  <rect class="state" x="1035" y="835" width="280" height="50"/><text x="1075" y="866" class="head">Ash / PostgreSQL / PubSub</text>
 
-  <path class="arrow" d="M660 425 L660 470"/>
-  <rect class="group" x="65" y="470" width="1190" height="190"/>
-  <text x="90" y="500" class="label">AGENT AND RESEARCH EXECUTION</text>
-
-  <rect class="box" x="95" y="535" width="210" height="88"/>
-  <text x="120" y="567" class="head">Context</text>
-  <text x="120" y="592" class="body">task state · retrieval</text>
-
-  <rect class="box" x="325" y="535" width="210" height="88"/>
-  <text x="350" y="567" class="head">Sandbox</text>
-  <text x="350" y="592" class="body">workspace · toolchains</text>
-
-  <rect class="box" x="555" y="535" width="210" height="88"/>
-  <text x="580" y="567" class="head">Tool loop</text>
-  <text x="580" y="592" class="body">dispatch · loop safety</text>
-
-  <rect class="box" x="785" y="535" width="210" height="88"/>
-  <text x="810" y="567" class="head">Checkpoint</text>
-  <text x="810" y="592" class="body">history · plan · engine state</text>
-
-  <rect class="box" x="1015" y="535" width="210" height="88"/>
-  <text x="1040" y="567" class="head">Verify and persist</text>
-  <text x="1040" y="592" class="body">results · evidence · lifecycle</text>
-
-  <path class="arrow" d="M660 660 L660 705"/>
-  <rect class="group" x="105" y="705" width="1110" height="105"/>
-  <text x="135" y="735" class="label">SHARED APPLICATION SERVICES</text>
-  <text x="135" y="766" class="head">document vault · browser/search · connectors · model installation · OCR · media/cinema · UI</text>
-  <text x="135" y="792" class="small">The services reuse one supervised resource, inference, execution, and persistence substrate.</text>
+  <text x="235" y="938" class="body">Local model servers, accelerator pools, remote providers, containers, and system services remain observable runtime resources rather than hidden assumptions.</text>
 </svg>

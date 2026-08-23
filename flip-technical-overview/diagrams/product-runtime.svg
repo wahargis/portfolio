@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="930" viewBox="0 0 1400 930" role="img" aria-labelledby="title desc">
+  <title id="title">Flip product architecture and AI participant runtime</title>
+  <desc id="desc">Web, native, and API surfaces enter shared community domains. Explicit AI triggers pass through authorization, bounded context, capability admission, durable tool execution, model routing, evidence persistence, and message publication. A separate curation path turns selected chat into source-linked forum knowledge.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker>
+    <style>
+      .bg{fill:#f8fafc}.group{fill:#ffffff;stroke:#64748b;stroke-width:2;rx:18}.box{fill:#ffffff;stroke:#334155;stroke-width:2;rx:12}.ai{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;rx:12}.curate{fill:#ecfeff;stroke:#0f766e;stroke-width:2;rx:12}.state{fill:#f1f5f9;stroke:#475569;stroke-width:2;rx:12}.title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.label{font:700 13px Arial,sans-serif;fill:#475569;letter-spacing:1.2px}.head{font:700 18px Arial,sans-serif;fill:#0f172a}.body{font:15px Arial,sans-serif;fill:#334155}.small{font:13px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}.dash{stroke:#64748b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="930"/>
+  <text x="55" y="52" class="title">Flip: community product and AI participant runtime</text>
+  <text x="55" y="80" class="subtitle">Product authorization, agent execution, curation, and realtime delivery share one durable application model.</text>
+
+  <rect class="group" x="55" y="110" width="1290" height="120"/>
+  <text x="80" y="140" class="label">PRODUCT SURFACES</text>
+  <rect class="box" x="90" y="160" width="350" height="48"/><text x="190" y="191" class="head">Phoenix LiveView / web</text>
+  <rect class="box" x="525" y="160" width="350" height="48"/><text x="620" y="191" class="head">React native clients / Electric</text>
+  <rect class="box" x="960" y="160" width="350" height="48"/><text x="1060" y="191" class="head">API, jobs, and integrations</text>
+
+  <path class="arrow" d="M700 230 L700 270"/>
+  <rect class="group" x="55" y="270" width="1290" height="145"/>
+  <text x="80" y="300" class="label">COMMUNITY DOMAIN</text>
+  <rect class="box" x="90" y="325" width="270" height="60"/><text x="145" y="352" class="head">Accounts and membership</text><text x="145" y="374" class="small">identity · roles · communities</text>
+  <rect class="box" x="400" y="325" width="270" height="60"/><text x="493" y="352" class="head">Chat</text><text x="448" y="374" class="small">rooms · messages · replies · reactions</text>
+  <rect class="box" x="710" y="325" width="270" height="60"/><text x="808" y="352" class="head">Forum</text><text x="754" y="374" class="small">threads · replies · voting · provenance</text>
+  <rect class="box" x="1020" y="325" width="270" height="60"/><text x="1100" y="352" class="head">Media and artifacts</text><text x="1073" y="374" class="small">uploads · generated assets · status</text>
+
+  <path class="arrow" d="M535 415 L535 455"/>
+  <path class="arrow" d="M845 415 L845 455"/>
+
+  <rect class="group" x="55" y="455" width="805" height="300"/>
+  <text x="80" y="485" class="label">AI PARTICIPANT TURN</text>
+  <rect class="ai" x="90" y="515" width="220" height="82"/>
+  <text x="118" y="544" class="head">1. Trigger and scope</text><text x="118" y="568" class="body">mention / reply detection</text><text x="118" y="588" class="small">actor · room · feature policy</text>
+  <rect class="ai" x="350" y="515" width="220" height="82"/>
+  <text x="378" y="544" class="head">2. Context and tools</text><text x="378" y="568" class="body">bounded room history</text><text x="378" y="588" class="small">capability and effect admission</text>
+  <rect class="ai" x="610" y="515" width="220" height="82"/>
+  <text x="638" y="544" class="head">3. Durable agent loop</text><text x="638" y="568" class="body">Oban reply worker</text><text x="638" y="588" class="small">rounds · deadlines · recovery</text>
+  <path class="arrow" d="M310 556 L350 556"/><path class="arrow" d="M570 556 L610 556"/>
+
+  <rect class="ai" x="90" y="635" width="220" height="82"/>
+  <text x="118" y="664" class="head">4. Tool execution</text><text x="118" y="688" class="body">typed calls and results</text><text x="118" y="708" class="small">retrieval · documents · media</text>
+  <rect class="ai" x="350" y="635" width="220" height="82"/>
+  <text x="378" y="664" class="head">5. Model routing</text><text x="378" y="688" class="body">product-owned contract</text><text x="378" y="708" class="small">local / hosted providers</text>
+  <rect class="ai" x="610" y="635" width="220" height="82"/>
+  <text x="638" y="664" class="head">6. Commit the reply</text><text x="638" y="688" class="body">message + source ledger</text><text x="638" y="708" class="small">citations · artifacts · warnings</text>
+  <path class="arrow" d="M720 597 L720 616 L200 616 L200 635"/>
+  <path class="arrow" d="M310 676 L350 676"/><path class="arrow" d="M570 676 L610 676"/>
+
+  <rect class="group" x="900" y="455" width="445" height="300"/>
+  <text x="925" y="485" class="label">CONVERSATION CURATION</text>
+  <rect class="curate" x="935" y="515" width="375" height="54"/><text x="1020" y="548" class="head">Selected authorized chat content</text>
+  <path class="arrow" d="M1122 569 L1122 600"/>
+  <rect class="curate" x="935" y="600" width="375" height="54"/><text x="1029" y="633" class="head">Claimed synthesis run</text>
+  <path class="arrow" d="M1122 654 L1122 685"/>
+  <rect class="curate" x="935" y="685" width="375" height="54"/><text x="985" y="718" class="head">Forum publication with source lineage</text>
+
+  <path class="arrow" d="M700 755 L700 795"/>
+  <rect class="group" x="55" y="795" width="1290" height="95"/>
+  <text x="80" y="825" class="label">DURABLE AND REALTIME SUBSTRATE</text>
+  <rect class="state" x="90" y="840" width="275" height="32"/><text x="145" y="862" class="body">PostgreSQL / Ecto authority</text>
+  <rect class="state" x="400" y="840" width="275" height="32"/><text x="477" y="862" class="body">Oban queues and retries</text>
+  <rect class="state" x="710" y="840" width="275" height="32"/><text x="760" y="862" class="body">PubSub / Channels / presence</text>
+  <rect class="state" x="1020" y="840" width="275" height="32"/><text x="1090" y="862" class="body">Electric durable sync</text>
+</svg>

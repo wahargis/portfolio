@@ -1,40 +1,40 @@
-# ADR 0001 — Curated portfolio boundary
+# ADR 0001 — Public architecture boundary
 
 - **Status:** Accepted
 - **Decision scope:** Portfolio publication
 
 ## Context
 
-Flip has a public source repository, but a technical portfolio still needs a curated explanation of the product rather than a second, partial copy of the source tree. The source also contains implementation chronology, deployment-specific configuration, tests, provider integrations, and operational detail that do not all belong in the reviewer path.
+Flip's implementation repository is private. The public portfolio still needs enough technical evidence to explain the product, agent runtime, data model, authorization, client architecture, workflows, and failure handling without publishing private code or replacing the implementation repository with a partial copy.
 
-A shallow marketing page is insufficient; duplicating the repository is unnecessary and creates drift.
+A shallow product description would conceal the engineering. A source mirror would expose unnecessary implementation and operational detail, create maintenance drift, and weaken the private-repository boundary.
 
 ## Decision
 
-The portfolio publishes:
+Publish selected public architecture material:
 
-- product aims and actor model;
-- domain, data, process, client, and deployment boundaries;
-- sanitized lifecycles and failure semantics;
-- architecture diagrams and stable decisions;
-- implemented/evolving/experimental status;
-- representative synthetic scenarios;
-- honest limitations;
-- a link to the canonical public source repository.
+- product and domain behavior;
+- system, data, process, client, and deployment boundaries;
+- sanitized lifecycle and failure semantics;
+- rendered architecture diagrams and stable decisions;
+- representative product and synthetic-environment images;
+- private source paths that identify where load-bearing behavior is implemented;
+- implemented scope and current limitations.
 
-The portfolio does not publish or duplicate:
+Do not publish or duplicate:
 
+- private source code;
 - production data or copied private messages;
 - credentials, host paths, tokens, or security-sensitive thresholds;
-- deployment-specific secrets and private operational state;
-- prompt/persona content that is not required to understand architecture;
-- internal campaign logs or issue chronology as the main narrative;
-- claims requiring evidence that is not included.
+- production deployment and administrative state;
+- proprietary prompt or persona content not required to understand the architecture;
+- internal campaign logs or issue chronology as the project narrative;
+- claims that cannot be supported by public architecture or selected implementation evidence.
 
 ## Consequences
 
-Reviewers can move from a stable architecture narrative to the canonical source when they need implementation detail. The portfolio remains readable and avoids drifting into a stale mirror.
+The public repository can establish the system's architecture and engineering depth while preserving source and operational confidentiality. Source-path references must remain synchronized with the private implementation, and public diagrams must avoid becoming generic substitutes for the actual behavior they describe.
 
 ## Revisit when
 
-The public source structure or portfolio audience changes enough that a different review path is more useful.
+Revisit if the implementation repository becomes public, the confidentiality boundary changes, or a distributable reference implementation replaces the current portfolio evidence model.

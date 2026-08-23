@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">Project Manager atlas synthetic project record</title>
+  <desc id="desc">The public quickstart project atlas contains three phases, an experiment, finding, and decision. The execution DAG leaves Package handoff blocked on Map retrieval gaps and selects the higher-impact actionable phase Test topic briefings.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker>
+    <style>
+      .bg{fill:#f8fafc}.group{fill:#ffffff;stroke:#64748b;stroke-width:2;rx:18}.phase{fill:#eff6ff;stroke:#1d4ed8;stroke-width:2;rx:12}.blocked{fill:#f1f5f9;stroke:#64748b;stroke-width:2;stroke-dasharray:7 5;rx:12}.evidence{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;rx:12}.decision{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:12}.result{fill:#fff7ed;stroke:#c2410c;stroke-width:2;rx:12}.title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.label{font:700 13px Arial,sans-serif;fill:#475569;letter-spacing:1.2px}.head{font:700 18px Arial,sans-serif;fill:#0f172a}.body{font:15px Arial,sans-serif;fill:#334155}.small{font:13px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}.dash{stroke:#64748b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="760"/>
+  <text x="55" y="52" class="title">Project Manager: concrete synthetic project record</text>
+  <text x="55" y="80" class="subtitle">The `atlas` project below is the public repository's quickstart data, shown as persisted planning and evidence state.</text>
+
+  <rect class="group" x="55" y="110" width="1290" height="250"/>
+  <text x="80" y="140" class="label">EXECUTION DAG</text>
+  <rect class="phase" x="95" y="180" width="330" height="90"/>
+  <text x="120" y="212" class="head">Phase 1 — Map retrieval gaps</text><text x="120" y="238" class="body">impact 40 · actionable</text><text x="120" y="258" class="small">contains the initial retrieval experiment</text>
+  <rect class="phase" x="535" y="180" width="330" height="90"/>
+  <text x="560" y="212" class="head">Phase 2 — Test topic briefings</text><text x="560" y="238" class="body">impact 80 · actionable</text><text x="560" y="258" class="small">highest-impact dependency-satisfied phase</text>
+  <rect class="blocked" x="975" y="180" width="330" height="90"/>
+  <text x="1000" y="212" class="head">Phase 3 — Package handoff</text><text x="1000" y="238" class="body">impact 60 · blocked</text><text x="1000" y="258" class="small">depends on Phase 1</text>
+  <path class="dash" d="M425 225 L975 225"/>
+  <rect class="result" x="490" y="300" width="420" height="40"/><text x="535" y="327" class="head">Computed next work: Test topic briefings</text>
+
+  <path class="arrow" d="M260 360 L260 400"/>
+  <rect class="group" x="55" y="400" width="1290" height="290"/>
+  <text x="80" y="430" class="label">EVIDENCE AND DECISION CHAIN INSIDE PHASE 1</text>
+  <rect class="evidence" x="95" y="480" width="335" height="100"/>
+  <text x="120" y="512" class="head">Experiment</text><text x="120" y="540" class="body">Inventory current retrieval behavior</text><text x="120" y="563" class="small">explicit investigation attached to Phase 1</text>
+  <rect class="evidence" x="535" y="480" width="335" height="100"/>
+  <text x="560" y="512" class="head">Finding</text><text x="560" y="540" class="body">Retrieval misses code-symbol queries</text><text x="560" y="563" class="small">produced by the experiment</text>
+  <rect class="decision" x="975" y="480" width="330" height="125"/>
+  <text x="1000" y="512" class="head">Decision</text><text x="1000" y="540" class="body">Adopt trigram tokenizer</text><text x="1000" y="566" class="small">Why: code symbols are not matched</text><text x="1000" y="586" class="small">by the default tokenizer</text>
+  <path class="arrow" d="M430 530 L535 530"/><path class="arrow" d="M870 530 L975 530"/>
+  <text x="235" y="650" class="body">The phase DAG computes actionable work; the evidence graph preserves what the project learned and why a decision exists.</text>
+</svg>
