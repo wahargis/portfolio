@@ -6,7 +6,28 @@ HomeCloud treats local AI as an operating-system problem rather than a model-ser
 
 The platform is implemented as a supervised Elixir application. Interactive products, connectors, agents, research programs, document workflows, browser automation, OCR, and media generation use the same routing, resource, execution, persistence, and telemetry substrate instead of starting independent model processes and competing for hardware informally.
 
+## Logical platform architecture
+
 <img src="assets/diagrams/architecture.svg" alt="HomeCloud supervised local-first AI operations architecture" width="100%" />
+
+The logical architecture is independent of one host or accelerator generation. It defines how application requests enter supervised runtime services, how inference and GPU capacity are admitted, how agents receive context and isolated tools, and how results and checkpoints become durable state.
+
+## Reference deployment — August 2026
+
+<img src="assets/diagrams/reference-deployment.svg" alt="HomeCloud four-V100 and A100 Drive reference deployment, August 2026" width="100%" />
+
+The active private deployment provides a concrete implementation of that architecture:
+
+- **four NVIDIA V100 32 GB accelerators** form the principal local inference and research pool;
+- a **separate NVIDIA A100 Drive 32 GB accelerator** provides additional heterogeneous capacity;
+- model services are health-monitored and exposed through HomeCloud's routing and instance-pool contracts;
+- GPU claims and workload scheduling coordinate interactive inference, research, OCR, image, video, and other accelerator-bound work;
+- containerized agent workspaces execute tools against durable project state;
+- PostgreSQL and durable file storage hold application objects, checkpoints, documents, and artifacts;
+- hosted model, search, and media providers remain available as explicit capability routes;
+- **Flip is hosted as an application workload and can consume HomeCloud-served local inference while retaining its own community authorization, context, tools, and content authority.**
+
+The diagram does not assert a physical interconnect topology that is not part of the public evidence. It records the deployed accelerator inventory and system roles without turning one hardware arrangement into the definition of HomeCloud.
 
 ## Request lifecycle
 
@@ -162,10 +183,11 @@ HomeCloud's implementation repository is private. These paths identify the code 
 | `lib/home_cloud/intelligence/context_engine.ex` | Token budgeting, context construction, file tracking, retrieval, and compaction. |
 | `lib/home_cloud/intelligence/tool_registry.ex` | Typed runtime tool registry and profile-aware tool selection. |
 
-## Deployment boundary
+## Current boundaries
 
-The diagram on this page describes the reusable logical architecture. The active private deployment uses heterogeneous local accelerators, system-managed model services, durable storage, and remote-provider fallbacks, but exact host inventory and security-sensitive configuration are not part of the public portfolio contract.
-
-HomeCloud is not positioned as a general replacement for Kubernetes or as a public multi-tenant cloud. It is a self-hosted application and operations platform built around owned AI capacity, controlled workloads, and recoverable local execution.
+- The public topology documents the four-V100 pool and separate A100 Drive accelerator but omits private hostnames, network layout, credentials, and security-sensitive service configuration.
+- HomeCloud is a self-hosted AI application and operations platform, not a general replacement for Kubernetes or a public multi-tenant cloud.
+- A private reference deployment demonstrates the system; it does not constrain the logical architecture to one accelerator model or host layout.
+- Local-first operation does not require every workload to remain local when a hosted route is more appropriate for capability or availability.
 
 [← Back to portfolio](../README.md)
