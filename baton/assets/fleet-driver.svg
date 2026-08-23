@@ -1,60 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="840" viewBox="0 0 1320 840" role="img" aria-labelledby="title desc">
-  <title id="title">Baton controlled software-delivery architecture</title>
-  <desc id="desc">An operator approves a goal and plan. Baton validates and routes the work, supervises persistent coding-agent sessions in isolated Git worktrees, verifies captured artifacts, and controls result adoption and export.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="960" viewBox="0 0 1400 960" role="img" aria-labelledby="title desc">
+  <title id="title">Baton cross-harness fleet application</title>
+  <desc id="desc">An orchestrator or operator uses embedded, resident, CLI, or MCP surfaces to run plans, parallel waves, and declarative workflows. Collaboration state, a deterministic coordinator kernel, provider adapters, isolated worktrees, harvesting, verification, review, and integration support persistent full-session coding harnesses.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}
-      .title{font:700 27px Arial,sans-serif;fill:#17191d}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 18px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .bg{fill:#f8fafc}.group{fill:#ffffff;stroke:#64748b;stroke-width:2;rx:18}.box{fill:#ffffff;stroke:#334155;stroke-width:2;rx:12}.app{fill:#eff6ff;stroke:#1d4ed8;stroke-width:2;rx:12}.collab{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;rx:12}.kernel{fill:#fff7ed;stroke:#c2410c;stroke-width:2;rx:12}.worker{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:12}.result{fill:#ecfeff;stroke:#0f766e;stroke-width:2;rx:12}.title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.label{font:700 13px Arial,sans-serif;fill:#475569;letter-spacing:1.2px}.head{font:700 18px Arial,sans-serif;fill:#0f172a}.body{font:15px Arial,sans-serif;fill:#334155}.small{font:13px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}.bi{stroke:#334155;stroke-width:2;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}
     </style>
   </defs>
-  <rect class="bg" width="1320" height="840"/>
-  <text x="55" y="52" class="title">Baton: controlled software delivery across persistent coding-agent harnesses</text>
+  <rect class="bg" width="1400" height="960"/>
+  <text x="55" y="52" class="title">Baton: run-centric orchestration for full coding-harness sessions</text>
+  <text x="55" y="80" class="subtitle">Planning, routing, parallel work, interaction, steering, shared context, recovery, harvesting, review, and integration share one application model.</text>
 
-  <rect class="box" x="105" y="88" width="1110" height="92"/>
-  <text x="135" y="118" class="label">APPROVED INTENT</text>
-  <text x="135" y="149" class="head">Objective · definition of done · constraints · risk · budget · scope · verification</text>
+  <rect class="box" x="190" y="108" width="1020" height="72"/>
+  <text x="235" y="138" class="label">OUTCOME</text>
+  <text x="235" y="165" class="head">Operator or orchestrator defines the objective, constraints, workflow, and completion contract</text>
 
-  <path class="arrow" d="M660 180 L660 225"/>
-  <rect class="group" x="65" y="225" width="1190" height="205"/>
-  <text x="90" y="255" class="label">BATON CONTROL PLANE</text>
+  <path class="arrow" d="M700 180 L700 218"/>
+  <rect class="group" x="55" y="218" width="1290" height="115"/>
+  <text x="80" y="248" class="label">CONTROL SURFACES — ONE APPLICATION AUTHORITY</text>
+  <rect class="box" x="90" y="266" width="270" height="45"/><text x="158" y="296" class="head">Embedded openBaton()</text>
+  <rect class="box" x="400" y="266" width="270" height="45"/><text x="485" y="296" class="head">Resident application bus</text>
+  <rect class="box" x="710" y="266" width="270" height="45"/><text x="825" y="296" class="head">CLI client</text>
+  <rect class="box" x="1020" y="266" width="270" height="45"/><text x="1135" y="296" class="head">MCP northbound</text>
 
-  <rect class="box" x="95" y="285" width="250" height="110"/>
-  <text x="120" y="317" class="head">Validate and route</text>
-  <text x="120" y="346" class="body">versioned goal and plan</text>
-  <text x="120" y="370" class="body">exact harness/model/effort</text>
+  <path class="arrow" d="M700 333 L700 370"/>
+  <rect class="group" x="55" y="370" width="1290" height="190"/>
+  <text x="80" y="400" class="label">RUN APPLICATION</text>
+  <rect class="app" x="85" y="430" width="280" height="92"/>
+  <text x="110" y="460" class="head">Runs and plans</text><text x="110" y="485" class="body">start · approve · act · answer</text><text x="110" y="507" class="small">status · stop · recover · resume</text>
+  <rect class="app" x="395" y="430" width="280" height="92"/>
+  <text x="420" y="460" class="head">Waves and workflows</text><text x="420" y="485" class="body">parallel members · exact routes</text><text x="420" y="507" class="small">workflow-as-data · re-drive failed</text>
+  <rect class="app" x="705" y="430" width="280" height="92"/>
+  <text x="730" y="460" class="head">Attention and steering</text><text x="730" y="485" class="body">questions · decisions · replies</text><text x="730" y="507" class="small">checkpoints · nudge · claim · wait</text>
+  <rect class="app" x="1015" y="430" width="300" height="92"/>
+  <text x="1040" y="460" class="head">Harvest and delivery</text><text x="1040" y="485" class="body">artifacts · evidence · briefing</text><text x="1040" y="507" class="small">review · adopt · integrate</text>
 
-  <rect class="box" x="385" y="285" width="250" height="110"/>
-  <text x="410" y="317" class="head">Persistent sessions</text>
-  <text x="410" y="346" class="body">provider capability adapters</text>
-  <text x="410" y="370" class="body">events, prompts, stop controls</text>
+  <path class="arrow" d="M700 560 L700 598"/>
+  <rect class="group" x="55" y="598" width="575" height="155"/>
+  <text x="80" y="628" class="label">COLLABORATION STATE</text>
+  <rect class="collab" x="90" y="655" width="235" height="70"/><text x="115" y="684" class="head">Knowledge horizons</text><text x="115" y="707" class="small">task · workflow · project</text>
+  <rect class="collab" x="355" y="655" width="235" height="70"/><text x="380" y="684" class="head">Working context</text><text x="380" y="707" class="small">scratchpads · boards · REPL · packs</text>
 
-  <rect class="box" x="675" y="285" width="250" height="110"/>
-  <text x="700" y="317" class="head">Supervise interaction</text>
-  <text x="700" y="346" class="body">questions · approvals · waits</text>
-  <text x="700" y="370" class="body">checkpoints · steering · recovery</text>
+  <rect class="group" x="670" y="598" width="675" height="155"/>
+  <text x="695" y="628" class="label">DETERMINISTIC COORDINATOR KERNEL</text>
+  <rect class="kernel" x="705" y="655" width="190" height="70"/><text x="730" y="684" class="head">Route and capacity</text><text x="730" y="707" class="small">cards · seats · leases</text>
+  <rect class="kernel" x="915" y="655" width="190" height="70"/><text x="940" y="684" class="head">Events and replay</text><text x="940" y="707" class="small">fences · cursors · receipts</text>
+  <rect class="kernel" x="1125" y="655" width="185" height="70"/><text x="1150" y="684" class="head">Liveness and cleanup</text><text x="1150" y="707" class="small">stall · reap · recovery</text>
 
-  <rect class="box" x="965" y="285" width="250" height="110"/>
-  <text x="990" y="317" class="head">Evidence and lineage</text>
-  <text x="990" y="346" class="body">timeline · usage · artifacts</text>
-  <text x="990" y="370" class="body">terminal and failure state</text>
+  <path class="arrow" d="M1005 753 L1005 790"/>
+  <path class="arrow" d="M342 753 L342 790"/>
+  <rect class="group" x="55" y="790" width="1290" height="120"/>
+  <text x="80" y="820" class="label">FULL-SESSION WORKER FLEET</text>
+  <rect class="worker" x="90" y="842" width="230" height="45"/><text x="135" y="872" class="head">Claude harness + worktree</text>
+  <rect class="worker" x="340" y="842" width="230" height="45"/><text x="392" y="872" class="head">Codex harness + worktree</text>
+  <rect class="worker" x="590" y="842" width="230" height="45"/><text x="650" y="872" class="head">GLM / DeepSeek seats</text>
+  <rect class="worker" x="840" y="842" width="230" height="45"/><text x="905" y="872" class="head">Grok harness + worktree</text>
+  <rect class="worker" x="1090" y="842" width="220" height="45"/><text x="1150" y="872" class="head">Kimi and other seats</text>
 
-  <path class="arrow" d="M660 430 L660 475"/>
-  <rect class="group" x="65" y="475" width="1190" height="170"/>
-  <text x="90" y="505" class="label">ISOLATED REPOSITORY WORK</text>
-  <rect class="box" x="110" y="535" width="310" height="78"/>
-  <text x="140" y="566" class="head">Worker worktree A</text>
-  <text x="140" y="590" class="body">pinned base · scoped mutation</text>
-  <rect class="box" x="505" y="535" width="310" height="78"/>
-  <text x="535" y="566" class="head">Worker worktree B</text>
-  <text x="535" y="590" class="body">independent persistent session</text>
-  <rect class="box" x="900" y="535" width="310" height="78"/>
-  <text x="930" y="566" class="head">Fresh verification sandbox</text>
-  <text x="930" y="590" class="body">captured artifact · exact contract</text>
-
-  <path class="arrow" d="M660 645 L660 690"/>
-  <rect class="box" x="190" y="690" width="940" height="100"/>
-  <text x="220" y="721" class="label">CONTROLLER-OWNED RESULT</text>
-  <text x="220" y="751" class="head">verification evidence · adoption decision · integration or secure no-replace export</text>
-  <text x="220" y="775" class="small">A worker can implement and report; it cannot grant itself repository or publication authority.</text>
+  <path class="arrow" d="M700 910 L700 940"/>
+  <text x="366" y="945" class="body">Provider-native execution remains inside each harness; Baton owns the run, coordination, state, and delivery lifecycle around it.</text>
 </svg>
