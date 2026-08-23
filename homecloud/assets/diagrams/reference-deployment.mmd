@@ -1,0 +1,32 @@
+flowchart TB
+    U["Users and clients<br/>Flip web/desktop/mobile/PWA · HomeCloud operations · connectors/agents/research"]
+
+    subgraph A["Self-hosted application layer"]
+      F["Flip Phoenix application<br/>community product · AI participant runtime · jobs"]
+      H["HomeCloud Elixir/Phoenix application<br/>routing · agents · research · operations · services"]
+      D["PostgreSQL and durable storage<br/>application state · checkpoints · documents · artifacts"]
+    end
+
+    subgraph C["HomeCloud resource and execution control"]
+      C1["Inference and model router"]
+      C2["Instance pool and health"]
+      C3["GPU claims and workload scheduler"]
+      C4["Agent sandboxes and tools"]
+      C1 --> C2 --> C3 --> C4
+    end
+
+    subgraph G["Local accelerator and model-service layer"]
+      V1["V100 32 GB"]
+      V2["V100 32 GB"]
+      V3["V100 32 GB"]
+      V4["V100 32 GB"]
+      A100["Separate A100 Drive 32 GB accelerator"]
+    end
+
+    X["Hosted model, search, and media providers"]
+
+    U --> A
+    F --> H
+    A --> C
+    C --> G
+    C -. capability fallback .-> X
