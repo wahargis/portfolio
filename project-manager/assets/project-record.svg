@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920" role="img" aria-labelledby="title desc">
+  <title id="title">Project Manager typed project record</title>
+  <desc id="desc">A project contains dependency-ordered phases. Experiments produce findings; findings test hypotheses and inform decisions; decisions and findings can create follow-on experiments. Sessions, retrieval, and review operate over the same typed record.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#43506a"/></marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#2f6fed"/></marker>
+    <style>
+      .bg{fill:#f7f9fc}.group{fill:#eef3f8;stroke:#8b99ad;stroke-width:2;rx:22}.box{fill:#fff;stroke:#33415c;stroke-width:2;rx:16}
+      .blue{fill:#eef4ff;stroke:#2f6fed}.green{fill:#ecf8f3;stroke:#228b68}.amber{fill:#fff6e8;stroke:#b36b00}.purple{fill:#f4efff;stroke:#7656d6}.gray{fill:#f5f6f8;stroke:#68758b}
+      .title{font:700 34px Inter,Arial,sans-serif;fill:#182238}.subtitle{font:20px Inter,Arial,sans-serif;fill:#526077}.label{font:700 15px Inter,Arial,sans-serif;fill:#33415c;letter-spacing:1.2px}.head{font:700 22px Inter,Arial,sans-serif;fill:#1c2940}.body{font:17px Inter,Arial,sans-serif;fill:#40506a}.small{font:15px Inter,Arial,sans-serif;fill:#53627a}.mono{font:16px ui-monospace,SFMono-Regular,Consolas,monospace;fill:#33415c}
+      .line{stroke:#43506a;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.blueLine{stroke:#2f6fed;stroke-width:2.5;fill:none;marker-end:url(#arrowBlue)}.dash{stroke:#68758b;stroke-width:2;fill:none;stroke-dasharray:8 7;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="920"/>
+  <text x="70" y="60" class="title">Project Manager: one project record from plan to evidence to handoff</text>
+  <text x="70" y="94" class="subtitle">Execution order and reasoning history remain connected without becoming the same graph</text>
+
+  <rect class="group" x="60" y="135" width="410" height="650"/>
+  <text x="90" y="170" class="label">EXECUTION DAG</text>
+  <rect class="box blue" x="105" y="220" width="320" height="95"/><text x="130" y="250" class="head">Phase A</text><text x="130" y="276" class="body">establish baseline</text><text x="130" y="300" class="small">impact 90 · in progress</text>
+  <rect class="box blue" x="105" y="370" width="320" height="95"/><text x="130" y="400" class="head">Phase B</text><text x="130" y="426" class="body">evaluate design</text><text x="130" y="450" class="small">depends on A · pending</text>
+  <rect class="box blue" x="105" y="520" width="320" height="95"/><text x="130" y="550" class="head">Phase C</text><text x="130" y="576" class="body">implementation</text><text x="130" y="600" class="small">depends on B · pending</text>
+  <path class="line" d="M265 315 L265 370"/><path class="line" d="M265 465 L265 520"/>
+  <rect class="box amber" x="105" y="670" width="320" height="75"/><text x="265" y="704" text-anchor="middle" class="head">Next-work selection</text><text x="265" y="730" text-anchor="middle" class="small">dependency satisfied + impact order</text>
+
+  <rect class="group" x="520" y="135" width="690" height="650"/>
+  <text x="550" y="170" class="label">EVIDENCE AND DECISION GRAPH</text>
+  <rect class="box purple" x="575" y="220" width="245" height="95"/><text x="697" y="254" text-anchor="middle" class="head">Hypothesis</text><text x="697" y="283" text-anchor="middle" class="body">proposed → testing</text>
+  <rect class="box amber" x="885" y="220" width="270" height="95"/><text x="1020" y="254" text-anchor="middle" class="head">Constraint / literature</text><text x="1020" y="283" text-anchor="middle" class="body">scope · source · lifecycle</text>
+  <rect class="box blue" x="575" y="380" width="245" height="105"/><text x="697" y="414" text-anchor="middle" class="head">Experiment</text><text x="697" y="444" text-anchor="middle" class="body">pending / pass / fail</text><text x="697" y="468" text-anchor="middle" class="small">belongs to active phase</text>
+  <rect class="box green" x="885" y="380" width="270" height="105"/><text x="1020" y="414" text-anchor="middle" class="head">Finding</text><text x="1020" y="444" text-anchor="middle" class="body">evidence + confidence</text><text x="1020" y="468" text-anchor="middle" class="small">ProducedBy experiment</text>
+  <rect class="box green" x="575" y="555" width="245" height="105"/><text x="697" y="589" text-anchor="middle" class="head">Decision</text><text x="697" y="619" text-anchor="middle" class="body">what + why</text><text x="697" y="643" text-anchor="middle" class="small">Informed by evidence</text>
+  <rect class="box purple" x="885" y="555" width="270" height="105"/><text x="1020" y="589" text-anchor="middle" class="head">Follow-on work</text><text x="1020" y="619" text-anchor="middle" class="body">branch or convergence</text><text x="1020" y="643" text-anchor="middle" class="small">new experiment / phase change</text>
+  <path class="line" d="M697 315 L697 380"/><text x="710" y="350" class="small">TestedBy</text>
+  <path class="line" d="M820 432 L885 432"/><text x="835" y="416" class="small">Produces</text>
+  <path class="line" d="M970 380 L760 315"/><text x="835" y="335" class="small">Supports / Contradicts</text>
+  <path class="line" d="M960 485 L760 555"/><text x="805" y="535" class="small">Informs</text>
+  <path class="line" d="M820 607 L885 607"/><text x="835" y="591" class="small">Causes</text>
+  <path class="dash" d="M1020 555 L1020 485"/><text x="1035" y="525" class="small">DerivedFrom</text>
+
+  <rect class="group" x="1260" y="135" width="280" height="650"/>
+  <text x="1290" y="170" class="label">OPERATIONS</text>
+  <rect class="box amber" x="1300" y="220" width="200" height="90"/><text x="1400" y="250" text-anchor="middle" class="head">Session</text><text x="1400" y="276" text-anchor="middle" class="small">active experiment</text><text x="1400" y="298" text-anchor="middle" class="small">summary</text>
+  <rect class="box purple" x="1300" y="360" width="200" height="90"/><text x="1400" y="390" text-anchor="middle" class="head">Context</text><text x="1400" y="416" text-anchor="middle" class="small">phase subgraph</text><text x="1400" y="438" text-anchor="middle" class="small">temporal delta</text>
+  <rect class="box amber" x="1300" y="500" width="200" height="90"/><text x="1400" y="530" text-anchor="middle" class="head">Review</text><text x="1400" y="556" text-anchor="middle" class="small">stalls · contradictions</text><text x="1400" y="578" text-anchor="middle" class="small">constraint expiry</text>
+  <rect class="box gray" x="1300" y="640" width="200" height="90"/><text x="1400" y="670" text-anchor="middle" class="head">Audit / repair</text><text x="1400" y="696" text-anchor="middle" class="small">orphans · branches</text><text x="1400" y="718" text-anchor="middle" class="small">cross-project leakage</text>
+  <path class="dash" d="M1260 405 L1210 405"/><path class="dash" d="M1260 545 L1210 545"/>
+
+  <rect class="group" x="190" y="815" width="1220" height="75"/>
+  <text x="225" y="846" class="small">Typed relationships: ProducedBy · Informed · Supports · Contradicts · Supersedes · DependsOn</text>
+  <text x="225" y="870" class="small">DerivedFrom · TestedBy · ViolatedBy · BranchesFrom · ConvergesInto</text>
+</svg>

@@ -1,0 +1,10 @@
+flowchart LR
+  PA[Phase A] --> PB[Phase B] --> PC[Phase C]
+  H[Hypothesis] -->|TestedBy| E[Experiment]
+  E -->|ProducedBy| F[Finding]
+  F -->|Supports / Contradicts| H
+  F -->|Informed| D[Decision]
+  D -->|Causes| N[Follow-on experiment or phase change]
+  C[Constraint / literature] --> E
+  S[Session and context] -.-> E
+  R[Review / audit / repair] -.-> F

@@ -1,0 +1,12 @@
+flowchart LR
+  A[Admit objective, plan, scope, route] --> B[Allocate run, capacity, worktree, session]
+  B --> C[Advertise and approve plan]
+  C --> D[Persistent execution]
+  D --> E[Question / approval / wait / checkpoint]
+  E -->|answer, message, nudge, claim| D
+  E --> R[Reconnect / preserve / stop / reap]
+  D --> F[Capture deliverable commit and result pin]
+  F --> G[Verify in fresh worktree]
+  G --> H[Independent review]
+  H --> I[Adopt / integrate]
+  I --> J[Close resources and emit receipt]
