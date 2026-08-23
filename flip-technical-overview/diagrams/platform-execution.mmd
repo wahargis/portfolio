@@ -1,0 +1,23 @@
+flowchart LR
+  A[Product event\nmessage, reply, curation, document, data, media] --> B[Admission\nactor, AI identity, origin, feature state]
+  B --> C[Context\nconversation, internal retrieval, sources, documents, artifacts]
+  C --> D[Route and capability catalog]
+  D --> E[Model working round]
+  E -->|tool call| F[Typed capability execution]
+  F -->|result| E
+  E -->|terminal draft| G[Validation and product commit]
+  G --> H[Reply, citation, action, artifact, or forum state]
+  H --> I[Durable sync and realtime clients]
+
+  F --> J[Asynchronous artifact or job]
+  J --> K[Provider or background worker]
+  K --> L[Terminal artifact state]
+  L --> M[Deduplicated continuation]
+  M --> B
+
+  N[(PostgreSQL)] --- B
+  N --- C
+  N --- G
+  N --- H
+  O[(Oban and supervised processes)] --- J
+  O --- K

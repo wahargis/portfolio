@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1040" viewBox="0 0 1500 1040" role="img" aria-labelledby="title desc">
+  <title id="title">Flip product-integrated agent execution</title>
+  <desc id="desc">A product event is admitted under actor and product scope, receives bounded context and a capability catalog, runs a model and tool loop, commits durable product state, and updates clients. Long-running tools use durable artifacts and deduplicated continuation.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
+    <style>
+      .h1{font:700 32px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}
+      .band{font:700 15px Inter,Arial,sans-serif;fill:#0369a1;letter-spacing:.8px}.nt{font:700 17px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 14px Inter,Arial,sans-serif;fill:#334155}
+      .small{font:400 13px Inter,Arial,sans-serif;fill:#475569}.arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#64748b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1500" height="1040" fill="#f8fafc"/>
+  <text x="70" y="62" class="h1">Flip: product-integrated agent execution</text>
+  <text x="70" y="92" class="sub">Identity, access, context, tools, effects, and continuation remain part of the application runtime.</text>
+
+  <rect x="55" y="125" width="1390" height="210" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="158" class="band">PRODUCT ADMISSION</text>
+
+  <g transform="translate(80 185)"><rect width="240" height="112" rx="12" fill="#e0f2fe" stroke="#7dd3fc"/><text x="18" y="32" class="nt">Product event</text><text x="18" y="58" class="nc">Message, reply, curation,</text><text x="18" y="79" class="nc">document, data, media,</text><text x="18" y="100" class="nc">or completed artifact</text></g>
+  <path class="arrow" d="M320 241 H370"/>
+  <g transform="translate(375 185)"><rect width="250" height="112" rx="12" fill="#e0f2fe" stroke="#7dd3fc"/><text x="18" y="32" class="nt">Identity and scope</text><text x="18" y="58" class="nc">Invoking actor, AI identity,</text><text x="18" y="79" class="nc">community, origin object,</text><text x="18" y="100" class="nc">visibility, feature state</text></g>
+  <path class="arrow" d="M625 241 H675"/>
+  <g transform="translate(680 185)"><rect width="300" height="112" rx="12" fill="#e0f2fe" stroke="#7dd3fc"/><text x="18" y="32" class="nt">Bounded context</text><text x="18" y="58" class="nc">Conversation and reply ancestry,</text><text x="18" y="79" class="nc">authorized product retrieval, sources,</text><text x="18" y="100" class="nc">documents, data, and artifact state</text></g>
+  <path class="arrow" d="M980 241 H1030"/>
+  <g transform="translate(1035 185)"><rect width="320" height="112" rx="12" fill="#e0f2fe" stroke="#7dd3fc"/><text x="18" y="32" class="nt">Route and capability admission</text><text x="18" y="58" class="nc">Model and provider requirements,</text><text x="18" y="79" class="nc">turn-specific tool catalog, trusted scope,</text><text x="18" y="100" class="nc">deadlines, output and effect contracts</text></g>
+
+  <rect x="55" y="365" width="1390" height="330" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="398" class="band">AGENT EXECUTION AND EFFECTS</text>
+
+  <g transform="translate(110 445)"><rect width="300" height="145" rx="14" fill="#f0f9ff" stroke="#38bdf8" stroke-width="1.5"/><text x="20" y="34" class="nt">Model working state</text><text x="20" y="63" class="nc">Interpret request and current evidence</text><text x="20" y="85" class="nc">Select retrieval, analysis, or action</text><text x="20" y="107" class="nc">Accumulate structured tool results</text><text x="20" y="129" class="nc">Produce a terminal draft when ready</text></g>
+  <path class="arrow" d="M410 517 H490"/>
+  <g transform="translate(495 425)"><rect width="420" height="185" rx="14" fill="#ecfeff" stroke="#22d3ee" stroke-width="1.5"/><text x="20" y="34" class="nt">Typed capabilities</text><text x="20" y="64" class="nc">Internal search and product reads under trusted scope</text><text x="20" y="88" class="nc">Web and source retrieval, documents, PDFs, and data</text><text x="20" y="112" class="nc">Product actions, polls, files, forum operations, charts</text><text x="20" y="136" class="nc">Image and video description, generation, and editing</text><text x="20" y="160" class="nc">Each result returns validated state to the working turn</text></g>
+  <path class="arrow" d="M915 517 H995"/>
+  <g transform="translate(1000 445)"><rect width="330" height="145" rx="14" fill="#f0f9ff" stroke="#38bdf8" stroke-width="1.5"/><text x="20" y="34" class="nt">Terminal validation</text><text x="20" y="63" class="nc">Separate working protocol from reply</text><text x="20" y="85" class="nc">Check citations and artifact identities</text><text x="20" y="107" class="nc">Validate action and publication state</text><text x="20" y="129" class="nc">Commit one durable product outcome</text></g>
+  <path class="dash" d="M495 570 C440 650 260 650 260 590"/>
+  <text x="278" y="650" class="small">tool result returns to the same bounded turn</text>
+
+  <rect x="55" y="725" width="850" height="245" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="758" class="band">DURABLE PRODUCT STATE</text>
+  <g transform="translate(85 795)"><rect width="250" height="125" rx="12" fill="#eef2ff" stroke="#a5b4fc"/><text x="18" y="32" class="nt">Committed objects</text><text x="18" y="58" class="nc">Reply, forum update, action,</text><text x="18" y="79" class="nc">citation, artifact, activity,</text><text x="18" y="100" class="nc">job, and lifecycle state</text></g>
+  <path class="arrow" d="M335 857 H400"/>
+  <g transform="translate(405 795)"><rect width="200" height="125" rx="12" fill="#eef2ff" stroke="#a5b4fc"/><text x="18" y="32" class="nt">PostgreSQL</text><text x="18" y="58" class="nc">Canonical identities,</text><text x="18" y="79" class="nc">authorization inputs,</text><text x="18" y="100" class="nc">provenance and status</text></g>
+  <path class="arrow" d="M605 857 H670"/>
+  <g transform="translate(675 795)"><rect width="200" height="125" rx="12" fill="#eef2ff" stroke="#a5b4fc"/><text x="18" y="32" class="nt">Client delivery</text><text x="18" y="58" class="nc">Durable sync, API,</text><text x="18" y="79" class="nc">LiveView, Channels,</text><text x="18" y="100" class="nc">web and native UI</text></g>
+
+  <rect x="935" y="725" width="510" height="245" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="960" y="758" class="band">LONG-RUNNING EFFECTS</text>
+  <g transform="translate(965 795)"><rect width="185" height="125" rx="12" fill="#fff7ed" stroke="#fdba74"/><text x="16" y="32" class="nt">Pending artifact</text><text x="16" y="58" class="nc">Durable request,</text><text x="16" y="79" class="nc">provider attempt,</text><text x="16" y="100" class="nc">progress and failure</text></g>
+  <path class="arrow" d="M1150 857 H1185"/>
+  <g transform="translate(1190 795)"><rect width="225" height="125" rx="12" fill="#fff7ed" stroke="#fdba74"/><text x="16" y="32" class="nt">Terminal continuation</text><text x="16" y="58" class="nc">Completion or failure event</text><text x="16" y="79" class="nc">starts one deduplicated turn</text><text x="16" y="100" class="nc">under the original product scope</text></g>
+
+  <path class="arrow" d="M1165 590 V700 H210 V795"/>
+  <text x="280" y="690" class="small">validated terminal output creates the committed product object</text>
+  <path class="arrow" d="M705 610 V735 H1058 V795"/>
+  <text x="735" y="727" class="small">long-running capability creates a pending artifact before provider completion</text>
+</svg>

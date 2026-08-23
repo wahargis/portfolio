@@ -1,40 +1,19 @@
-flowchart TB
-    subgraph CLIENTS["Client layer"]
-      WEB["Phoenix web"]
-      NATIVE["React / TypeScript native clients"]
-    end
-    subgraph APP["Phoenix application"]
-      AUTH["Accounts + authorization"]
-      CHAT["Chat"]
-      FORUM["Forum"]
-      SYN["Synthesis + AI runtime"]
-      MEDIA["Media + artifacts"]
-      NOTIF["Notifications + settings"]
-      AUTH --> CHAT
-      AUTH --> FORUM
-      AUTH --> SYN
-      AUTH --> MEDIA
-      AUTH --> NOTIF
-    end
-    subgraph ASYNC["Durable asynchronous work"]
-      OBAN["Oban queues and schedules"]
-      WORKERS["Curation, AI reply, linkback, recuration, artifact, maintenance"]
-      OBAN --> WORKERS
-    end
-    subgraph STATE["State and realtime"]
-      PG[("PostgreSQL")]
-      ELECTRIC["Electric durable sync"]
-      PUBSUB["Phoenix PubSub / channels"]
-      PG --> ELECTRIC
-    end
-    WEB --> AUTH
-    NATIVE --> AUTH
-    SYN --> OBAN
-    WORKERS --> PG
-    CHAT --> PG
-    FORUM --> PG
-    MEDIA --> PG
-    ELECTRIC --> NATIVE
-    PUBSUB --> WEB
-    PUBSUB --> NATIVE
-    SYN --> EXT["Model, search, document, data, and media providers"]
+flowchart LR
+  subgraph TOP["ENTRY POINTS"]
+    T0["Phoenix web and LiveView\nServer-rendered interaction; and direct context calls"]
+    T1["API and native commands\nAuthenticated product commands; and durable client projection"]
+    T2["Channels and PubSub\nEphemeral presence, progress,; typing and product events"]
+    T3["Oban and supervised workers\nCuration, artifacts, repair,; notifications and continuation"]
+    T4["Callbacks and scheduled work\nProvider terminal events,; maintenance and timed workflows"]
+  end
+  subgraph BOTTOM["APPLICATION SERVICES"]
+    B0["Product contexts\nAccounts, membership, chat, forums,; search, media and domain validation"]
+    B1["Agent services\nContext, retrieval, routing, tools,; activity, evidence and terminal reply"]
+    B2["PostgreSQL authority\nObjects, relationships, lifecycle,; jobs, artifacts and sync state"]
+    B3["External adapters\nModels, search, documents, storage,; media, connectors and delivery"]
+  end
+  T0 --> B0
+  T1 --> B0
+  T2 --> B2
+  T3 --> B1
+  T4 --> B1

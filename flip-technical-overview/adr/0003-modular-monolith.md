@@ -1,24 +1,26 @@
-# ADR 0003 — Modular Phoenix monolith
+# ADR 0003: Modular Phoenix application
 
 - **Status:** Accepted
-- **Decision scope:** Product and data architecture
+- **Scope:** Main product deployment
 
 ## Context
 
-Chat, forum, synthesis, AI replies, citations, artifacts, notifications, and authorization share users, communities, transactions, realtime updates, and relational provenance. Splitting them into services would add network failure and eventual consistency before a demonstrated scale or ownership need.
+Flip's main workflows cross identity, membership, chat, forums, search, AI activity, curation, media, background work, and client delivery. Several operations require shared transactions or current authorization across these domains.
+
+Splitting the application into independently deployed services would add network failure, distributed transactions, duplicated authorization, and more operational state before those boundaries are justified by measured load or team ownership.
 
 ## Decision
 
-Use one Phoenix application with explicit domain contexts, one PostgreSQL authority, one migration path, one PubSub system, and Oban-backed asynchronous workflows.
+Keep the primary product as one Phoenix and Ecto application with explicit contexts and service boundaries. Use PostgreSQL as shared durable authority, Oban and supervised processes for background isolation, and provider adapters for external services.
 
-Contexts communicate through public domain functions and durable identifiers. “Single application” does not permit arbitrary cross-context table mutation.
+Contexts own their schemas and state transitions. Agent tools call the owning product context rather than writing across domains directly.
 
 ## Consequences
 
-Cross-domain transactions and source relationships remain straightforward. The application can be deployed compactly and scaled by nodes/roles before service extraction.
+The repository and application are large and require disciplined context ownership. Expensive background work must be isolated by queues, processes, and concurrency limits. Internal boundaries need tests because deployment does not enforce them.
 
-The cost is boundary discipline: large contexts or workers must be decomposed internally, and tests must detect unauthorized cross-domain coupling.
+The application retains straightforward product transactions and consistent authorization across chat, forums, curation, AI effects, and client state.
 
-## Revisit when
+## Revision conditions
 
-A domain has independently demonstrated scaling, release, regulatory, or team-ownership requirements that outweigh distributed consistency cost.
+Extract a workload when it has a stable contract, independent operating requirements, demonstrated scaling or fault-isolation need, and a clear solution for authorization and transaction boundaries.

@@ -1,17 +1,24 @@
-flowchart TD
-    CONTEXT["Actor + community + surface + feature state"] --> CATALOG["Server computes capability catalog"]
-    CATALOG --> MODEL["Model receives admitted schemas"]
-    MODEL --> CALL["Structured tool call"]
-    CALL --> PARSE{"Known name and valid arguments?"}
-    PARSE -->|no| REJECT["Structured rejection"]
-    PARSE -->|yes| SCOPE{"Trusted scope and domain authorization?"}
-    SCOPE -->|no| CLOSED["Fail closed"]
-    SCOPE -->|yes| ISO["Isolated task + timeout"]
-    ISO --> READ["Read / analysis tool"]
-    ISO --> EFFECT["Product action / durable artifact"]
-    READ --> RESULT["Normalized result + source identity"]
-    EFFECT --> RECEIPT["Domain effect + durable receipt"]
-    ISO -->|raise, exit, timeout| HONEST["Honest model-visible failure"]
-    RESULT --> LOOP["Return to bounded runtime"]
-    RECEIPT --> LOOP
-    HONEST --> LOOP
+flowchart LR
+  subgraph TOP["TOOL REQUEST PATH"]
+    T0["Model request\nTool name and user-controlled; arguments from the current round"]
+    T1["Capability lookup\nTool admitted for this actor,; surface, route and feature state"]
+    T0 --> T1
+    T2["Schema validation\nTyped arguments, size and format,; unsupported fields rejected"]
+    T1 --> T2
+    T3["Trusted scope injection\nActor, community, origin, AI identity,; workspace and operation identity"]
+    T2 --> T3
+    T4["Authorization and execution\nOwning product or external service,; timeout, concurrency and retry class"]
+    T3 --> T4
+    T5["Normalized result\nDurable result or effect identity,; status, evidence and failure returned"]
+    T4 --> T5
+  end
+  subgraph BOTTOM["RESULT CLASSES"]
+    B0["Read-only result\nScoped product record, source,; document passage or analysis data"]
+    B1["Committed product effect\nValidated mutation with canonical; identity, lifecycle and client event"]
+    B2["Pending asynchronous artifact\nProvider attempt, progress, terminal; state, cancellation and continuation"]
+    B3["Refusal or failure\nUnknown tool, invalid schema, denied; scope, timeout or unsafe retry"]
+  end
+  T5 --> B0
+  T5 --> B1
+  T5 --> B2
+  T5 --> B3

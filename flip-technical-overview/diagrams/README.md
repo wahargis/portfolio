@@ -1,28 +1,20 @@
 # Flip Diagram Index
 
-The diagrams isolate distinct parts of the product and runtime. SVG files are the rendered documents; Mermaid sources are retained beside diagrams where the source format is useful.
+These diagrams document product and agent execution flows. They show state ownership, authorization, persistence, effects, failure, and recovery rather than only naming components.
 
-| Diagram | System detail |
+| Diagram | System behavior |
 |---|---|
-| **[Product and AI runtime](product-runtime.svg)** | Community surfaces, shared domains, the complete AI participant turn, conversation curation, and durable/realtime infrastructure. |
-| [System context](system-context.svg) | Members, operators, clients, providers, and systems outside Flip's product authority. |
-| [Service and container map](service-container-map.svg) | Phoenix contexts, background work, PostgreSQL, synchronization, realtime delivery, and external capabilities. |
-| [AI reply lifecycle](agent-execution-sequence.svg) | Trigger admission, context construction, model and tool rounds, evidence, terminal composition, and message publication. |
-| [Governed tool execution](governed-tool-execution.svg) | Capability selection, trusted actor scope, argument validation, effect authority, execution, and audit. |
-| [Retrieval and citation flow](retrieval-source-citation-flow.svg) | Internal, external, and document sources becoming durable evidence and citations. |
-| [Chat-to-forum synthesis](synthesis-pipeline.svg) | Source selection, synthesis state, forum publication, lineage, and feedback. |
-| [Client synchronization](client-synchronization.svg) | Commands, optimistic state, server transactions, Electric delivery, and ephemeral Channels. |
-| [Model routing and audit](model-routing-audit.svg) | Product route policy, provider adapters, failure classification, activity, and usage records. |
-| [Deployment topology](deployment-topology.svg) | Product and synthetic environments sharing application architecture without sharing data or authority. |
-| [CI and quality gates](ci-quality-gates.svg) | Deterministic domain tests, client checks, provider evaluation, security checks, and release evidence. |
+| [Product runtime](product-runtime.svg) | One direct AI request from product trigger through actor scope, context, capability selection, model and tool execution, committed effects, durable state, and client delivery. |
+| [Platform execution](platform-execution.svg) | Direct and asynchronous agent execution, including pending artifacts and deduplicated continuation. |
+| [System context](system-context.svg) | Members, operators, clients, workflows, product domains, agent services, durable state, and external providers. |
+| [Service and container map](service-container-map.svg) | Phoenix entry points, product contexts, agent services, PostgreSQL authority, workers, realtime delivery, and provider adapters. |
+| [Agent execution sequence](agent-execution-sequence.svg) | Turn admission, context, route and tool admission, working rounds, terminal validation, product commit, and continuation. |
+| [Governed tool execution](governed-tool-execution.svg) | Capability lookup, schema validation, trusted scope, authorization, read-only results, committed effects, pending artifacts, and refusals. |
+| [Retrieval and citation flow](retrieval-source-citation-flow.svg) | Internal retrieval, external discovery, direct source reads, evidence records, citation validation, and incomplete-evidence handling. |
+| [Conversation curation](synthesis-pipeline.svg) | Source selection, curation run, planning, validation, forum publication, provenance, access, partial failure, and correction. |
+| [Client synchronization](client-synchronization.svg) | Optimistic commands, canonical commits, durable synchronization, realtime delivery, deduplication, offline recovery, and access revocation. |
+| [Model routing and audit](model-routing-audit.svg) | Workload requirements, route selection, provider adaptation, local or hosted execution, activity records, fallback, evaluation, and visible failure. |
+| [Product and synthetic environments](deployment-topology.svg) | Shared contracts with separate data, credentials, queues, storage, callbacks, and authority. |
+| [Testing and evaluation](ci-quality-gates.svg) | Deterministic product checks, agent and tool fixtures, background recovery, client convergence, security, route evaluation, and operational evidence. |
 
-The primary diagram is embedded in the [Flip case study](../README.md). The remaining diagrams accompany the consolidated technical documentation:
-
-- [Product and domain model](../docs/00-product-and-domain.md)
-- [System and data architecture](../docs/01-system-and-data-architecture.md)
-- [AI participant runtime](../docs/02-ai-participant-runtime.md)
-- [Retrieval, tools, and artifacts](../docs/03-retrieval-tools-and-artifacts.md)
-- [Clients and deployment](../docs/04-clients-and-deployment.md)
-- [Testing, operations, and current status](../docs/05-testing-operations-and-status.md)
-
-The diagrams omit production data, credentials, private hostnames, proprietary prompts and personas, exact abuse thresholds, and operational details that are not necessary to explain the architecture.
+Mermaid source is stored beside the rendered SVGs. Public diagrams omit product data, credentials, provider keys, private host configuration, prompt and persona state, and administrative access.

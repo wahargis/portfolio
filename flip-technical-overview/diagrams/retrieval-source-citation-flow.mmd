@@ -1,16 +1,25 @@
 flowchart LR
-    Q["User question"] --> KIND{"External, internal, document, or structured data?"}
-    KIND --> EXT["Search / direct source discovery"]
-    KIND --> INT["Actor-scoped product retrieval"]
-    KIND --> DOC["Document / PDF extraction"]
-    KIND --> DATA["Typed data provider"]
-    EXT --> READ["Read actual source"]
-    INT --> EVIDENCE["Authorized records + identifiers"]
-    DOC --> EVIDENCE
-    DATA --> EVIDENCE
-    READ --> EVIDENCE
-    EVIDENCE --> SELECT["Select supporting passage / records"]
-    SELECT --> MINT["Persist source + citation identity"]
-    MINT --> DRAFT["Model composes claim with citation token"]
-    DRAFT --> VERIFY["Validate identity, visibility, and quote support"]
-    VERIFY --> REPLY["Reply + reader-facing source ledger"]
+  subgraph TOP["EVIDENCE ACQUISITION"]
+    T0["Research question\nCurrent actor, origin, task,; known references and working budget"]
+    T1["Internal retrieval\nAuthorized product search, direct; reads and stable product references"]
+    T2["External discovery\nSearch results identify candidate; pages, files and source metadata"]
+    T3["Direct source read\nRetrieve selected pages, documents,; passages, tables or media evidence"]
+    T4["Evidence records\nCanonical source identity, content,; selected passages, status and relation"]
+    T5["Analysis and terminal use\nSynthesize, calculate or compare,; then cite stored evidence only"]
+  end
+  subgraph BOTTOM["VALIDATION AND USER OUTPUT"]
+    B0["Citation validation\nReference exists, belongs to admitted; evidence and remains visible"]
+    B1["Reader-facing source view\nTitle, link or product reference,; relevant status without private trace"]
+    B2["Administrative activity\nTool input class, route, duration,; errors and complete source lineage"]
+    B3["Incomplete evidence\nFailed reads and unsupported claims; remain explicit in terminal behavior"]
+  end
+  T0 --> T1
+  T0 --> T2
+  T2 --> T3
+  T1 --> T4
+  T3 --> T4
+  T4 --> T5
+  T5 --> B0
+  T5 --> B1
+  T5 --> B2
+  T5 --> B3

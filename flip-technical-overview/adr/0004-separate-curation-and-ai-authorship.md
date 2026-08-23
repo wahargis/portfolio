@@ -1,25 +1,27 @@
-# ADR 0004 — Separate curation and AI authorship
+# ADR 0004: Separate curation from direct AI authorship
 
 - **Status:** Accepted
-- **Decision scope:** Content integrity
+- **Scope:** AI-created and AI-assisted content
 
 ## Context
 
-Models are used both to organize human conversation into durable structure and to author new AI replies. Treating these as one workflow makes it unclear who said what.
+A direct AI reply creates new content attributed to an AI identity. Conversation curation selects and reorganizes content written by human participants. Treating both as generic generation would make authorship, source relationships, access, and correction unclear.
 
 ## Decision
 
-Model two paths:
+Use separate workflows and data relationships:
 
-1. **Curation:** preserve source-message and participant identity; use AI for topic structure, placement, and bounded bridge context.
-2. **AI participation:** persist new content under an explicit AI identity with trigger, citation, artifact, and action provenance.
-
-The UI and data model must keep source text, structural curation text, and AI-authored text distinguishable.
+- direct AI content is attributed to the AI identity and associated with its activity, tools, sources, and artifacts;
+- curation records selected messages, source participants, plan and destination state, forum objects, linkback, feedback, and recuration history;
+- generated headings or bridge text in curation are identified as AI additions rather than reassigned source authorship;
+- source visibility remains part of access decisions for curation-derived content.
 
 ## Consequences
 
-The product carries more content types and lifecycle rules, but it avoids silently rewriting community history or presenting AI composition as participant speech.
+The application maintains two related but distinct AI content paths. Curation requires more durable state than a summary call, including selection version, destination validation, source relationships, partial failure, and correction.
 
-## Revisit when
+The product can answer who wrote a piece of content, which conversation produced a forum item, and which generated additions were made during curation.
 
-No expected change. Implementations may evolve, but the authorship distinction is a product integrity invariant.
+## Revision conditions
+
+Add another content mode only when its authorship and provenance requirements cannot be represented by direct AI authorship or conversation curation.

@@ -1,17 +1,26 @@
 flowchart LR
-    CHANGE["Code, schema, client, or route change"] --> DET["Deterministic gates"]
-    DET --> UNIT["Domain + authorization tests"]
-    DET --> INT["Database, jobs, migrations, provider adapters"]
-    DET --> CLIENT["Client sync, reconciliation, native build"]
-    DET --> SEC["Security and dependency checks"]
-    UNIT --> BUILD["Compile / release / container build"]
-    INT --> BUILD
-    CLIENT --> BUILD
-    SEC --> BUILD
-    BUILD --> SCEN["Selected end-to-end scenarios"]
-    SCEN --> EVAL["Versioned AI route and curation evaluation"]
-    EVAL --> RELEASE{"Evidence acceptable?"}
-    RELEASE -->|yes| SHIP["Deploy"]
-    RELEASE -->|no| BLOCK["Block or constrain route / feature"]
-    SHIP --> OBS["Operational and user quality signals"]
-    OBS --> EVAL
+  subgraph TOP["DETERMINISTIC SYSTEM CHECKS"]
+    T0["Schema and static checks\nMigrations, types, formats, links,; configuration and secret scanning"]
+    T1["Product-domain tests\nIdentity, authorization, transactions,; effects, provenance and lifecycle"]
+    T0 --> T1
+    T2["Agent and tool fixtures\nAdmission, context, tool protocol,; terminal validation and retry classes"]
+    T1 --> T2
+    T3["Background recovery\nJobs, stale work, callbacks, artifacts,; continuation and partial failure"]
+    T2 --> T3
+    T4["Client convergence\nOptimistic state, sync, realtime order,; offline recovery and revocation"]
+    T3 --> T4
+    T5["Security and isolation\nScope override, cross-community reads,; replay, unsafe target and environment boundary"]
+    T4 --> T5
+  end
+  subgraph BOTTOM["MODEL AND OPERATIONAL EVIDENCE"]
+    B0["Route evaluation\nConversation, research, curation,; documents, tools and multimodal work"]
+    B1["Failure injection\nProvider, tool, worker, database,; storage, network and stale-state cases"]
+    B2["Operational records\nLatency, usage, queue, tool, artifact,; continuation and client delivery state"]
+    B3["Release decision\nAffected deterministic checks, route; evaluation and public contract updates"]
+  end
+  B0 --> B3
+  B1 --> B3
+  B2 --> B3
+  T5 --> B0
+  T5 --> B1
+  T5 --> B2
