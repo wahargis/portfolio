@@ -1,52 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
-  <title id="title">Project Manager architecture</title>
-  <desc id="desc">CLI, MCP, and web surfaces share a Rust application core. A typed evidence graph, separate contradiction and confidence review, and a deterministic execution DAG persist in SQLite.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Project Manager research operations architecture</title>
+  <desc id="desc">CLI, MCP, and web interfaces share one Rust application. Portfolio planning, experiment and evidence workflows, hypothesis and decision lifecycles, session context, and review services use deterministic DAG, graph, truth-maintenance, retrieval, and validation engines over one versioned SQLite store.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}.note{fill:#fff;stroke:#646b75;stroke-width:1.5;stroke-dasharray:7 6;rx:12}
-      .title{font:700 27px Arial,sans-serif;fill:#17191d}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 18px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .bg{fill:#f8fafc}.group{fill:#ffffff;stroke:#64748b;stroke-width:2;rx:18}.box{fill:#ffffff;stroke:#334155;stroke-width:2;rx:12}.service{fill:#eff6ff;stroke:#1d4ed8;stroke-width:2;rx:12}.engine{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;rx:12}.store{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:14}.title{font:700 30px Arial,sans-serif;fill:#0f172a}.subtitle{font:16px Arial,sans-serif;fill:#475569}.label{font:700 13px Arial,sans-serif;fill:#475569;letter-spacing:1.2px}.head{font:700 18px Arial,sans-serif;fill:#0f172a}.body{font:15px Arial,sans-serif;fill:#334155}.small{font:13px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}
     </style>
   </defs>
-  <rect class="bg" width="1200" height="760"/>
-  <text x="55" y="52" class="title">Project Manager: durable reasoning and deterministic execution control</text>
+  <rect class="bg" width="1400" height="900"/>
+  <text x="55" y="52" class="title">Project Manager: research operations and durable project state</text>
+  <text x="55" y="80" class="subtitle">Planning, evidence, decisions, context, and integrity checks operate on one typed project record.</text>
 
-  <rect class="group" x="55" y="85" width="1090" height="118"/>
-  <text x="80" y="113" class="label">INTERFACES</text>
-  <rect class="box" x="90" y="132" width="285" height="48"/><text x="210" y="163" class="head">CLI</text>
-  <rect class="box" x="458" y="132" width="285" height="48"/><text x="566" y="163" class="head">MCP</text>
-  <rect class="box" x="825" y="132" width="285" height="48"/><text x="925" y="163" class="head">Web</text>
+  <rect class="group" x="55" y="110" width="1290" height="115"/>
+  <text x="80" y="140" class="label">INTERFACES</text>
+  <rect class="box" x="95" y="158" width="340" height="45"/><text x="235" y="188" class="head">CLI</text>
+  <rect class="box" x="530" y="158" width="340" height="45"/><text x="665" y="188" class="head">MCP stdio</text>
+  <rect class="box" x="965" y="158" width="340" height="45"/><text x="1080" y="188" class="head">Web dashboard</text>
 
-  <path class="arrow" d="M600 203 L600 245"/>
-  <rect class="group" x="55" y="245" width="1090" height="320"/>
-  <text x="80" y="275" class="label">SHARED RUST APPLICATION CORE</text>
+  <path class="arrow" d="M700 225 L700 265"/>
+  <rect class="group" x="55" y="265" width="1290" height="235"/>
+  <text x="80" y="295" class="label">APPLICATION WORKFLOWS</text>
+  <rect class="service" x="85" y="325" width="230" height="135"/>
+  <text x="110" y="355" class="head">Portfolio and phases</text><text x="110" y="382" class="body">projects · subprojects</text><text x="110" y="405" class="body">dependencies · impact</text><text x="110" y="428" class="small">actionable work and completion gates</text>
+  <rect class="service" x="335" y="325" width="230" height="135"/>
+  <text x="360" y="355" class="head">Experiments and evidence</text><text x="360" y="382" class="body">experiments · findings</text><text x="360" y="405" class="body">branches · convergence</text><text x="360" y="428" class="small">causal upstream requirements</text>
+  <rect class="service" x="585" y="325" width="230" height="135"/>
+  <text x="610" y="355" class="head">Interpretation</text><text x="610" y="382" class="body">hypotheses · decisions</text><text x="610" y="405" class="body">literature · principles</text><text x="610" y="428" class="small">confidence and belief lifecycle</text>
+  <rect class="service" x="835" y="325" width="230" height="135"/>
+  <text x="860" y="355" class="head">Session continuity</text><text x="860" y="382" class="body">active experiment</text><text x="860" y="405" class="body">temporal delta · handoff</text><text x="860" y="428" class="small">bounded active-phase context</text>
+  <rect class="service" x="1085" y="325" width="230" height="135"/>
+  <text x="1110" y="355" class="head">Review and repair</text><text x="1110" y="382" class="body">operational review</text><text x="1110" y="405" class="body">graph audit · orphan repair</text><text x="1110" y="428" class="small">contradictions and stale state</text>
 
-  <rect class="box" x="85" y="305" width="310" height="155"/>
-  <text x="110" y="338" class="head">Typed evidence graph</text>
-  <text x="110" y="367" class="body">findings · experiments · decisions</text>
-  <text x="110" y="391" class="body">hypotheses · constraints · feedback</text>
-  <text x="110" y="423" class="small">support · contradiction · supersession</text>
-  <text x="110" y="446" class="small">derivation · testing · provenance</text>
+  <path class="arrow" d="M700 500 L700 540"/>
+  <rect class="group" x="55" y="540" width="1290" height="170"/>
+  <text x="80" y="570" class="label">SHARED RUST ENGINES</text>
+  <rect class="engine" x="85" y="600" width="280" height="78"/>
+  <text x="110" y="630" class="head">Execution DAG</text><text x="110" y="654" class="body">topology · ready phases · stagnation</text>
+  <rect class="engine" x="395" y="600" width="280" height="78"/>
+  <text x="420" y="630" class="head">Graph and truth maintenance</text><text x="420" y="654" class="body">typed traversal · support · contradiction</text>
+  <rect class="engine" x="705" y="600" width="280" height="78"/>
+  <text x="730" y="630" class="head">Retrieval and context</text><text x="730" y="654" class="body">ranked search · subgraphs · temporal delta</text>
+  <rect class="engine" x="1015" y="600" width="300" height="78"/>
+  <text x="1040" y="630" class="head">Lifecycle validation</text><text x="1040" y="654" class="body">causal guards · transitions · consistency</text>
 
-  <rect class="box" x="445" y="305" width="310" height="155"/>
-  <text x="470" y="338" class="head">Review analysis</text>
-  <text x="470" y="367" class="body">contradiction candidates</text>
-  <text x="470" y="391" class="body">numeric confidence scoring</text>
-  <text x="470" y="423" class="small">review evidence for people and agents</text>
-  <text x="470" y="446" class="small">not an automatic scheduler gate</text>
-
-  <rect class="box" x="805" y="305" width="310" height="155"/>
-  <text x="830" y="338" class="head">Execution DAG</text>
-  <text x="830" y="367" class="body">phase dependencies · completion</text>
-  <text x="830" y="391" class="body">topological order · cycle checks</text>
-  <text x="830" y="423" class="small">ready phases filtered by dependencies</text>
-  <text x="830" y="446" class="small">and ordered by impact</text>
-
-  <rect class="note" x="270" y="490" width="660" height="48"/>
-  <text x="326" y="520" class="body">Analysis informs review and planning; the current DAG remains deterministic and separately controlled.</text>
-
-  <path class="arrow" d="M600 565 L600 615"/>
-  <rect class="box" x="245" y="615" width="710" height="86"/>
-  <text x="510" y="649" class="head">SQLite persistence</text>
-  <text x="330" y="678" class="body">typed nodes and edges · phase state · migrations · retrieval and session records</text>
+  <path class="arrow" d="M700 710 L700 750"/>
+  <rect class="store" x="130" y="750" width="1140" height="105"/>
+  <text x="575" y="785" class="head">Versioned SQLite project store</text>
+  <text x="225" y="817" class="body">projects · phases · experiments · findings · hypotheses · decisions · literature · constraints · principles · feedback · sessions</text>
+  <text x="260" y="842" class="small">typed relationships · timestamps · belief state · migrations · interface-independent application semantics</text>
 </svg>
