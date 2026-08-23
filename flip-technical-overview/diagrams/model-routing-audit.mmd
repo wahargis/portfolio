@@ -1,13 +1,24 @@
 flowchart LR
-    RUNTIME["Product runtime: context, tools, terminal contract"] --> POLICY["Route policy"]
-    POLICY --> MATCH{"Capability and policy match"}
-    MATCH --> ADAPTER["Provider adapter"]
-    ADAPTER --> HOSTED["Hosted endpoint"]
-    ADAPTER --> LOCAL["Local / HomeCloud endpoint"]
-    HOSTED --> NORMAL["Normalized content, tool calls, usage, errors"]
-    LOCAL --> NORMAL
-    NORMAL --> RUNTIME
-    ADAPTER --> CIRCUIT["Health, circuit, and bounded fallback"]
-    CIRCUIT --> POLICY
-    RUNTIME --> AUDIT["Durable reply/artifact + operational correlation"]
-    POLICY --> AUDIT
+  subgraph TOP["ROUTE EXECUTION"]
+    T0["Workload profile\nConversation, research, curation,; documents, vision or generation"]
+    T1["Route requirements\nModality, context, tools, privacy,; latency, cost and evaluation status"]
+    T0 --> T1
+    T2["Route selection\nCompatible healthy model, provider,; endpoint, limits and fallback policy"]
+    T1 --> T2
+    T3["Provider adapter\nTranslate request, normalize streams,; tool calls, finish and failure state"]
+    T2 --> T3
+    T4["Local or hosted execution\nFinite local capacity or managed; provider rate and service limits"]
+    T3 --> T4
+    T5["Normalized terminal state\nReply, refusal, timeout, protocol; error, usage and asynchronous job"]
+    T4 --> T5
+  end
+  subgraph BOTTOM["AUDIT, FALLBACK, AND EVALUATION"]
+    B0["Activity record\nRoute, attempts, timing, usage, tools,; sources, artifacts and outcome"]
+    B1["Compatible fallback\nPreserve modality, tools, privacy,; context, deadline and evidence state"]
+    B2["Route evaluation\nWorkload-specific accuracy, tool use,; latency, cost and failure behavior"]
+    B3["Visible failure\nPreserve product state and completed; evidence when no compatible route remains"]
+  end
+  T5 --> B0
+  T2 --> B1
+  T2 --> B2
+  T5 --> B3

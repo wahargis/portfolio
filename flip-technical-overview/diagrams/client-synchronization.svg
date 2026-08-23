@@ -1,61 +1,61 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="740" viewBox="0 0 1280 740" role="img" aria-labelledby="title desc">
-<title id="title">Web and native state synchronization</title>
-<desc id="desc">Authoritative HTTP commands, Electric durable synchronization, and Phoenix ephemeral channels serve different state classes.</desc>
-<defs>
-          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-            <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-          </marker>
-          <style>
-            .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
-            .soft{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:16}
-            .decision{fill:#fff;stroke:#30343b;stroke-width:2}
-            .title{font:700 25px Arial,sans-serif;fill:#17191d}
-            .head{font:700 16px Arial,sans-serif;fill:#20242a}
-            .body{font:14px Arial,sans-serif;fill:#454b55}
-            .small{font:12px Arial,sans-serif;fill:#555d68}
-            .label{font:700 12px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
-            .arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
-            .dash{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
-            .line{stroke:#30343b;stroke-width:2;fill:none}
-          </style>
-        </defs>
-<rect class="bg" width="1280" height="740"/>
-<text x="45" y="45" class="title">Web and native state synchronization</text>
-<rect class="soft" x="55" y="100" width="340" height="180"/>
-<text x="75" y="131" class="head">Client</text>
-<text x="75" y="157" class="body">UI + local draft</text>
-<text x="75" y="179" class="body">optimistic mutation</text>
-<text x="75" y="201" class="body">authorized durable cache</text>
-<text x="75" y="223" class="body">presence / typing</text>
-<rect class="box" x="475" y="100" width="330" height="180"/>
-<text x="495" y="131" class="head">Phoenix authority</text>
-<text x="495" y="157" class="body">HTTP/domain commands</text>
-<text x="495" y="179" class="body">authorization + validation</text>
-<text x="495" y="201" class="body">canonical identities</text>
-<text x="495" y="223" class="body">channels / PubSub</text>
-<rect class="box" x="885" y="100" width="330" height="180"/>
-<text x="905" y="131" class="head">PostgreSQL</text>
-<text x="905" y="157" class="body">durable messages/threads</text>
-<text x="905" y="179" class="body">permissions · artifacts</text>
-<text x="905" y="201" class="body">transaction identity</text>
-<path class="arrow" d="M395 170 L475 170"/>
-<text x="435.0" y="162.0" text-anchor="middle" class="small">command</text>
-<path class="arrow" d="M805 170 L885 170"/>
-<text x="845.0" y="162.0" text-anchor="middle" class="small">transaction</text>
-<rect class="soft" x="190" y="410" width="360" height="130"/>
-<text x="210" y="441" class="head">Electric durable sync</text>
-<text x="210" y="467" class="body">authorized shapes</text>
-<text x="210" y="489" class="body">reconnect and canonical convergence</text>
-<rect class="soft" x="730" y="410" width="360" height="130"/>
-<text x="750" y="441" class="head">Ephemeral realtime</text>
-<text x="750" y="467" class="body">presence · typing</text>
-<text x="750" y="489" class="body">transient progress / alerts</text>
-<path class="arrow" d="M1050 280 L1050 345 L370 345 L370 410"/>
-<text x="375" y="337" class="small">committed rows</text>
-<path class="arrow" d="M370 540 L370 620 L225 620 L225 280"/>
-<text x="230" y="612" class="small">reconcile optimistic state</text>
-<path class="arrow" d="M640 280 L640 350 L910 350 L910 410"/>
-<text x="915" y="342" class="small">channel events</text>
-<path class="dash" d="M910 540 L910 620 L345 620 L345 280"/>
-<text x="350" y="612" class="small">non-durable projection</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="930" viewBox="0 0 1500 930" role="img" aria-labelledby="title desc">
+<title id="title">Web and native-client state convergence</title><desc id="desc">Commands, durable synchronization, and realtime events can arrive in different orders and still resolve to one canonical product state.</desc>
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
+<style>.h1{font:700 31px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}.band{font:700 15px Inter,Arial,sans-serif;letter-spacing:.8px}.nt{font:700 16px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 13.5px Inter,Arial,sans-serif;fill:#334155}.railtitle{font:700 13px Inter,Arial,sans-serif;fill:#334155;letter-spacing:.5px}.rail{font:400 13px Inter,Arial,sans-serif;fill:#475569}.arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.drop{stroke:#64748b;stroke-width:1.8;fill:none;marker-end:url(#arrow)}</style></defs>
+<rect width="1500" height="930" fill="#f8fafc"/>
+<text x="70" y="58" class="h1">Web and native-client state convergence</text><text x="70" y="88" class="sub">Commands, durable synchronization, and realtime events can arrive in different orders and still resolve to one canonical product state.</text>
+<rect x="50" y="120" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="155" class="band" fill="#0369a1">COMMAND AND DELIVERY PATHS</text>
+<rect x="50" y="435" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="470" class="band" fill="#6d28d9">CLIENT RECONCILIATION</text>
+<rect x="70.0" y="205" width="206.7" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="86.0" y="236" class="nt">Local interaction</text>
+<text x="86.0" y="263" class="nc">Draft, optimistic object and</text>
+<text x="86.0" y="284" class="nc">client transaction identity</text>
+<rect x="300.7" y="205" width="206.7" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="316.7" y="236" class="nt">Server command</text>
+<text x="316.7" y="263" class="nc">Authenticate, authorize, validate</text>
+<text x="316.7" y="284" class="nc">target and current product state</text>
+<rect x="531.3" y="205" width="206.7" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="547.3" y="236" class="nt">Canonical commit</text>
+<text x="547.3" y="263" class="nc">PostgreSQL object, version, lifecycle</text>
+<text x="547.3" y="284" class="nc">and transaction relationship</text>
+<rect x="762.0" y="205" width="206.7" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="778.0" y="236" class="nt">Command response</text>
+<text x="778.0" y="263" class="nc">Canonical identity or structured</text>
+<text x="778.0" y="284" class="nc">refusal may arrive first or last</text>
+<rect x="992.7" y="205" width="206.7" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="1008.7" y="236" class="nt">Durable synchronization</text>
+<text x="1008.7" y="263" class="nc">Authorized projection, updates,</text>
+<text x="1008.7" y="284" class="nc">deletions and access-driven removal</text>
+<rect x="1223.3" y="205" width="206.7" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="1239.3" y="236" class="nt">Realtime event</text>
+<text x="1239.3" y="263" class="nc">Presence, typing, transient progress</text>
+<text x="1239.3" y="284" class="nc">and low-latency product notification</text>
+<rect x="70.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="86.0" y="551" class="nt">Deduplicate</text>
+<text x="86.0" y="578" class="nc">Local transaction, canonical identity</text>
+<text x="86.0" y="599" class="nc">and server version collapse delivery paths</text>
+<rect x="416.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="432.0" y="551" class="nt">Offline recovery</text>
+<text x="432.0" y="578" class="nc">Reload durable state without replaying</text>
+<text x="432.0" y="599" class="nc">all missed realtime events</text>
+<rect x="762.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="778.0" y="551" class="nt">Capability negotiation</text>
+<text x="778.0" y="578" class="nc">Render authentication, upload, push,</text>
+<text x="778.0" y="599" class="nc">sync and AI features actually available</text>
+<rect x="1108.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="1124.0" y="551" class="nt">Access revocation</text>
+<text x="1124.0" y="578" class="nc">Remove cached records, controls and</text>
+<text x="1124.0" y="599" class="nc">local search after projection changes</text>
+<path class="arrow" d="M276.7 277.5 H296.7"/>
+<path class="arrow" d="M507.3 277.5 H527.3"/>
+<path class="arrow" d="M738.0 277.5 H758.0"/>
+<path class="drop" d="M738.0 277.5 V187.0 H992.7 V277.5"/>
+<path class="drop" d="M738.0 277.5 V187.0 H1223.3 V277.5"/>
+<path class="drop" d="M865.3 350 V430 H231.0 V520"/>
+<path class="drop" d="M1096.0 350 V430 H231.0 V520"/>
+<path class="drop" d="M1326.7 350 V430 H231.0 V520"/>
+<path class="drop" d="M1096.0 350 V430 H577.0 V520"/>
+<path class="drop" d="M1096.0 350 V430 H923.0 V520"/>
+<path class="drop" d="M1096.0 350 V430 H1269.0 V520"/>
+<rect x="50" y="755" width="1400" height="105" rx="14" fill="#e2e8f0"/><text x="75" y="797" class="railtitle">SOURCES OF TRUTH</text><text x="75" y="828" class="rail">PostgreSQL owns durable product and workflow state; Channels own ephemeral delivery; clients own drafts until server acceptance.</text>
 </svg>

@@ -1,53 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
-<title id="title">Flip service and container map</title>
-<desc id="desc">The client layer talks to a modular Phoenix application. Product contexts share PostgreSQL, Oban, Electric, and PubSub; external models and tools remain behind product-owned adapters.</desc>
-<defs>
-          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-            <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-          </marker>
-          <style>
-            .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
-            .soft{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:16}
-            .decision{fill:#fff;stroke:#30343b;stroke-width:2}
-            .title{font:700 25px Arial,sans-serif;fill:#17191d}
-            .head{font:700 16px Arial,sans-serif;fill:#20242a}
-            .body{font:14px Arial,sans-serif;fill:#454b55}
-            .small{font:12px Arial,sans-serif;fill:#555d68}
-            .label{font:700 12px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
-            .arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
-            .dash{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
-            .line{stroke:#30343b;stroke-width:2;fill:none}
-          </style>
-        </defs>
-<rect class="bg" width="1280" height="760"/>
-<text x="45" y="45" class="title">Flip service and container map</text>
-<rect class="soft" x="55" y="95" width="1170" height="105"/>
-<text x="75" y="126" class="head">Client layer</text>
-<text x="75" y="152" class="body">Phoenix web · React/TypeScript client · Tauri desktop · Capacitor mobile</text>
-<rect class="soft" x="55" y="260" width="1170" height="220"/>
-<text x="75" y="291" class="head">Phoenix modular application</text>
-<text x="75" y="317" class="body">accounts + authorization · chat · forum · synthesis + AI runtime</text>
-<text x="75" y="339" class="body">notifications · media/artifacts · settings/support · audit</text>
-<text x="75" y="361" class="body">HTTP/domain commands · synchronization controllers · channels</text>
-<rect class="box" x="55" y="565" width="270" height="110"/>
-<text x="75" y="596" class="head">PostgreSQL</text>
-<text x="75" y="622" class="body">canonical durable state</text>
-<text x="75" y="644" class="body">search · provenance</text>
-<rect class="box" x="365" y="565" width="250" height="110"/>
-<text x="385" y="596" class="head">Oban</text>
-<text x="385" y="622" class="body">queues · schedules</text>
-<text x="385" y="644" class="body">retry · uniqueness</text>
-<rect class="box" x="655" y="565" width="250" height="110"/>
-<text x="675" y="596" class="head">Realtime</text>
-<text x="675" y="622" class="body">Electric durable sync</text>
-<text x="675" y="644" class="body">PubSub / channels</text>
-<rect class="box" x="945" y="565" width="280" height="110"/>
-<text x="965" y="596" class="head">External capability</text>
-<text x="965" y="622" class="body">model endpoints</text>
-<text x="965" y="644" class="body">search/data/docs/media</text>
-<path class="arrow" d="M640 200 L640 260"/>
-<path class="arrow" d="M300 480 L300 525 L190 525 L190 565"/>
-<path class="arrow" d="M520 480 L520 565"/>
-<path class="arrow" d="M760 480 L760 565"/>
-<path class="arrow" d="M1010 480 L1010 565"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="930" viewBox="0 0 1500 930" role="img" aria-labelledby="title desc">
+<title id="title">Flip application and service containers</title><desc id="desc">Entry points call shared product contexts; background work and provider adapters operate against durable application state.</desc>
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
+<style>.h1{font:700 31px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}.band{font:700 15px Inter,Arial,sans-serif;letter-spacing:.8px}.nt{font:700 16px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 13.5px Inter,Arial,sans-serif;fill:#334155}.railtitle{font:700 13px Inter,Arial,sans-serif;fill:#334155;letter-spacing:.5px}.rail{font:400 13px Inter,Arial,sans-serif;fill:#475569}.arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.drop{stroke:#64748b;stroke-width:1.8;fill:none;marker-end:url(#arrow)}</style></defs>
+<rect width="1500" height="930" fill="#f8fafc"/>
+<text x="70" y="58" class="h1">Flip application and service containers</text><text x="70" y="88" class="sub">Entry points call shared product contexts; background work and provider adapters operate against durable application state.</text>
+<rect x="50" y="120" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="155" class="band" fill="#0369a1">ENTRY POINTS</text>
+<rect x="50" y="435" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="470" class="band" fill="#15803d">APPLICATION SERVICES</text>
+<rect x="70.0" y="205" width="252.8" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="86.0" y="236" class="nt">Phoenix web and LiveView</text>
+<text x="86.0" y="263" class="nc">Server-rendered interaction</text>
+<text x="86.0" y="284" class="nc">and direct context calls</text>
+<rect x="346.8" y="205" width="252.8" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="362.8" y="236" class="nt">API and native commands</text>
+<text x="362.8" y="263" class="nc">Authenticated product commands</text>
+<text x="362.8" y="284" class="nc">and durable client projection</text>
+<rect x="623.6" y="205" width="252.8" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="639.6" y="236" class="nt">Channels and PubSub</text>
+<text x="639.6" y="263" class="nc">Ephemeral presence, progress,</text>
+<text x="639.6" y="284" class="nc">typing and product events</text>
+<rect x="900.4" y="205" width="252.8" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="916.4" y="236" class="nt">Oban and supervised workers</text>
+<text x="916.4" y="263" class="nc">Curation, artifacts, repair,</text>
+<text x="916.4" y="284" class="nc">notifications and continuation</text>
+<rect x="1177.2" y="205" width="252.8" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="1193.2" y="236" class="nt">Callbacks and scheduled work</text>
+<text x="1193.2" y="263" class="nc">Provider terminal events,</text>
+<text x="1193.2" y="284" class="nc">maintenance and timed workflows</text>
+<rect x="70.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="86.0" y="551" class="nt">Product contexts</text>
+<text x="86.0" y="578" class="nc">Accounts, membership, chat, forums,</text>
+<text x="86.0" y="599" class="nc">search, media and domain validation</text>
+<rect x="416.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="432.0" y="551" class="nt">Agent services</text>
+<text x="432.0" y="578" class="nc">Context, retrieval, routing, tools,</text>
+<text x="432.0" y="599" class="nc">activity, evidence and terminal reply</text>
+<rect x="762.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="778.0" y="551" class="nt">PostgreSQL authority</text>
+<text x="778.0" y="578" class="nc">Objects, relationships, lifecycle,</text>
+<text x="778.0" y="599" class="nc">jobs, artifacts and sync state</text>
+<rect x="1108.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="1124.0" y="551" class="nt">External adapters</text>
+<text x="1124.0" y="578" class="nc">Models, search, documents, storage,</text>
+<text x="1124.0" y="599" class="nc">media, connectors and delivery</text>
+<path class="drop" d="M392.0 592.5 V502.0 H762.0 V592.5"/>
+<path class="arrow" d="M738.0 592.5 H758.0"/>
+<path class="drop" d="M738.0 592.5 V502.0 H1108.0 V592.5"/>
+<path class="drop" d="M196.4 350 V430 H231.0 V520"/>
+<path class="drop" d="M473.2 350 V430 H231.0 V520"/>
+<path class="drop" d="M750.0 350 V430 H923.0 V520"/>
+<path class="drop" d="M1026.8 350 V430 H577.0 V520"/>
+<path class="drop" d="M1303.6 350 V430 H577.0 V520"/>
+<rect x="50" y="755" width="1400" height="105" rx="14" fill="#e2e8f0"/><text x="75" y="797" class="railtitle">TRANSACTION AND RECOVERY</text><text x="75" y="828" class="rail">Product effects commit through owning contexts; queued work refers to durable records; clients recover from canonical state.</text>
 </svg>

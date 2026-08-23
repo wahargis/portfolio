@@ -1,22 +1,26 @@
-# ADR 0007 — Provider-compatible inference boundary
+# ADR 0007: Product-owned inference routes and provider adapters
 
 - **Status:** Accepted
-- **Decision scope:** Model routing
+- **Scope:** Local and hosted model execution
 
 ## Context
 
-Flip uses models for several surfaces with different latency, context, tool, and modality requirements. Provider APIs and tool-call behavior change over time. Product semantics should not be tied to one model vendor.
+Flip uses different models and providers for conversation, research, structured planning, document work, vision, and media generation. Provider APIs differ in streaming, tool calls, context, structured output, usage, errors, and asynchronous operation.
+
+Product identity, access, tools, effects, and persistence should not change when a route changes.
 
 ## Decision
 
-Define a product-owned inference envelope and normalize provider behavior behind adapters. Route policy selects a compatible local or hosted endpoint based on surface requirements and deployment policy.
+Flip constructs a provider-independent request containing selected context, AI identity and instructions, admitted tools, output requirements, deadlines, route metadata, and activity identity.
 
-Identity, permissions, admitted tools, citations, terminal behavior, and persistence remain in Flip.
+Provider adapters translate the request and normalize meaningful events while preserving capability differences. Route selection and fallback consider modality, context, tools, privacy, health, latency, cost, and route-specific evaluation.
 
 ## Consequences
 
-Adapters must handle tool-call, streaming, finish-reason, forced-tool, and error-shape differences. Models can be evaluated and replaced by surface without redesigning the product.
+Adapters and evaluations require maintenance as providers change. Not every provider can be substituted for every workload. Fallback can fail when no compatible route remains.
 
-## Revisit when
+The product can use local and hosted inference without giving providers authority over product scope or durable effects.
 
-A stable cross-provider protocol removes meaningful adapter differences while preserving current product control.
+## Revision conditions
+
+Extend the request or event contract when a provider capability cannot be represented accurately. Do not bypass the product runtime for convenience.

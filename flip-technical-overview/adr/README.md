@@ -1,18 +1,18 @@
-# Flip Architecture Decisions
+# Architecture decision records
 
-These records document stable architectural choices that affect product behavior, state, authorization, deployment, or recovery. Production data, credentials, proprietary prompt and persona configuration, security-sensitive thresholds, and private implementation chronology are outside their scope.
+These records summarize decisions that affect Flip's public system architecture. They state the context, current decision, consequences, and conditions for revision.
+
+The records are public technical documentation. They do not link to the private implementation repository and do not expose product data, credentials, provider keys, host configuration, prompt and persona state, or administrative access.
 
 | ADR | Decision |
 |---|---|
-| [0001](0001-public-architecture-boundary.md) | Publish selected architecture and implementation evidence without mirroring the private source repository. |
-| [0002](0002-separate-demo-environment.md) | Keep the synthetic technical environment separate from product data and authority. |
-| [0003](0003-modular-monolith.md) | Use a modular Phoenix application with PostgreSQL as durable product authority. |
-| [0004](0004-separate-curation-and-ai-authorship.md) | Represent conversation curation separately from newly AI-authored participation. |
-| [0005](0005-server-authoritative-capability-plane.md) | Construct tools, authorization, and effect authority inside the application. |
-| [0006](0006-split-durable-and-ephemeral-realtime.md) | Use durable synchronization and ephemeral Channels for different classes of state. |
-| [0007](0007-provider-compatible-inference.md) | Keep model and provider routing behind a product-owned inference contract. |
-| [0008](0008-durable-citations-and-artifacts.md) | Persist citations, evidence, and artifacts as typed product objects. |
+| [0001](0001-public-architecture-boundary.md) | Maintain a private implementation and a separate public architecture portfolio. |
+| [0002](0002-separate-demo-environment.md) | Use a separate synthetic technical environment. |
+| [0003](0003-modular-monolith.md) | Keep the main product as a modular Phoenix application. |
+| [0004](0004-separate-curation-and-ai-authorship.md) | Separate curation of human content from direct AI authorship. |
+| [0005](0005-server-authoritative-capability-plane.md) | Select tools and trusted scope on the server. |
+| [0006](0006-split-durable-and-ephemeral-realtime.md) | Separate durable, asynchronous, ephemeral, and local client state. |
+| [0007](0007-provider-compatible-inference.md) | Use provider-compatible inference behind product-owned routes. |
+| [0008](0008-durable-citations-and-artifacts.md) | Store citations and artifacts as durable application objects. |
 
-Each decision states the context, selected design, consequences, and conditions that would justify revision.
-
-[← Flip case study](../README.md)
+The broader decision summary is in [Architecture decisions](../docs/10-architecture-decisions.md).

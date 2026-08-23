@@ -1,57 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="760" viewBox="0 0 1320 760" role="img" aria-labelledby="title desc">
-<title id="title">Product and synthetic deployment boundary</title>
-<desc id="desc">Product, synthetic technical, CI, and development environments share architecture contracts but not data, credentials, queues, sessions, storage, or provider authority.</desc>
-<defs>
-          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-            <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-          </marker>
-          <style>
-            .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
-            .soft{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:16}
-            .decision{fill:#fff;stroke:#30343b;stroke-width:2}
-            .title{font:700 25px Arial,sans-serif;fill:#17191d}
-            .head{font:700 16px Arial,sans-serif;fill:#20242a}
-            .body{font:14px Arial,sans-serif;fill:#454b55}
-            .small{font:12px Arial,sans-serif;fill:#555d68}
-            .label{font:700 12px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
-            .arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
-            .dash{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
-            .line{stroke:#30343b;stroke-width:2;fill:none}
-          </style>
-        </defs>
-<rect class="bg" width="1320" height="760"/>
-<text x="45" y="45" class="title">Product and synthetic deployment boundary</text>
-<rect class="soft" x="330" y="80" width="660" height="100"/>
-<text x="350" y="111" class="head">Shared architecture contract</text>
-<text x="350" y="137" class="body">source version · migrations · domain semantics · public scenario definitions</text>
-<rect class="box" x="55" y="285" width="280" height="170"/>
-<text x="75" y="316" class="head">Product environment</text>
-<text x="75" y="342" class="body">private user/community data</text>
-<text x="75" y="364" class="body">independent secrets and sessions</text>
-<text x="75" y="386" class="body">independent queues/storage/providers</text>
-<rect class="box" x="365" y="285" width="280" height="170"/>
-<text x="385" y="316" class="head">Synthetic technical environment</text>
-<text x="385" y="342" class="body">versioned synthetic fixtures</text>
-<text x="385" y="364" class="body">independent secrets and sessions</text>
-<text x="385" y="386" class="body">independent queues/storage/providers</text>
-<rect class="box" x="675" y="285" width="280" height="170"/>
-<text x="695" y="316" class="head">CI / integration</text>
-<text x="695" y="342" class="body">ephemeral database and fixtures</text>
-<text x="695" y="364" class="body">fakes + selected integrations</text>
-<text x="695" y="386" class="body">release evidence</text>
-<rect class="box" x="985" y="285" width="280" height="170"/>
-<text x="1005" y="316" class="head">Local development</text>
-<text x="1005" y="342" class="body">developer-owned local data</text>
-<text x="1005" y="364" class="body">isolated credentials</text>
-<text x="1005" y="386" class="body">no implicit production copy</text>
-<path class="arrow" d="M660 180 L660 235 L195 235 L195 285"/>
-<path class="arrow" d="M660 180 L660 235 L505 235 L505 285"/>
-<path class="arrow" d="M660 180 L660 235 L815 235 L815 285"/>
-<path class="arrow" d="M660 180 L660 235 L1125 235 L1125 285"/>
-<rect class="soft" x="260" y="575" width="800" height="110"/>
-<text x="280" y="606" class="head">Non-sharing boundary</text>
-<text x="280" y="632" class="body">no production database snapshots, user uploads, credentials, tokens, queues, or realtime namespaces in the synthetic environment</text>
-<path class="dash" d="M195 455 L195 520 L660 520 L660 575"/>
-<text x="665" y="512" class="small">authority remains separate</text>
-<path class="dash" d="M505 455 L505 520 L660 520"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="930" viewBox="0 0 1500 930" role="img" aria-labelledby="title desc">
+<title id="title">Product and synthetic environment topology</title><desc id="desc">The environments share contracts and state-transition behavior but use separate data, credentials, workers, storage, callbacks, and authority.</desc>
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
+<style>.h1{font:700 31px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}.band{font:700 15px Inter,Arial,sans-serif;letter-spacing:.8px}.nt{font:700 16px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 13.5px Inter,Arial,sans-serif;fill:#334155}.railtitle{font:700 13px Inter,Arial,sans-serif;fill:#334155;letter-spacing:.5px}.rail{font:400 13px Inter,Arial,sans-serif;fill:#475569}.arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.drop{stroke:#64748b;stroke-width:1.8;fill:none;marker-end:url(#arrow)}</style></defs>
+<rect width="1500" height="930" fill="#f8fafc"/>
+<text x="70" y="58" class="h1">Product and synthetic environment topology</text><text x="70" y="88" class="sub">The environments share contracts and state-transition behavior but use separate data, credentials, workers, storage, callbacks, and authority.</text>
+<rect x="50" y="120" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="155" class="band" fill="#0369a1">PRODUCT ENVIRONMENT</text>
+<rect x="50" y="435" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="470" class="band" fill="#15803d">SYNTHETIC TECHNICAL ENVIRONMENT</text>
+<rect x="70.0" y="205" width="322.0" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="86.0" y="236" class="nt">Product clients</text>
+<text x="86.0" y="263" class="nc">Real accounts, communities, web,</text>
+<text x="86.0" y="284" class="nc">desktop and mobile sessions</text>
+<path class="arrow" d="M392.0 277.5 H412.0"/>
+<rect x="416.0" y="205" width="322.0" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="432.0" y="236" class="nt">Product Phoenix application</text>
+<text x="432.0" y="263" class="nc">Product configuration, identity,</text>
+<text x="432.0" y="284" class="nc">authorization and domain services</text>
+<path class="arrow" d="M738.0 277.5 H758.0"/>
+<rect x="762.0" y="205" width="322.0" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="778.0" y="236" class="nt">Product state</text>
+<text x="778.0" y="263" class="nc">Database, queues, storage, artifacts,</text>
+<text x="778.0" y="284" class="nc">telemetry and delivery channels</text>
+<path class="arrow" d="M1084.0 277.5 H1104.0"/>
+<rect x="1108.0" y="205" width="322.0" height="145" rx="13" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="1124.0" y="236" class="nt">Product providers</text>
+<text x="1124.0" y="263" class="nc">Scoped model, search, media, push,</text>
+<text x="1124.0" y="284" class="nc">email and connector credentials</text>
+<rect x="70.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="86.0" y="551" class="nt">Synthetic clients</text>
+<text x="86.0" y="578" class="nc">Non-production identities, scenarios,</text>
+<text x="86.0" y="599" class="nc">fixtures and controlled capabilities</text>
+<path class="arrow" d="M392.0 592.5 H412.0"/>
+<rect x="416.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="432.0" y="551" class="nt">Synthetic Phoenix application</text>
+<text x="432.0" y="578" class="nc">Same contract classes and failure</text>
+<text x="432.0" y="599" class="nc">paths under separate configuration</text>
+<path class="arrow" d="M738.0 592.5 H758.0"/>
+<rect x="762.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="778.0" y="551" class="nt">Synthetic state</text>
+<text x="778.0" y="578" class="nc">Separate database, queues, storage,</text>
+<text x="778.0" y="599" class="nc">hostnames, callbacks and telemetry</text>
+<path class="arrow" d="M1084.0 592.5 H1104.0"/>
+<rect x="1108.0" y="520" width="322.0" height="145" rx="13" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5"/>
+<text x="1124.0" y="551" class="nt">Fixtures or test providers</text>
+<text x="1124.0" y="578" class="nc">Deterministic streams or independently</text>
+<text x="1124.0" y="599" class="nc">scoped test credentials and quotas</text>
+<rect x="685" y="390" width="130" height="85" rx="42" fill="#ffffff" stroke="#ef4444" stroke-width="2"/><text x="716" y="425" class="nt">NO DATA</text><text x="708" y="449" class="nc">OR AUTHORITY</text>
+<rect x="50" y="755" width="1400" height="105" rx="14" fill="#e2e8f0"/><text x="75" y="797" class="railtitle">SHARED PUBLIC MATERIAL</text><text x="75" y="828" class="rail">Schemas, diagrams, decisions, scenario assertions and failure evidence. No product data, private credentials, source paths or administrative access.</text>
 </svg>

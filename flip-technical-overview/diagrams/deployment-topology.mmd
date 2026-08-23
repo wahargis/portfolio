@@ -1,14 +1,20 @@
-flowchart TB
-    SRC["Shared source, migrations, domain contracts, and scenario definitions"]
-    SRC --> PROD["Product environment"]
-    SRC --> SYN["Synthetic technical environment"]
-    SRC --> CI["CI / ephemeral integration environment"]
-    SRC --> DEV["Local development"]
-    PROD --> PDATA[("Private product database and storage")]
-    PROD --> PSEC["Independent secrets, sessions, queues, providers"]
-    SYN --> SDATA[("Versioned synthetic data")]
-    SYN --> SSEC["Independent secrets, sessions, queues, providers"]
-    CI --> EDATA[("Ephemeral fixtures")]
-    DEV --> LDATA[("Developer-owned local data")]
-    PDATA -. never shared .-> SDATA
-    PSEC -. never shared .-> SSEC
+flowchart LR
+  subgraph TOP["PRODUCT ENVIRONMENT"]
+    T0["Product clients\nReal accounts, communities, web,; desktop and mobile sessions"]
+    T1["Product Phoenix application\nProduct configuration, identity,; authorization and domain services"]
+    T0 --> T1
+    T2["Product state\nDatabase, queues, storage, artifacts,; telemetry and delivery channels"]
+    T1 --> T2
+    T3["Product providers\nScoped model, search, media, push,; email and connector credentials"]
+    T2 --> T3
+  end
+  subgraph BOTTOM["SYNTHETIC TECHNICAL ENVIRONMENT"]
+    B0["Synthetic clients\nNon-production identities, scenarios,; fixtures and controlled capabilities"]
+    B1["Synthetic Phoenix application\nSame contract classes and failure; paths under separate configuration"]
+    B0 --> B1
+    B2["Synthetic state\nSeparate database, queues, storage,; hostnames, callbacks and telemetry"]
+    B1 --> B2
+    B3["Fixtures or test providers\nDeterministic streams or independently; scoped test credentials and quotas"]
+    B2 --> B3
+  end
+  TOP -. separate data and authority .- BOTTOM

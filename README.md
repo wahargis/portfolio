@@ -1,49 +1,92 @@
-# AI Systems & Agent Engineering Portfolio
+# Agent Engineering and AI Systems Portfolio
 
-Four implemented systems spanning AI product architecture, agent execution and orchestration, durable research state, data modeling, and local inference operations. Each project begins with a concrete product or operating problem and follows it through the state model, execution model, failure handling, and implementation that make the system work.
+I design and implement stateful AI applications, agent runtimes, multi-agent control systems, project-intelligence software, and self-hosted model infrastructure.
 
-## [Flip](flip-technical-overview/)
+This portfolio covers four implemented systems. The project pages describe their current workflows, architecture, state models, control boundaries, failure handling, and representative implementation evidence.
 
-**Real-time community platform and in-product AI runtime**
+## Projects
 
-Flip combines live chat, threaded forums, media, and explicit AI participation in one product. Conversation remains immediate and social, while selected discussion can move through a durable synthesis workflow into searchable forum knowledge without losing authorship, source context, or audience restrictions.
+| Project | System | Main engineering work |
+|---|---|---|
+| **[Flip](flip-technical-overview/)** | A real-time community product with AI participants, research tools, multimodal artifacts, and chat-to-forum curation. | Product-integrated agent execution, actor-scoped context and retrieval, typed tools and effects, asynchronous continuation, provenance, authorization, and web/native client convergence. |
+| **[Project Manager](project-manager/)** | A local project-intelligence system for research and technical work that continues across many sessions. | Typed project and evidence graphs, causal and branch history, contradiction and confidence review, graph-aware retrieval, session continuity, deterministic phase scheduling, and shared CLI/MCP/web behavior. |
+| **[Baton](baton/)** | A control system for persistent coding-agent sessions across several coding harnesses. | Goal and plan compilation, route and capability selection, dependency-driven waves and workflows, structured interaction, shared context, worktree ownership, result evidence, review, adoption, and integration. |
+| **[HomeCloud](homecloud/)** | A supervised local-first AI application platform operating self-hosted models and agent workloads on finite GPU infrastructure. | OTP supervision, model-instance pools, GPU claims and scheduling, agent execution modes, tool and modality registries, containerized workspaces, checkpoint recovery, research, documents, connectors, and media services. |
 
-The engineering work extends well beyond model integration. Flip includes a product-owned agent runtime for trigger detection, actor and room authorization, bounded context construction, capability admission, multi-round tool execution, provider routing, citations, artifacts, continuation of long-running media work, and durable activity records. Phoenix, PostgreSQL, Oban, PubSub, Channels, LiveView, and Electric-based client synchronization carry the resulting state across web and native clients. The public case study includes product and synthetic-environment screens plus a complete runtime and curation architecture.
+## Flip
 
-**[Project case study](flip-technical-overview/)** · **[Technical documentation](flip-technical-overview/docs/00-product-and-domain.md)** · **[Live product](https://flip.engineering)** · **[Synthetic technical environment](https://flip.tech-demo.dev)**
+Flip is a multi-user community application in which AI participates through the same product identity, authorization, data, and lifecycle systems used by human participants. A turn begins with a product event and an invoking actor. The server resolves the AI identity, community, room or forum, membership, visibility, feature state, and permitted capabilities before selecting context or calling a model.
 
-## [Project Manager](project-manager/)
+The runtime supports direct replies, internal and external research, document and data work, product actions, image and video operations, generated artifacts, and continuation after asynchronous provider work. Tool calls are typed application requests. Product mutations, citations, and artifacts receive durable identities and are committed through the owning domain services.
 
-**Local-first research operations and durable project state for people and agents**
+Conversation curation is a separate workflow. Selected human messages can be organized into forum content while retaining participant attribution, source-message relationships, source-derived access restrictions, feedback, and recuration history.
 
-Project Manager manages work that outlives a task list, chat session, or original plan. Projects, phases, experiments, findings, hypotheses, decisions, literature, constraints, principles, feedback, and sessions are stored as typed operational state rather than reconstructed from notes after the fact.
+**[Read the Flip case study](flip-technical-overview/)**
 
-Its agent-facing design combines guarded MCP workflows, causal evidence requirements, dependency-aware execution, temporal context reconstruction, project-scoped retrieval, truth-maintenance operations, and explicit review and repair surfaces. A deterministic phase DAG selects dependency-satisfied work; contradiction and confidence analysis remain separate review inputs rather than opaque scheduling decisions. The case study renders the public `atlas` quickstart as one concrete phase DAG and evidence-to-decision record.
+## Project Manager
 
-**[Project case study](project-manager/)** · **[Public source](https://github.com/wahargis/project-manager)**
+Project Manager stores technical project state as typed objects and relationships rather than relying on notes, issue comments, or prompt history. Experiments, findings, hypotheses, decisions, constraints, literature, principles, phases, reviews, branches, merges, and handoffs remain queryable across sessions.
 
-## [Baton](baton/)
+The evidence graph records support, contradiction, supersession, derivation, production, testing, dependency, causal, branch, merge, and provenance relationships. Retrieval combines lexical matching with typed filters and graph traversal. Session start and end operations load current state and write durable handoffs for the next human or agent session.
 
-**Run-centric orchestration for full coding-harness sessions across providers**
+The execution DAG remains separate from the evidence graph. Completed dependencies determine which phases are ready, while contradiction and confidence analysis provide review information that can lead to explicit project updates.
 
-Baton coordinates persistent vendor-native coding harnesses as a fleet. An objective can be compiled into a plan or declarative workflow, routed onto exact harness, model, and effort combinations, and executed through parallel waves with visible member state, structured interaction, steering, shared context, recovery, and result collection.
+**[Read the Project Manager case study](project-manager/)**
 
-The system unifies embedded, resident, CLI, and MCP control surfaces over one run model. Provider adapters preserve native session capabilities; the coordinator maintains event and lifecycle state; workers receive isolated Git worktrees; collaboration state carries questions, replies, scratchpads, knowledge, and briefing packs; and harvested results can proceed through verification, review, adoption, and integration. The case study includes a recorded two-worker wave in which both sessions completed but a missing harvested result correctly produced an incomplete workflow verdict.
+## Baton
 
-**[Project case study](baton/)** · **[Public source](https://github.com/Flip-Engineering/baton)**
+Baton coordinates persistent coding-agent sessions instead of treating workers as one-shot model calls. A run starts from an approved goal and plan with repository scope, dependencies, route policy, budgets, effects, and verification requirements.
 
-## [HomeCloud](homecloud/)
+The controller selects exact harness, model, and effort routes; schedules dependency-ready work; starts workers in owned Git worktrees; and records questions, approvals, waits, checkpoints, interruptions, steering, events, shared context, and result lineage. Provider adapters preserve differences in native session behavior rather than hiding them behind a text-completion interface.
 
-**Local-first AI operations platform and recoverable agent runtime**
+Worker output remains a candidate result. Verification, review, selection, adoption, local integration, export, and cleanup are explicit controller operations with durable state.
 
-HomeCloud turns heterogeneous owned compute into a supervised application platform for inference, agents, research, documents, connectors, browser work, and multimodal generation. Applications request capabilities; the runtime resolves model and backend policy, admits work against actual capacity, manages GPU and model-service ownership, and returns durable results to product state.
+**[Read the Baton case study](baton/)**
 
-The implementation combines OTP supervision, priority-aware model-instance pools, inference routing, GPU claims and workload scheduling, containerized agent workspaces, dynamic tool selection, loop control, checkpoint recovery, telemetry, and long-running research execution. The dated reference deployment shows the four-V100 32 GB local pool, separate A100 Drive 32 GB accelerator, hosted-provider fallbacks, durable application state, and Flip hosted as an application workload.
+## HomeCloud
 
-**[Project case study](homecloud/)**
+HomeCloud operates a four-GPU V100 server as a shared application runtime for interactive inference, agent tasks, research, document work, connectors, browser and search tools, and multimodal workloads.
 
-## Architecture across the projects
+The OTP application supervises model services, instance pools, GPU monitoring and claims, workload scheduling, agent processes, tool and modality registries, sandboxes, checkpoints, research services, connectors, media queues, health monitoring, and Phoenix application surfaces.
 
-The projects are independently deployable and do not assume one another. Their boundaries and complementary engineering coverage are documented in **[Systems architecture across the portfolio](PORTFOLIO_ARCHITECTURE.md)**.
+Requests are admitted according to workload type, priority, route compatibility, healthy instance capacity, queue state, and GPU ownership. Agent work can run in autonomous, interactive, or plan-only modes with selected context, permitted tools, containerized workspaces, loop controls, lifecycle events, and phase-aware checkpoints.
 
-Project Manager and Baton publish their implementation repositories. Flip and HomeCloud are represented through the public case studies, diagrams, and selected implementation evidence in this repository because their implementation repositories are private.
+**[Read the HomeCloud case study](homecloud/)**
+
+## Engineering coverage
+
+| Area | Portfolio work |
+|---|---|
+| **Agent runtime design** | Product-event admission, actor and object scope, context construction, retrieval, model routing, tool loops, effects, terminal validation, continuation, and recovery. |
+| **Multi-agent orchestration** | Goal and plan contracts, task topology, waves, workflows, route capability, persistent sessions, questions, approvals, waits, interruption, steering, shared context, and run lifecycle. |
+| **Durable project reasoning** | Typed evidence, causal and branch history, contradiction and confidence review, provenance, graph-aware retrieval, temporal state, phase dependencies, and session handoff. |
+| **AI infrastructure** | Supervision, model processes, capacity pools, priority queues, GPU ownership, workload transitions, sandboxes, checkpoints, health, telemetry, and local or remote routing. |
+| **Application and data systems** | Phoenix and OTP applications, Rust services, Node.js control systems, PostgreSQL, SQLite, Oban, realtime channels, synchronization, CLI, MCP, web, desktop, and mobile surfaces. |
+| **Reliability and evaluation** | Idempotent effects, explicit lifecycle state, bounded retry, stale-state rejection, restart recovery, artifact verification, deterministic tests, route-specific model evaluation, and operational telemetry. |
+
+## Representative system evidence
+
+The project pages include concrete examples and state flows in addition to architecture descriptions:
+
+- Flip documents a complete AI turn from actor admission through context, tools, effects, persistence, asynchronous artifacts, and client delivery.
+- Project Manager includes a research-cycle example with experiment, finding, decision, contradiction, branch, merge, and execution-phase relationships.
+- Baton includes a recorded multi-worker run with persistent sessions, dependency waits, tool activity, commits, result review, and completed run state.
+- HomeCloud includes the current four-V100 deployment, model-instance capacity, GPU scheduling, agent execution, checkpointing, and application-service flow.
+
+## System boundaries
+
+- The four projects are independent systems. None requires the others to operate.
+- Flip and HomeCloud are private implementations. Their public technical material is contained in this portfolio and does not link to unavailable source repositories.
+- Project Manager and Baton link to their public implementation repositories from their project pages.
+- Public material omits product data, credentials, provider keys, private messages, host-specific secrets, prompt and persona configuration, and administrative authority.
+
+For a direct comparison of execution, state ownership, control, and recovery, see **[Portfolio system boundaries](PORTFOLIO_ARCHITECTURE.md)**.
+
+## Live systems
+
+- [Flip product](https://flip.engineering)
+- [Synthetic Flip technical environment](https://flip.tech-demo.dev)
+
+---
+
+**William Hargis — Agent Engineering, AI Systems, and Data Engineering**
