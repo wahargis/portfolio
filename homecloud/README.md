@@ -1,170 +1,225 @@
 # HomeCloud
 
-> A local-first AI application and operations platform that turns finite GPU hardware into dependable inference, agent, research, and multimodal services.
+HomeCloud is a self-hosted AI application platform built with Elixir, Phoenix, and Ash. It provides one supervised runtime for local and remote model access, interactive chat, autonomous agents, tools, context and memory, long-running research, media workflows, browser automation, connectors, and scheduled operations.
 
-## At a glance
+The canonical source repository is private. This case study describes selected implemented paths without publishing credentials, private configuration, deployment data, or complete source.
 
-| | |
+## Platform architecture
+
+```mermaid
+flowchart TB
+    surfaces["Phoenix LiveView, REST, WebSocket, MCP,<br/>browser automation, connectors, heartbeat, and scheduled work"]
+
+    subgraph runtime["Shared supervised application runtime"]
+        execution["ExecutionEngine and ContextEngine<br/>completion, chat, agents, context,<br/>tools, retries, callbacks"]
+        programs["ResearchRunner and agency services<br/>projects, trials, autonomous work"]
+        apps["Media, browser, connector,<br/>and background job services"]
+        coordination["PubSub, telemetry,<br/>heartbeat, and job state"]
+    end
+
+    subgraph request["Inference request control"]
+        router["ModelRouter and InferenceRouter<br/>provider selection, failover,<br/>timeouts and streaming"]
+        pool["InstancePool<br/>start or adopt llama-server,<br/>health, priority checkout, affinity"]
+        slots["SlotGuard<br/>reserve interactive slots;<br/>background work uses spare capacity"]
+        local["Primary local<br/>llama-server pool"]
+        remote["Configured remote<br/>model providers"]
+    end
+
+    subgraph gpucontrol["GPU service and device coordination"]
+        lifecycle["GpuWorkloadScheduler<br/>known queues and tool demand,<br/>fixed priority, systemd swaps, locks"]
+        claims["GpuClaimRegistry<br/>persistent GPU-set claims,<br/>conflicts, expiry and recovery"]
+        specialist["Specialist model services<br/>research, OCR, translation,<br/>image and video"]
+        external["External benchmarks,<br/>tools and dispatchers"]
+        gpus["Local GPU sets"]
+    end
+
+    state[(PostgreSQL and Ash records<br/>pgvector memory and knowledge<br/>workspaces, documents, media, reports)]
+
+    surfaces --> execution
+    surfaces --> programs
+    surfaces --> apps
+    execution --> router
+    programs --> execution
+    apps --> router
+    programs --> lifecycle
+    apps --> lifecycle
+    programs --> claims
+
+    router -->|"local route"| pool
+    router -->|"remote route"| remote
+    pool --> slots
+    slots --> local
+    local --> gpus
+
+    lifecycle -->|"start, stop, adopt"| specialist
+    specialist --> gpus
+    external -->|"acquire or release"| claims
+    claims -->|"coordinate ownership"| gpus
+
+    execution --> state
+    programs --> state
+    apps --> state
+    claims --> state
+    coordination --> surfaces
+```
+
+Phoenix LiveView, REST, WebSocket, MCP, connectors, and scheduled services enter shared application modules instead of running separate inference and automation stacks. `ExecutionEngine` provides the common completion, chat, and agent loop. Research, agency, media, and connector services reuse model routing, tools, persistence, PubSub, and supervised process infrastructure.
+
+The runtime implements four separate controls:
+
+1. Request execution controls model calls, tool calls, callbacks, retries, and final state.
+2. Local inference controls instance health, checkout, priority, and prompt-cache affinity.
+3. GPU service control loads and unloads specialist model services according to known work queues and capacity.
+4. Persistent GPU claims coordinate model services, research jobs, benchmarks, and external dispatchers that may run outside the Phoenix process.
+
+## Model routing and local inference
+
+`ModelRouter` is the central entry point for local and remote generation. It resolves provider and model configuration, applies request timeouts, supports streaming, classifies failures, and can attempt a configured failover chain.
+
+Local text inference uses `InstancePool` and `InferenceRouter`:
+
+- `InstancePool` starts or adopts configured `llama-server` instances, checks health, and restarts unhealthy managed instances.
+- Callers check out an instance and check it back in after the request. Checkout queues distinguish user, research, and background work.
+- Multi-slot instances can serve more than one caller. Checkout state identifies the assigned instance and slot.
+- Affinity hints can prefer an instance that already holds useful prompt-cache state.
+- A remote-only deployment can start without a local model pool.
+
+`SlotGuard` protects interactive use of a parallel local server. It reads the server's `/slots` state and reserves capacity for user requests. Research and background calls proceed only when the server has spare slots beyond that reservation.
+
+## GPU service and claim control
+
+HomeCloud uses two additional controls for work that is broader than a single local inference checkout.
+
+### Specialist model lifecycle
+
+`GpuWorkloadScheduler` manages the lifecycle of configured specialist services such as research, OCR, translation, image, and video models. It polls known work queues and tool demand, detects active systemd services, and applies a fixed workload priority order.
+
+The scheduler can:
+
+- keep the primary user-facing model loaded;
+- load a required specialist service on demand;
+- stop an idle, lower-priority service before loading another service;
+- wait for GPU memory to become available before starting the replacement;
+- return a GPU to its configured baseline service after temporary work completes;
+- apply idle thresholds, swap cooldowns, unavailable-service state, and benchmark locks; and
+- publish status and swap history for operational views.
+
+Its scope is model-process placement and lifecycle. Request scheduling remains in the request, instance, and slot controls.
+
+### Persistent GPU claims
+
+`GpuClaimRegistry` stores time-bounded claims against explicit GPU sets. A claim records an owner, purpose, claim type, exclusivity, start time, and expiry. Overlapping claims conflict when either claim is exclusive.
+
+The registry coordinates work across the application and external processes. It also adopts the active primary inference service as a claim, expires stale claims, persists claim state for crash recovery, and publishes acquire, release, and expiry events through PubSub.
+
+`InstancePool`, `SlotGuard`, `GpuWorkloadScheduler`, and `GpuClaimRegistry` control different parts of local compute. They use separate state and control paths because they manage different resources and process boundaries.
+
+## Agent execution
+
+`ExecutionEngine` provides the common request loop for completion, chat, and autonomous work.
+
+```mermaid
+flowchart LR
+    subgraph agent["Interactive completion, chat, or agent request"]
+        a1["1. ExecutionEngine normalizes mode,<br/>provider, tool profile, callbacks, limits"] --> a2["2. ContextEngine builds messages from<br/>task, history, memory, and token budget"]
+        a2 --> a3{"3. ModelRouter route"}
+        a3 -->|"Local"| a4["InstancePool checkout with<br/>user, research, or background priority"]
+        a4 --> a5["SlotGuard preserves interactive capacity;<br/>background calls wait without spare slots"]
+        a3 -->|"Remote"| a6["Configured provider adapter<br/>with timeout and failover policy"]
+        a5 --> a7["4. Submit model request;<br/>emit token or phase events"]
+        a6 --> a7
+        a7 --> a8{"5. Tool calls returned?"}
+        a8 -->|"Yes"| a9["ToolRegistry checks active profile;<br/>ToolDispatch runs allowed operations"]
+        a9 --> a10["6. Append tool output or failure<br/>to structured conversation state"]
+        a10 --> a11{"7. Continue within turn,<br/>retry, and tool limits?"}
+        a11 -->|"Continue"| a7
+        a8 -->|"No"| a12["8. Persist result, usage, artifacts,<br/>and controlled terminal state"]
+        a11 -->|"Stop"| a12
+        a12 --> a13["9. Check in local instance<br/>and publish final event"]
+    end
+
+    subgraph research["Long-running verified research project"]
+        r1["1. ResearchRunner starts or resumes project;<br/>loads configuration and prior trials"] --> r2{"2. Project type"}
+        r2 -->|"Code or CUDA"| r3["3. TTTDiscover builds solution tree;<br/>PUCT selects state and generates candidates"]
+        r2 -->|"Benchmark"| r4["Run configured model-server evaluation"]
+        r3 --> r5{"4. Evaluation path"}
+        r5 -->|"Code"| r6["Write candidate to sandbox;<br/>compile and run configured tests"]
+        r5 -->|"CUDA"| r7["Obtain required GPU claim or service;<br/>compile and run correctness checks"]
+        r7 --> r8["CudaReward inspects or profiles kernel;<br/>compares configured measurements"]
+        r6 --> r9["5. Produce normalized verified score;<br/>retain diagnostics for failures"]
+        r8 --> r9
+        r4 --> r9
+        r9 --> r10["6. Persist candidate, result, measurements,<br/>artifacts, score, and failure state"]
+        r10 --> r11{"7. Budget, early stop,<br/>or project stop?"}
+        r11 -->|"Continue"| r3
+        r11 -->|"Stop"| r12["8. Update best verified result<br/>and generate project report"]
+    end
+
+    evidence[(PostgreSQL and Ash execution records<br/>pgvector and prior context<br/>workspaces, tests, binaries, profiles, reports)]
+    a12 --> evidence
+    r10 --> evidence
+```
+
+A normal agent request follows this path:
+
+1. Normalize the mode, provider options, tool profile, callbacks, and execution limits.
+2. Build structured messages with `ContextEngine`, including retrieved memory, task state, conversation history, and the available token budget.
+3. Select a local or remote route. Local requests obtain an eligible instance and slot; remote requests use the configured adapter.
+4. Submit the model request and emit token or phase events when streaming is enabled.
+5. Parse returned tool calls and check them against the active tool profile.
+6. Dispatch each allowed call through the static or dynamic tool registry.
+7. Append tool output or failure information to conversation state and continue within turn, retry, and tool-call limits.
+8. Persist the result, usage, artifacts, and terminal state, then check in any local instance.
+
+Tool failures remain part of the execution record, so a later model turn can respond to the failure. The engine does not require every tool call to succeed before it can produce a controlled terminal result.
+
+`ToolRegistry` provides model-visible schemas and profile-based access to file, shell, Git, test, browser, web research, media, memory, session, code-analysis, and sub-agent operations. Dynamic extensions are loaded into a separate ETS-backed registry during application startup.
+
+## Research and verified optimization
+
+`ResearchRunner` manages long-running research projects as a supervised process. It starts, pauses, resumes, and stops projects; restores active projects after restart; limits concurrent trials; adapts the delay between trials; records score trajectories and strategy history; publishes progress; and produces reports.
+
+The runner selects an execution path from the project type:
+
+- code optimization uses `TTTDiscover` with compiled and tested candidates;
+- CUDA kernel optimization uses the CUDA execution and reward path; and
+- inference benchmarking evaluates model-server configurations.
+
+`TTTDiscover` maintains a tree-structured solution buffer and uses PUCT-based state selection to balance exploration and exploitation. Candidate solutions are generated by a model, but code rewards come from compilation and test execution rather than model judgment. Higher-reward prior candidates are included in later context, generation temperature and exploration pressure change with the remaining budget, and the search stops after a configured period without improvement. The current implementation uses in-context adaptation; it does not claim to update model weights.
+
+For CUDA projects, `CudaReward` and the CUDA orchestration path can compile a candidate, run correctness checks, inspect or profile the binary, compare measured behavior with the task configuration, and return a normalized result with diagnostics. Failed compilation and failed correctness checks remain explicit low-scoring trials instead of being removed from the research record.
+
+Each trial stores the candidate, execution result, measurements, score, failure state, and relevant artifacts. The next search step can therefore use verified prior results rather than only a generated summary of the work.
+
+## Supervision, persistence, and external services
+
+The OTP supervision tree starts repositories, PubSub, HTTP clients, model and media registries, tool registries, local inference services, GPU controls, research and agency runners, browser services, connectors, heartbeat services, and maintenance processes as separate children. A failed worker can terminate or restart without terminating unrelated application services.
+
+PostgreSQL and Ash store application, execution, research, claim, asset, and connector records. pgvector supports configured memory and knowledge retrieval. Phoenix PubSub carries execution, research, connector, and infrastructure events. Files, code workspaces, documents, and generated media remain outside relational records where appropriate.
+
+Some model services are separate operating-system processes. The application checks, adopts, starts, stops, and monitors those services through explicit interfaces rather than assuming that every GPU process belongs to the Phoenix supervisor.
+
+## Selected implementation paths
+
+| Implemented area | Source path |
 |---|---|
-| **Product** | A supervised runtime and application platform for self-hosted models, agent execution, research workflows, documents, connectors, and media services. |
-| **Users** | A technical operator and the applications or agents that need reliable access to local and remote AI capability. |
-| **Core problem** | Local accelerators provide valuable compute but not an operating model. Applications still need model lifecycle, capacity allocation, priority, health, recovery, isolation, and a coherent API over heterogeneous backends. |
-| **Engineering focus** | GPU claims, model-instance pools, priority-aware routing, workload scheduling, sandboxed tools, recoverable agent loops, verification, and supervised application services. |
-| **Primary implementation** | Elixir/OTP and Phoenix with PostgreSQL/Ash, local and remote inference adapters, system process integration, containers, telemetry, and LiveView application surfaces. |
-| **Source** | [`wahargis/home-cloud`](https://github.com/wahargis/home-cloud) |
+| Application supervision and startup wiring | `lib/home_cloud/application.ex` |
+| Completion, chat, and agent execution | `lib/home_cloud/intelligence/execution_engine.ex` |
+| Local and remote model routing | `lib/home_cloud/intelligence/model_router.ex` |
+| Local `llama-server` process pool and checkout | `lib/home_cloud/intelligence/instance_pool.ex` |
+| Context assembly, budgeting, refresh, and compaction | `lib/home_cloud/intelligence/context_engine.ex` |
+| Tool schemas, profiles, and dispatch registration | `lib/home_cloud/intelligence/tool_registry.ex` |
+| Interactive slot reservation | `lib/home_cloud/infrastructure/slot_guard.ex` |
+| Specialist model service lifecycle | `lib/home_cloud/infrastructure/gpu_workload_scheduler.ex` |
+| Persistent cross-process GPU claims | `lib/home_cloud/infrastructure/gpu_claim_registry.ex` |
+| Long-running research project control | `lib/home_cloud/intelligence/optimization/research_runner.ex` |
+| PUCT search and verified code rewards | `lib/home_cloud/intelligence/optimization/ttt_discover.ex` |
+| CUDA compilation, correctness, profiling, and reward | `lib/home_cloud/intelligence/optimization/cuda_reward.ex` |
 
-## The product problem
+## Current boundaries
 
-Running a model locally is straightforward compared with operating a useful local AI platform.
-
-A single inference server does not answer:
-
-- Which model service should be running on which accelerator?
-- How many concurrent requests can the healthy hardware actually support?
-- Should an interactive user request preempt a research benchmark or background job?
-- How does an application check out a model instance and return it safely?
-- What happens when a server process is unhealthy or a GPU is already claimed?
-- How are long-running agents isolated, observed, checkpointed, and resumed?
-- How do document, connector, research, and media workloads share the same infrastructure?
-- When should the system use a local model, a different local backend, or a remote provider?
-
-HomeCloud treats those as one runtime problem. It combines infrastructure control with application-level AI services so that local compute becomes a dependable capability rather than a collection of manually started model processes.
-
-The platform is local-first, not local-only. Its abstractions allow local model servers and remote providers to participate in the same application while preserving the operational distinctions that matter: capacity, latency, cost, health, privacy, and tool support.
-
-## Representative workflow
-
-A representative agent request proceeds as follows:
-
-1. **A request enters through an application surface.** It may originate from the web application, an internal workflow, a connector, or a research process.
-2. **The runtime selects an inference path.** Model and inference routers consider configuration, backend type, workload priority, and current capacity.
-3. **A healthy instance is checked out.** The instance pool tracks local model-server slots, affinities, load, health, and restart state. Concurrency is derived from healthy infrastructure rather than supplied as an arbitrary caller constant.
-4. **GPU authority is respected.** Claim and scheduling services prevent incompatible workloads from treating the same accelerator as unowned. Interactive, research, and background priorities shape admission and model-service changes.
-5. **The execution environment is prepared.** Agent work receives a containerized sandbox and a durable workspace. The execution engine builds context, discovers permitted tools, dispatches model turns, executes tools, and detects loops or quality regressions.
-6. **State is checkpointed.** Message history, plan state, loop state, and engine state can be persisted by phase so a long-running task can resume after interruption instead of restarting from turn zero.
-7. **Results return to product state.** The outcome can be validated, stored, presented in the UI, used by a research workflow, placed in the document vault, delivered through a connector, or handed to a media service.
-8. **Capacity is released or returned to baseline.** Checked-out instances and GPU claims are reconciled so later interactive and background work sees accurate availability.
-
-This workflow connects hardware reality to application behavior. The user asks for an AI capability; the platform handles the model, process, resource, tool, recovery, and persistence concerns required to deliver it.
-
-## Architecture
-
-<img src="assets/diagrams/architecture.svg" alt="HomeCloud local-first AI platform architecture" width="1050" />
-
-### 1. Supervised application platform
-
-HomeCloud runs as an OTP application with a broad supervision tree. Database access, PubSub, HTTP clients, model instances, GPU monitors, schedulers, connectors, browser services, model installation, agent execution, research processes, health monitoring, and the Phoenix endpoint are started and supervised according to configuration.
-
-This matters because the platform is not a script that assumes every dependency is already available. Components have lifecycle, restart behavior, optional configuration, and a place in the application’s operational state.
-
-### 2. Model and instance control
-
-The instance pool manages local inference-server processes as check-out resources. It tracks available and busy slots, request priority, model affinity, health, and restart state. User, research, and background work can be treated differently without requiring each caller to implement its own queue.
-
-The routing layer can choose between local server types and remote providers while presenting a coherent inference interface to higher-level workflows. Backend-specific behavior remains in adapters rather than leaking into every application feature.
-
-### 3. GPU claims and workload scheduling
-
-A GPU is not available merely because a process has not recently logged activity. HomeCloud represents claims and workload ownership explicitly, polls hardware and queue state, and applies cooldown and idle checks before changing a model service.
-
-The scheduler can preserve an interactive baseline, move to a requested workload when the hardware is safely idle, and return capacity after work drains. Priority and ownership therefore shape model lifecycle instead of allowing each script to start or stop heavyweight services independently.
-
-### 4. Recoverable agent execution
-
-The execution engine supports autonomous, interactive, and plan-only modes. It builds context, discovers tools by profile, dispatches inference, executes tool calls, streams phase and result events, and monitors repeated actions, repeated output, score regression, and stalled improvement.
-
-Agent tasks run in containerized workspaces with relevant toolchains. The engine owns cleanup and records lifecycle telemetry so a setup failure or helper-process crash does not become an unexplained disappearance.
-
-Checkpointing persists turn history and execution state in PostgreSQL. Phase-specific snapshots allow plan, implementation, and critique work to coexist and allow the freshest valid state to be resumed after a crash.
-
-### 5. Research, verification, and evaluation
-
-The same runtime supports research and optimization work that would otherwise compete informally with interactive use. Research jobs can operate at a lower priority, use shared inference routing, and feed results into persisted application state.
-
-The platform includes tooling for evaluation, verification, optimization, code and CUDA research, and autonomous programs. These are presented as workloads over the runtime—not as unrelated scripts—so they inherit model routing, resource management, telemetry, and recovery behavior.
-
-### 6. Product services above the runtime
-
-HomeCloud extends beyond infrastructure management. The source tree includes document-vault behavior, connectors, browser and search tools, cinema/media workflows, OCR, model installation, notifications, and multimodal adapters.
-
-Those features are not listed to inflate scope. They demonstrate why the runtime exists: multiple product capabilities can reuse the same supervised model, GPU, agent, tool, and persistence layer instead of each shipping its own fragile AI stack.
-
-## Key design decisions
-
-### Derive concurrency from healthy infrastructure
-
-Callers do not decide that three jobs may run merely because they request three. Batch concurrency is derived from available inference capacity. This aligns application parallelism with the model servers and accelerator slots that can actually serve it.
-
-### Give user work explicit priority
-
-The instance pool and scheduler distinguish user, research, and background work. Priority is part of the runtime contract, which allows exploratory or maintenance workloads to use spare capacity without making interactive behavior unpredictable.
-
-### Represent GPU ownership
-
-Claims and scheduling state prevent multiple subsystems from assuming the same accelerator is free. Model-service transitions occur through a controller that can inspect idleness, queues, locks, and cooldown state.
-
-### Isolate agent tools
-
-Agent execution receives a container and workspace rather than unrestricted host execution. File operations are constrained to the mounted workspace, and resource reservations let tool work yield under pressure while still using idle host capacity.
-
-### Checkpoint semantic state, not only logs
-
-A recoverable agent needs more than its printed transcript. Checkpoints include message history, plan and context variables, loop-detection state, and engine state. Resumption can continue the execution model rather than replaying the entire task from the beginning.
-
-### Keep local and remote inference behind explicit adapters
-
-A local llama.cpp server, another local backend, and a remote provider have different operational properties. Adapters give higher-level features a stable interface without erasing backend-specific health and capacity.
-
-### Supervise optional capability
-
-Many HomeCloud services depend on deployment configuration. The application starts optional components deliberately and exposes health and telemetry rather than assuming that every connector, model service, or accelerator is present.
-
-## Reliability and failure handling
-
-The implementation addresses failure at several layers:
-
-- **Unhealthy model instance:** pool health and restart state prevent a failed server from remaining an apparently available slot.
-- **GPU contention:** claim and scheduler state gate model-service changes and concurrent workloads.
-- **Agent loop:** repeated actions, repeated output, quality regression, and plateaus can trigger warnings or stopping behavior.
-- **Tool or setup failure:** execution lifecycle events and status updates preserve diagnostic state; cleanup is designed to run on exceptional paths.
-- **Process interruption:** turn-level, phase-aware checkpoints preserve enough state for resumption.
-- **Sandbox leakage:** workspaces are mounted into containers, file operations are validated against the workspace, and generated workspaces can use durable, quota-controlled storage.
-- **Deployment variance:** optional components and inference backends are configuration-driven rather than assumed.
-- **Background starvation of users:** priority queues and baseline-return behavior keep interactive work visible to the scheduler.
-
-## Implementation evidence
-
-| Source | What it demonstrates |
-|---|---|
-| [`lib/home_cloud/application.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/application.ex) | The supervised application topology spanning database, model services, GPU control, agents, research, connectors, browser/media services, health, and the Phoenix endpoint. |
-| [`lib/home_cloud/intelligence/instance_pool.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/instance_pool.ex) | Model-instance checkout and return, priority queues, affinity, health, restart behavior, and multi-slot capacity. |
-| [`lib/home_cloud/infrastructure/gpu_workload_scheduler.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/infrastructure/gpu_workload_scheduler.ex) | GPU-aware workload selection, idle and cooldown checks, controlled model-service transitions, locks, and return to baseline. |
-| [`lib/home_cloud/intelligence/execution_engine.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/execution_engine.ex) | Autonomous, interactive, and plan-only agent modes; infrastructure-derived batch concurrency; sandbox ownership; context, tools, loop safety, and lifecycle events. |
-| [`lib/home_cloud/intelligence/execution_engine/checkpointer.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/execution_engine/checkpointer.ex) | Phase-aware persistence of message, plan, loop, event, and engine state for crash recovery. |
-| [`lib/home_cloud/intelligence/agent_sandbox.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/agent_sandbox.ex) | Containerized agent workspaces, durable storage, soft resource controls, tool execution, and workspace path validation. |
-
-## What the project demonstrates
-
-For an infrastructure or general software reviewer, HomeCloud demonstrates OTP supervision, process lifecycle, resource ownership, scheduling, health, adapters, persistence, containers, telemetry, and application integration around heterogeneous hardware.
-
-For an AI technical lead, it demonstrates the operational substrate that model-centric demos usually omit: inference capacity, priority, tool isolation, loop safety, checkpoint recovery, evaluation workloads, and the ability to reuse those services across multiple product domains.
-
-For a recruiter or product reviewer, the value can be stated simply: HomeCloud turns owned AI hardware into a usable platform rather than requiring every feature or user to understand how to start, route, monitor, and recover model processes manually.
-
-## Scope and boundaries
-
-- HomeCloud is a self-hosted application platform, not a general-purpose replacement for Kubernetes or a public multi-tenant cloud scheduler.
-- Hardware- and model-specific configuration exists in the implementation, but this portfolio page intentionally describes the reusable control model rather than private deployment details.
-- Not every optional service is required in every deployment.
-- Local-first does not mean every workload must run locally; remote providers remain valid routes where their capabilities or operating characteristics are appropriate.
-- This page emphasizes the platform architecture. It does not inventory every agent, research module, connector, media workflow, or UI feature present in the repository.
-
-## Review paths
-
-**Five minutes:** read **The product problem**, **Representative workflow**, and **Key design decisions**.
-
-**Twenty minutes:** continue through **Architecture**, **Reliability and failure handling**, and the six source links.
-
-**Deep review:** trace one request from application startup and routing through instance checkout, GPU scheduling, sandboxed execution, checkpointing, and result persistence.
-
-[← Back to portfolio](../README.md) · [View source repository](https://github.com/wahargis/home-cloud)
+- The source repository is private, so this portfolio does not expose complete implementation or deployment configuration.
+- Local inference and specialist model availability depend on configured model files, services, GPU topology, and health checks.
+- GPU priorities and service mappings are explicit deployment policy, not a general-purpose cluster scheduler.
+- The research system can verify only the properties represented by its compiler, tests, profiler, measurements, and task configuration.
+- This case study does not claim throughput, latency, model quality, or research improvement without a published measurement record.
