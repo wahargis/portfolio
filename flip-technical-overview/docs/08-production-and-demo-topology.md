@@ -1,66 +1,103 @@
-# 08 — Product and Synthetic Environment Boundary
+# Product and synthetic environment boundary
 
-## Why a separate technical environment exists
+Flip's public technical environment is separated from the product deployment. It exercises application contracts with synthetic data and fixtures without copying product accounts, messages, credentials, provider configuration, or administrative authority.
 
-Flip’s architecture should be inspectable without exposing real community data, production credentials, or administrative authority. A synthetic technical environment exercises the same product contracts with versioned non-sensitive relationships.
+![Product and synthetic environment topology](../diagrams/deployment-topology.svg)
 
-<img src="../diagrams/deployment-topology.svg" alt="Product and synthetic deployment boundary" width="900" />
+## Shared contracts
 
-This separation supports public review; it is not the product’s defining architecture.
+The synthetic environment can use the same kinds of schemas and state transitions for:
 
-## Shared behavior, independent authority
+- account, membership, room, message, forum, and artifact records;
+- AI identity and activity state;
+- actor- and origin-aware authorization;
+- context, retrieval, tool, effect, and terminal-response contracts;
+- curation runs and source provenance;
+- Oban jobs, retry, stale-work recovery, and continuation;
+- API, realtime, synchronization, and client reconciliation;
+- provider fixtures and route evaluation inputs.
 
-Product, synthetic, CI, and local environments can share source version, migrations, domain contracts, job definitions, provider adapters, and scenario definitions.
+The purpose is to exercise behavior, not to reproduce product data or capacity.
 
-They do not share the things that confer authority:
+## Required separation
 
-- databases or user uploads;
-- credentials, encryption/signing material, or sessions;
-- queues, PubSub namespaces, or administrative state;
-- object/media storage;
-- provider keys unless independently provisioned.
+| Resource | Product environment | Synthetic environment |
+|---|---|---|
+| **Database** | Product accounts, communities, content, activities, artifacts, and operations. | Synthetic-only identities, content, activities, and scenario state. |
+| **Queues and workers** | Product jobs and provider operations. | Scenario-specific jobs and fixtures with separate queue namespace. |
+| **Object storage** | Product uploads and generated artifacts. | Synthetic files and generated test artifacts in separate storage roots. |
+| **Authentication** | Product sessions, keys, and identity providers. | Synthetic accounts and independently scoped credentials. |
+| **Providers** | Product route policy and keys. | Fixtures, stubs, or independently scoped test keys. |
+| **Callbacks and webhooks** | Product hostnames and route secrets. | Separate hostnames, secrets, and callback validation. |
+| **Push, email, and deep links** | Product delivery channels. | Disabled, stubbed, or separately scoped technical channels. |
+| **Telemetry** | Product operational and user activity. | Synthetic scenario traces and test output. |
+| **Administrative access** | Product operator authority. | Synthetic-only administration with no product reach. |
 
-An environment identifier is infrastructure configuration. It is not a model-controlled switch and the synthetic environment cannot become a route into product data.
+The synthetic application should fail when a product-only resource is referenced. It should not silently proxy the request to the product deployment.
 
-## Synthetic data must preserve relationships
+## Provider fixtures
 
-A useful technical environment does more than populate tables. It needs enough relational fidelity to expose the architecture:
+Deterministic fixtures can model:
 
-- members with different visibility;
-- chat with reply structure;
-- a forum artifact derived from chat;
-- explicit AI-authored content;
-- safe citations and artifacts in several lifecycle states;
-- a correction or recuration path;
-- client synchronization across durable and ephemeral state.
+- normal streaming replies;
+- valid and invalid tool calls;
+- repeated or malformed deltas;
+- refusal and structured-output failure;
+- timeout, disconnect, quota, and retryable unavailability;
+- asynchronous image or video progress and completion;
+- duplicate callbacks and late terminal events;
+- usage present, missing, or inconsistent;
+- a fallback route with different capability constraints.
 
-These relationships let a reviewer inspect authorship, permission, provenance, failure, and recovery rather than only a staged happy-path screen.
+Fixtures make failure and recovery paths repeatable. Live-provider evaluation can run separately with non-product data and independently scoped credentials.
 
-## The architecture remains active
+## Synthetic product scenarios
 
-A public environment should not bypass the contracts it demonstrates. Authentication, authorization, job uniqueness, tool admission, URL and rendering controls, provider-key secrecy, rate/abuse controls, and product persistence remain in force.
+The environment includes scenarios for:
 
-The environment may use cheaper routes, reduced concurrency, deterministic provider fakes for selected cases, or restricted media capability. Those differences cannot change the data model or authorship/provenance rules.
+- direct AI participation in an allowed room;
+- denied access and revoked membership;
+- internal retrieval with a nearby restricted record;
+- web discovery, direct source reading, and citation validation;
+- typed product effects and duplicate command handling;
+- long-running artifact completion after application restart;
+- curation with destination validation, provenance, and partial failure;
+- native-client reconnect and reordered command, sync, and realtime delivery.
 
-## Reproducibility without operational disclosure
+Each scenario should assert durable application state, not only generated text.
 
-Synthetic scenarios should be reconstructible from versioned fixtures and migrations without depending on product snapshots. The public documentation describes the scenario and expected product transitions.
+## Exported evidence
 
-Reset credentials, host commands, private secrets, and deployment choreography are operational material and do not belong in the architecture portfolio.
+Technical evidence can include:
 
-## What the environment should make visible
+- architecture diagrams and state-transition descriptions;
+- synthetic object and event timelines;
+- test summaries and failure-injection results;
+- provider-fixture traces with sensitive fields removed;
+- client-convergence state before and after reconnect;
+- curation source and destination relationships using synthetic content;
+- artifact lifecycle and continuation records.
 
-A representative review should be able to answer:
+Exports exclude private prompts, credentials, raw provider keys, internal hostnames, copied product identifiers, and any content derived from product users.
 
-- Does internal retrieval obey the invoking actor’s community access?
-- Does external research produce inspectable evidence?
-- Does curation preserve participant authorship and source navigation?
-- Do artifacts show pending, completed, and failed state honestly?
-- Do web/native clients converge on committed state?
-- Does provider or tool failure degrade explicitly rather than corrupting the product?
+## Network and configuration controls
 
-The scenario guide is in [demo/README.md](../demo/README.md).
+Where practical, the synthetic environment should use:
 
-## Endpoint independence
+- separate environment variables and secret stores;
+- separate database, object storage, and queue endpoints;
+- deny lists or network policy for product hostnames and callbacks;
+- synthetic-only domain names and deep-link schemes;
+- independent provider keys with restricted quotas;
+- startup validation that rejects product resource identifiers;
+- output scanning for secret-shaped values and internal hostnames.
 
-The documentation and diagrams remain the durable public explanation. Temporary endpoint availability or provider configuration should not determine whether the architecture can be understood.
+Configuration separation is enforced by the application and deployment, not only by naming conventions.
+
+## Limits of the synthetic environment
+
+The environment does not prove product scale, production availability, or the quality of live product data. Provider fixtures do not replace live route evaluation. Synthetic authorization cases do not replace security review of the product deployment.
+
+It provides controlled evidence for system contracts and failure behavior while maintaining the private implementation and product boundary.
+
+[Previous: Model routing and inference](07-model-routing-and-inference.md) · [Next: Testing, evaluation, and operations](09-evaluation-testing-and-operations.md)

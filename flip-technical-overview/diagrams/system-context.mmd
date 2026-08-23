@@ -1,25 +1,19 @@
 flowchart LR
-    PEOPLE["Members and administrators"] --> CLIENTS["Web, desktop, and mobile clients"]
-    subgraph FLIP_CORE["Flip product authority"]
-      AUTH["Accounts + authorization"]
-      CHAT["Chat"]
-      FORUM["Forum"]
-      CURATION["Conversation curation"]
-      AIP["AI participants"]
-      ART["Citations and artifacts"]
-      DATA[("PostgreSQL + Oban")]
-      AUTH --> CHAT
-      AUTH --> FORUM
-      AUTH --> CURATION
-      AUTH --> AIP
-      CHAT --> DATA
-      FORUM --> DATA
-      CURATION --> DATA
-      AIP --> ART
-      ART --> DATA
-    end
-    CLIENTS --> AUTH
-    AIP --> MODELS["Hosted or local model endpoints"]
-    AIP --> TOOLS["Web, document, data, and media services"]
-    DATA --> SYNC["Electric + channels"]
-    SYNC --> CLIENTS
+  subgraph TOP["PRODUCT ACTORS AND SURFACES"]
+    T0["Members\nMessages, replies, research,; documents, media, curation"]
+    T1["Moderators and operators\nConfiguration, review, repair,; failure and activity inspection"]
+    T2["Web application\nLiveView and server-rendered; product interaction"]
+    T3["Desktop and mobile clients\nAuthenticated commands, sync,; realtime and local state"]
+    T4["Internal workflows\nJobs, scheduled work, callbacks,; and artifact continuation"]
+  end
+  subgraph BOTTOM["FLIP APPLICATION BOUNDARY"]
+    B0["Product domains\nIdentity, communities, chat, forums,; search, media, notifications"]
+    B1["Agent and curation runtime\nAdmission, context, tools, activity,; artifacts, publication, recovery"]
+    B2["Durable and realtime state\nPostgreSQL, Oban, PubSub, Channels,; API and synchronization projections"]
+    B3["External services\nLocal and hosted models, web sources,; documents, image/video, storage, push"]
+  end
+  T0 --> B0
+  T1 --> B0
+  T2 --> B0
+  T3 --> B2
+  T4 --> B1

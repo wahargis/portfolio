@@ -1,29 +1,34 @@
-# ADR 0002 — Separate synthetic technical environment
+# ADR 0002: Separate synthetic technical environment
 
 - **Status:** Accepted
-- **Decision scope:** Public technical review
+- **Scope:** Public scenarios, deterministic tests, and technical review
 
 ## Context
 
-A public architecture scenario is useful only if it exercises the real product contracts. Giving reviewers production access or copying production data would create privacy and security risk.
+Flip's product deployment contains accounts, community content, credentials, provider configuration, queues, storage, telemetry, and administrative authority that should not be copied into a public technical environment.
+
+The architecture still needs repeatable scenarios for authorization, agent execution, tools, curation, asynchronous artifacts, client synchronization, and failure recovery.
 
 ## Decision
 
-Maintain a separate synthetic technical environment that shares the product architecture and migration history but has independent:
+Run public scenarios in a separate synthetic environment with its own:
 
-- database and storage;
-- credentials and secrets;
-- sessions and administrative state;
-- provider configuration;
-- queues and realtime namespaces;
-- synthetic fixtures.
+- database and synthetic identities;
+- queues and worker namespace;
+- object storage and artifact roots;
+- credentials and provider fixtures or independently scoped keys;
+- callback and webhook routes;
+- hostnames, deep links, and client capability configuration;
+- telemetry and exported evidence.
 
-Public scenario documentation describes expected product transitions without publishing reset credentials or operational secrets.
+The synthetic environment uses the same kinds of application contracts and state transitions but does not proxy unknown requests to product resources.
 
 ## Consequences
 
-The environment requires fixture and deployment maintenance. It provides inspectable provenance, authorization, AI/tool, artifact, and synchronization scenarios without relying on private data.
+Scenario fixtures and assertions require maintenance as product contracts change. Live-provider evaluation remains separate from deterministic fixtures. The environment cannot establish product scale or availability.
 
-## Revisit when
+It can provide inspectable evidence for execution, authorization, persistence, retry, continuation, and client convergence without product data or authority.
 
-A fully local reproducible public distribution becomes preferable to a hosted synthetic environment.
+## Revision conditions
+
+Reconsider only if another environment can provide equivalent contract coverage with equal or stronger separation from product resources.

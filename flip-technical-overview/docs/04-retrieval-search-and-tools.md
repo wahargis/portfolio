@@ -1,135 +1,138 @@
-# 04 — Retrieval, Evidence, and the Capability Plane
+# Retrieval, evidence, and tools
 
-## The design problem is not “give the model tools”
+Flip's agent runtime uses application capabilities for product retrieval, external research, documents, data, media, and product effects. The server selects the capabilities available to each turn and applies trusted product scope before execution.
 
-Inside a multi-user product, a tool is a capability contract. It must define who can invoke it, what data it can see, whether it is read-only or effectful, how failure is represented, and what durable evidence or receipt survives after the model turn.
+![Governed tool execution](../diagrams/governed-tool-execution.svg)
 
-Flip’s capability plane exists to preserve those semantics while still letting an AI participant research broadly, reason over structured data, create artifacts, and act inside the product.
+## Capability classes
 
-<img src="../diagrams/retrieval-source-citation-flow.svg" alt="Retrieval, evidence, and citation flow" width="900" />
+| Class | Examples | Main controls |
+|---|---|---|
+| **Product reads** | Messages, rooms, forums, posts, search, members, polls, files, and existing artifacts. | Actor and community scope, object visibility, bounded result size, stable product references. |
+| **External research** | Web search, direct page reads, document retrieval, source extraction, and evidence assembly. | URL and source validation, deadlines, content limits, source identity, citation tracking. |
+| **Document and data analysis** | PDF and document reading, selected passages, tables, calculations, statistics, and charts. | File and dataset identity, typed inputs and outputs, size limits, reproducibility, artifact storage. |
+| **Product effects** | Replies, polls, forum changes, attachments, generated files, notifications, and other domain operations. | Target authorization, domain validation, idempotency, effect identity, durable commit, user-visible state. |
+| **Multimodal analysis** | Image and video description, OCR, frame or asset analysis. | Artifact visibility, modality route, size and duration limits, result identity. |
+| **Long-running generation** | Image and video generation or editing, document production, and staged media workflows. | Pending artifact, provider attempt, progress, cancellation, retry, terminal state, continuation. |
 
-## Four capability classes
+## Capability admission
 
-### Evidence acquisition
+The tool list is created for one turn using:
 
-These tools obtain information the model does not already possess:
+- the product surface and requested workload;
+- invoking actor and current membership;
+- community and origin object;
+- selected AI identity and feature configuration;
+- route support for tools and modalities;
+- configured services and current health;
+- policy for effectful or long-running operations;
+- working context and deadline budgets.
 
-- external search followed by direct webpage or historical-source reading;
-- actor-scoped chat and forum retrieval;
-- document and PDF extraction;
-- typed data providers for markets, economics, policy, conflict, environment, research, trade, and related domains.
+A tool that is not admitted cannot be invoked by name through another generic endpoint. The runtime does not provide the model with an unrestricted internal HTTP client, database connection, or file-system root.
 
-The architectural distinction is between **discovery** and **evidence**. A search result identifies a candidate source; the reader retrieves the actual page or document passage. Internal retrieval returns product identities under the invoking actor’s visibility. Structured providers retain dates, units, missing values, and provenance rather than flattening everything into prose.
+## Trusted scope
 
-### Derived analysis
+Tool schemas separate user-controlled arguments from server-controlled scope.
 
-Comparison, transformation, charting, rich-data rendering, and research-session operations derive a result from identified inputs. Their output carries the relationship to those inputs so a chart or comparison remains inspectable rather than becoming an unexplained image or paragraph.
+A model may supply a search query, document question, poll options, or requested transformation. The runtime supplies the actor, community, origin object, AI identity, workspace root, and other trusted values required by the operation.
 
-### Durable artifacts and product actions
+Tools reject attempts to override or broaden these values. Protected reads perform current authorization rather than assuming that context loaded earlier in the turn remains valid.
 
-Image/video generation and editing, polls, selected platform actions, and other effectful tools create state outside the model conversation. They run through product or provider services and return a durable request, artifact, action, or receipt identity.
+## Internal retrieval
 
-This identity is what makes retries, pending state, cancellation, continuation, permissions, and rendering possible. A model-authored string saying “I created it” is not an effect.
+Internal retrieval can combine product search, typed filters, direct object reads, and relationship traversal. The result includes stable product identities and enough metadata to support later authorization and citation.
 
-### Terminal composition
+Internal retrieval should answer questions such as:
 
-The drafting capability is deliberately part of the control surface. It converts a working model state into the candidate user-facing reply. Separating it from ordinary tool calls prevents internal planning or provider protocol from leaking into the product.
+- Which messages in the current room discuss the requested topic?
+- Which forum items visible to this actor provide durable background?
+- Which artifact or document is attached to the referenced message?
+- Which product object is the source of a synthesized forum result?
+- Which prior AI activity created the artifact used in this turn?
 
-## Catalog computation is authorization architecture
+The search index and retrieval layer do not create a new permission system. A search hit is returned only when the underlying object is currently readable.
 
-The runtime does not expose one universal registry. It computes the catalog from:
+## External research
+
+![Retrieval, source discovery, and citation](../diagrams/retrieval-source-citation-flow.svg)
+
+External research separates source discovery from evidence reading.
 
 ```text
-surface and product role
-  + feature / provider availability
-  + actor and community authorization
-  + object context
-  + deployment policy
-  = schemas admitted for this turn
+search query
+  -> candidate results and metadata
+  -> direct read of selected pages or documents
+  -> stored source and passage records
+  -> analysis or synthesis
+  -> final citations validated against stored evidence
 ```
 
-A curation worker, personal participant, forum enricher, ordinary room participant, and specialized game turn have different jobs. Narrow surfaces can receive replacement catalogs so they do not inherit unrelated research or media capabilities.
+Search snippets can guide selection but are not automatically accepted as full evidence. Direct reads can fail, return incomplete content, or provide unsupported material. Those outcomes remain visible to the runtime and can affect the final response.
 
-This is why “the tool exists in code” does not mean “every model can call it.” Reachability, authorization, effect class, renderer support, and lifecycle must agree.
+Source records can include canonical URL, title, retrieval time, content type, selected passages, tool status, and relationship to the AI activity. The reader-facing reply refers to the sources actually used rather than a list invented after generation.
 
-## Trusted scope follows execution
+## Documents and PDFs
 
-Internal retrieval demonstrates the critical pattern:
+Document operations use a durable file or source identity. The system can extract or select passages, answer questions, produce structured results, or create a derived artifact.
 
-```text
-reply runtime derives actor/community scope
-        |
-        v
-scope is captured by the dispatch closure
-        |
-        v
-child task calls a domain query
-        |
-        v
-membership and visibility predicates are applied
-```
+Large documents are processed in bounded segments or through an index appropriate to the workload. The final answer can retain passage or page references where available. Parsing, OCR, or extraction failures are stored separately from the model's interpretation.
 
-The model’s arguments cannot choose a different actor or community. If the trusted scope is absent, the result is an explicit empty/denied envelope that tells the model not to fabricate a product record or citation.
+A document visible to one actor is not placed in a globally accessible agent memory. Later access checks still apply to the durable file and derived result.
 
-## Dispatch isolates both failure and authority
+## Structured data and charts
 
-A parsed call is matched to a known handler, validated, and executed in a bounded task. The wrapper normalizes exceptions, process exits, throws, timeouts, and malformed results.
+Data tools use typed requests and results. A model can select a dataset, columns, filters, aggregation, or analysis operation, but the application or analysis runtime performs the calculation.
 
-<img src="../diagrams/governed-tool-execution.svg" alt="Governed tool execution" width="900" />
+Stored results can include:
 
-A failure result should give the model enough information to continue honestly without exposing internal stack traces or silently broadening access. The reply loop survives a broken tool; the product remains responsible for deciding whether any effect actually committed.
+- the source dataset and version;
+- query or transformation parameters;
+- table schema and rows used by the result;
+- statistics or model output;
+- chart specification and rendered artifact;
+- execution status and errors.
 
-## Evidence becomes a durable citation
+This allows a later user or system to inspect the data operation without treating generated prose as the calculation record.
 
-Flip’s citation flow separates source discovery from claim rendering:
+## Product effects
 
-1. A search, document, internal query, or typed provider returns an evidence envelope.
-2. A bounded passage or record set is selected.
-3. The server persists source metadata, the selected support, and a stable citation identity.
-4. The model places that identity near the claim it supports.
-5. Final validation confirms the identity exists and is visible in the current product context.
-6. The UI renders a source ledger independently of provider-specific citation syntax.
+A product effect follows the owning domain service.
 
-Quote verification can establish that the represented passage occurs in the retrieved source. It cannot prove the source true or the model’s broader inference warranted. Source quality, date, disagreement, and claim scope remain interpretation problems and should remain visible.
+For example, a poll request must identify an allowed target, pass option and lifecycle validation, receive a durable poll identity, and create the same product events expected by clients. A forum action must pass forum and source visibility rules. A generated file must receive an artifact identity and storage state before a reply can refer to it.
 
-## Retrieval is fit to the evidence type
+Effect calls use idempotency or operation identities where duplicate execution would create user-visible damage. A provider retry does not automatically repeat a committed effect.
 
-Flip does not force every source through one vector-search abstraction:
+## Long-running tools
 
-- product content benefits from authorization-aware full-text and relational retrieval;
-- external current information requires search plus direct reading;
-- large documents need page/section extraction;
-- structured data should remain typed;
-- social context is often selected by reply, room, author, and provenance relationships;
-- semantic/vector retrieval is useful where it measurably improves recall.
+Long-running generation creates a pending artifact or job and returns that object to the turn. Provider execution can then continue asynchronously.
 
-Vector similarity is one signal, not the product’s memory or permission model.
+The durable state includes:
 
-## Result budgeting preserves reopenability
+- requested operation and selected inputs;
+- model or provider route;
+- provider attempt identity;
+- progress and status;
+- output artifact or failure;
+- cancellation and retry state;
+- parent activity and continuation identity.
 
-Tool output can exceed a useful model context. The runtime can cap records, paginate, summarize with source identities, return next-request hints, or persist full data as an artifact while providing a compact model view.
+A completed artifact can be used by later product flows without requiring the provider session that created it.
 
-The important rule is that compaction must not remove the identity needed to cite, reopen, or inspect the result. A shorter answer is useful; an untraceable answer is not.
+## Citation and artifact validation
 
-## Effects and retries
+Before a terminal reply is stored, the runtime can check that referenced sources and artifacts exist, belong to the current activity or admitted context, and are visible to the target audience.
 
-Read operations, derived analysis, product actions, and provider-backed artifacts have different replay risks. Retrying a search is usually cheap. Retrying a poll publication, media charge, or message action may duplicate cost or state.
+Invalid references can be removed, repaired, or cause the terminal response to fail according to the product surface. The system does not publish a citation merely because the model emitted a plausible identifier or URL.
 
-Effectful operations therefore use causal identities and idempotency appropriate to the domain. Asynchronous operations expose pending, completed, and failed state and can re-enter the AI runtime through one continuation rather than relying on an open model session.
+## Failure handling
 
-## Security consequences
+- Unknown or unadmitted tools are rejected.
+- Schema-invalid calls do not reach product services.
+- Protected reads fail when the actor or origin scope is missing or stale.
+- Tool timeouts and provider errors remain distinct from successful empty results.
+- Effectful calls record whether an effect was committed before any retry.
+- Long-running calls preserve pending, failed, cancelled, and completed artifact state.
+- Source-read failure does not become a supported citation.
+- Artifact cleanup respects retained product references and lifecycle state.
 
-The capability design implies several hard boundaries:
-
-- retrieved webpages and documents are untrusted data, not instructions;
-- external fetchers enforce URL/network/size/time policy;
-- internal queries enforce server-side authorization;
-- effect tools use domain services rather than generic SQL/CRUD;
-- schemas and names are server-defined;
-- credentials never appear in model-visible results;
-- rendered HTML, markdown, charts, and media pass product validation;
-- audit state distinguishes user request, model choice, tool execution, and durable effect.
-
-## Architectural consequence
-
-The capability plane is what lets Flip expand beyond a chatbot without turning capability growth into permission drift. New tools are valuable only when their admission, evidence, effect, failure, and rendering contracts fit the product.
+[Previous: Agent runtime](03-agent-runtime.md) · [Next: Curation and provenance](05-synthesis-and-provenance.md)

@@ -1,98 +1,176 @@
-# 09 — Quality and Evaluation Strategy
+# Testing, evaluation, and operations
 
-## A good model response is not evidence that the product works
+Flip requires deterministic product testing, model-route evaluation, client-convergence testing, failure injection, and operational inspection. Model quality is one part of the system and is evaluated separately from identity, authorization, persistence, effects, and recovery.
 
-Flip combines deterministic product rules with non-deterministic model behavior and asynchronous infrastructure. Its quality strategy therefore separates four questions:
+![Testing and evaluation flow](../diagrams/ci-quality-gates.svg)
 
-1. Are the product invariants correct regardless of model?
-2. Does the selected model route behave acceptably for its assigned surface?
-3. Do the full user workflows converge across HTTP, jobs, database, sync, and UI?
-4. Does deployed behavior remain healthy and correct over time?
+## Deterministic product tests
 
-<img src="../diagrams/ci-quality-gates.svg" alt="Flip quality and release evidence" width="900" />
+### Identity and authorization
 
-## 1. Prove the deterministic shell
+Tests verify:
 
-The highest-value tests target the code-owned contracts that must survive every model change:
+- account and membership requirements for product surfaces;
+- AI identity availability and attribution;
+- room and forum visibility;
+- trusted actor and origin injection into tools;
+- current authorization on direct reads, search, retrieval, and effects;
+- origin-aware access for curation-derived content;
+- removal of revoked content from client projections.
 
-- authorization scope cannot widen during internal retrieval;
-- duplicate triggers do not produce duplicate visible effects;
-- tool failure cannot silently kill an AI turn;
-- curation cannot attribute text to the wrong participant or reference ineligible messages;
-- invalid citation/artifact identities do not render as evidence;
-- provider protocol cannot be persisted as normal content;
-- a failed transaction cannot publish a phantom realtime success;
-- optimistic clients converge on canonical identities;
-- asynchronous continuation happens once for the intended terminal event.
+These tests do not require a live model.
 
-These checks belong in domain, database, integration, job, adapter, and client tests. They should assert durable product state rather than merely that a function returned `:ok`.
+### Agent runtime
 
-## 2. Evaluate model behavior by surface
+Runtime tests cover:
 
-Model quality is not one benchmark score. The relevant behavior depends on the role.
+- duplicate trigger and continuation admission;
+- bounded conversation and reply-ancestry context;
+- turn-specific route and tool admission;
+- tool schema and trusted-scope handling;
+- working rounds, terminal output, and protocol repair;
+- citation and artifact validation;
+- activity and source records;
+- cancellation, retry classification, and terminal failure.
 
-For a research reply, the evaluation asks whether the model recognizes the need for current evidence, reads rather than cites search snippets, selects the right tools, handles disagreement, places citations near supported claims, and remains honest when evidence is insufficient.
+Provider fixtures supply deterministic streams and tool-call patterns.
 
-For curation, it asks whether the plan forms coherent topics, preserves source identity and reply relationships, chooses a valid destination, avoids duplication, and defers material that needs review.
+### Product effects
 
-For action or artifact workflows, it asks whether the model uses typed capabilities correctly, produces a valid terminal response, and handles pending or failed external work without claiming success.
+Effect tests verify:
 
-Evaluation cases are versioned with the route, model, adapter, configuration, and date. A result supports a deployment decision for that surface; it is not a timeless claim about the model.
+- domain validation and target authorization;
+- stable operation identities;
+- no duplicate visible effect after retry;
+- committed object and activity relationships;
+- partial failure and repair;
+- current client-visible lifecycle state.
 
-## 3. Test convergence across the product
+### Background workflows
 
-End-to-end scenarios cover the seams that unit tests cannot:
+Tests exercise:
 
-```text
-user command
-  -> authorization and transaction
-  -> background job / model / tools
-  -> durable reply, curation, or artifact state
-  -> Electric / channel projection
-  -> web or native rendering
-```
+- request and job insertion boundaries;
+- claim, stale ownership, retry, and terminal state;
+- provider polling or callback duplication;
+- asynchronous completion after worker or application restart;
+- one deduplicated continuation;
+- cancellation and late terminal events;
+- cleanup without deleting referenced artifacts.
 
-The adversarial cases matter most: response and sync arriving in either order, disconnect during a pending mutation, provider failure after evidence collection, worker crash during tool dispatch, linkback failing after forum commit, permission revocation against cached state, or a client waking after an artifact completed.
+### Curation
 
-The expected result is coherent state and honest failure, not one exact packet order.
+Curation tests cover source selection, plan validation, destination resolution, forum mutation, participant and message provenance, source-aware access, linkback, feedback, recuration, duplicate request, and partial stage failure.
 
-## 4. Use operations as quality feedback
+## Client and end-to-end tests
 
-Runtime telemetry should explain where user-visible outcomes degrade without retaining unnecessary private content. Useful signals include queue wait, provider and tool latency, terminal reason, retry/repair rate, citation validation failure, curation correction, artifact abandonment, sync lag, and route-specific evaluation drift.
+Client tests cover web and native paths through:
 
-Product feedback matters as much as infrastructure health. Participant correction, recuration, deletion of AI replies, source-link traversal, and unresolved artifact state reveal failures that a latency dashboard cannot.
+- authenticated commands and structured refusal;
+- optimistic object reconciliation;
+- response, durable sync, and realtime events arriving in different orders;
+- duplicate delivery and reconnect;
+- client capability and schema mismatch;
+- background completion while offline;
+- permission revocation and local-data removal;
+- AI, artifact, and curation lifecycle rendering.
 
-Operational data should feed new deterministic regressions or versioned evaluation cases rather than becoming a pile of unexamined logs.
+End-to-end scenarios use synthetic identities and data. They verify the resulting database, event, and client state rather than relying only on screenshots.
 
-## Citation quality has deterministic and semantic layers
+## Model-route evaluation
 
-Flip can deterministically check that a citation identity exists, the source was retrieved, and the selected passage appears in it. It cannot deterministically prove that the passage is true, current, or sufficient for every nearby inference.
+Evaluation sets are organized by workload.
 
-Semantic evaluation therefore considers relevance, claim scope, source type/date, and disagreement. High-stakes or disputed cases may require human review. The architecture is explicit about where automation ends.
+### Conversation
 
-## Security regressions are product regressions
+Measures include relevance, instruction and product-policy compliance, use of current conversation, refusal behavior, tool selection, latency, and response length.
 
-The suite must exercise cross-community retrieval denial, forged scope arguments, missing trusted scope, private source leakage into public artifacts, unsafe external fetching, prompt injection in retrieved content, rendered-content sanitization, unauthorized product actions, stale client capability, and credential redaction.
+### Research and evidence
 
-These are not separate from AI quality. An answer that is relevant but violates visibility is a failed product outcome.
+Measures include search and source selection, direct-read use, document grounding, citation correctness, handling of incomplete evidence, unsupported claims, and terminal source references.
 
-## CI and release evidence
+### Structured planning and curation
 
-A practical deterministic gate compiles and formats the server, applies migrations, runs server/client/integration/security tests, checks dependencies and documentation, and builds the release/container. Selected end-to-end scenarios verify the assembled product.
+Measures include schema validity, source-message coverage, destination validity, topic organization, duplicate handling, and preservation of authorship constraints.
 
-Model/provider evaluations are slower and can run on scheduled or pre-release tracks, but route changes should not ship without current evidence for the surfaces they affect. When a route regresses, the product can constrain or remove that route without blocking unrelated deterministic changes.
+### Documents and data
 
-## Failure-domain evidence
+Measures include selected-passage accuracy, extraction failure handling, calculation and transformation correctness, chart or table validity, and stable artifact references.
 
-The test and operations model should confirm that:
+### Multimodal work
 
-- model or tool outages degrade AI capability while ordinary collaboration remains coherent;
-- queue backlog delays durable work without inventing completion;
-- sync/channel interruption preserves PostgreSQL authority;
-- media failure produces a failed artifact rather than a broken conversation;
-- BEAM process restarts do not corrupt durable state;
-- database unavailability prevents non-durable success from being published.
+Measures include image or video understanding, request validity, asynchronous provider handling, progress and terminal state, continuation, and artifact quality where human or automated evaluation is available.
 
-## Evidence discipline
+Route evaluation records model, provider, configuration, test-set version, date, and metrics so results can be compared after a route change.
 
-Claims such as “production-ready,” “zero hallucinations,” “supports N users,” or “novel” require dated, reproducible evidence. The portfolio instead states the contracts, evaluation methods, failure boundaries, and known limitations that can be defended from the implementation.
+## Security testing
+
+Security tests include:
+
+- cross-community and cross-room retrieval attempts;
+- model attempts to override trusted scope;
+- prompt or source content that requests hidden tool access;
+- invalid internal URLs and callback targets;
+- file and artifact visibility changes;
+- secret-shaped content in tool arguments and exported traces;
+- duplicate and replayed effect requests;
+- stale client sessions and revoked membership;
+- synthetic-environment attempts to reach product resources.
+
+Tool output and external source content are treated as untrusted input to later model rounds and user-visible rendering.
+
+## Failure injection
+
+The system is tested under:
+
+- provider timeout, disconnect, refusal, malformed output, and quota;
+- tool timeout, invalid result, and partial effect;
+- worker crash before and after durable state changes;
+- duplicate jobs, callbacks, and terminal events;
+- database transaction rollback;
+- object storage or media-provider failure;
+- realtime disconnect and reordered delivery;
+- unavailable local inference or optional connector;
+- stale curation plan and changed source visibility.
+
+Failure injection checks final durable state, retry and repair behavior, user-visible status, and absence of duplicate effects.
+
+## Operational records
+
+Operations require structured records for:
+
+- activity and job lifecycle;
+- route and provider attempt;
+- latency, usage, and cost where available;
+- tool duration, result identity, and failure class;
+- queue time and retry count;
+- artifact progress and terminal status;
+- continuation and deduplication state;
+- client synchronization and delivery failures;
+- curation stage and partial result;
+- current endpoint and optional-service health.
+
+Reader-facing source or tool status is derived from these records but excludes credentials, internal arguments, and private errors.
+
+## Release checks
+
+A change to agent, tool, curation, provider, or client behavior should pass the relevant checks:
+
+1. schema and migration validation;
+2. product-domain and authorization tests;
+3. runtime and tool fixture tests;
+4. job and recovery tests;
+5. web and native-client convergence tests;
+6. security and synthetic-boundary tests;
+7. route evaluation for affected workloads;
+8. diagram and documentation updates when public contracts change.
+
+Documentation and evaluation versions should identify implemented behavior accurately. Planned work and experimental routes remain labeled as such.
+
+## Limits of evaluation
+
+Automated tests cannot establish all product usefulness or source quality. Human review remains necessary for conversation, curation, media quality, and ambiguous research tasks. Live provider behavior can also change without source changes.
+
+The operating model therefore combines deterministic application invariants, repeatable model evaluations, live health and telemetry, synthetic failure cases, and product-specific human review.
+
+[Previous: Product and synthetic environment boundary](08-production-and-demo-topology.md) · [Next: Architecture decisions](10-architecture-decisions.md)

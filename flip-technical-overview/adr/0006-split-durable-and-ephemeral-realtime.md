@@ -1,27 +1,29 @@
-# ADR 0006 — Split durable and ephemeral realtime state
+# ADR 0006: Separate durable, asynchronous, realtime, and local state
 
 - **Status:** Accepted
-- **Decision scope:** Client synchronization
+- **Scope:** Web and native-client data flow
 
 ## Context
 
-Messages, threads, votes, and settings must recover after disconnect and support reconciliation. Typing, presence, and transient progress are valuable only in the moment. One transport and persistence policy is poorly suited to both.
+Messages, forum items, AI activities, media jobs, typing indicators, and client drafts have different persistence and replay requirements. Treating all of them as realtime events would make product state unrecoverable. Persisting all transient interaction state would add unnecessary storage and synchronization.
 
 ## Decision
 
-Use:
+Use four state classes:
 
-- PostgreSQL as canonical durable state;
-- Electric shape synchronization for recoverable client projections;
-- HTTP/domain commands for authoritative mutations;
-- Phoenix channels/PubSub for ephemeral or targeted low-latency events.
+- PostgreSQL for durable product state;
+- PostgreSQL plus Oban and supervised workers for durable asynchronous state;
+- Phoenix Channels and PubSub for ephemeral realtime state;
+- client memory or local storage for drafts and other local interaction state.
 
-Clients may render optimistic state but reconcile to canonical identities and transactions.
+Server commands authorize and commit durable changes. Native clients receive authorized durable projections and reconcile optimistic state by local transaction and canonical object identity.
 
 ## Consequences
 
-Clients coordinate multiple realtime paths and need explicit reconnect tests. Durable state is recoverable without persisting every ephemeral event.
+Clients must handle command responses, durable synchronization, and realtime events arriving in different orders. Access revocation must remove durable projections and local affordances.
 
-## Revisit when
+The application can recover committed product and workflow state after disconnect or restart without replaying every transient event.
 
-A replacement synchronization protocol can express both classes without weakening durability or adding unnecessary persistence.
+## Revision conditions
+
+Change the owner or delivery path of a state class only when its durability, replay, consistency, or privacy requirements change and the replacement defines a clear source of truth.

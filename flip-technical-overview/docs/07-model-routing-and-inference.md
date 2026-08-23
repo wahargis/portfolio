@@ -1,113 +1,142 @@
-# 07 — Model Routing as Execution Policy
+# Model routing and inference
 
-## Product semantics must survive a model swap
+Flip routes AI workloads to local or hosted model services through product-owned request and event contracts. Routes are selected by workload requirements and current operating state. A provider or model change does not alter product identity, access, tools, effects, or persistence.
 
-Flip uses models for several different jobs: low-latency participation, evidence-heavy research, structured curation, document interpretation, and artifact continuation. Those jobs should not be defined by one provider’s API or one currently preferred model.
+![Model routing and audit](../diagrams/model-routing-audit.svg)
 
-The product therefore owns a stable inference contract and treats route selection as execution policy.
+## Workload profiles
 
-<img src="../diagrams/model-routing-audit.svg" alt="Model routing and provider isolation" width="900" />
+Different product surfaces require different model behavior.
 
-## Responsibility is deliberately layered
-
-| Layer | Responsibility |
+| Workload | Typical requirements |
 |---|---|
-| **Flip runtime** | Identity, product context, admitted tools, evidence, terminal behavior, persistence. |
-| **Route policy** | Select a compatible model/provider/local endpoint for this surface and deployment policy. |
-| **Provider adapter** | Translate request, stream, tool-call, finish, and error behavior. |
-| **Inference service** | Keep the model process or hosted capacity healthy and available. |
-| **Model** | Reason, select among admitted tools, and compose content. |
+| **Realtime conversation** | Low latency, reliable conversational continuation, bounded context, selected product tools, and fast failure. |
+| **Evidence-heavy research** | Larger working context, reliable tool use, source handling, document reading, and cited terminal output. |
+| **Curation and structured planning** | Schema adherence, coverage of selected source material, destination planning, and stable retry behavior. |
+| **Document and data work** | File or table context, analysis tools, structured results, chart or artifact references, and reproducible operations. |
+| **Vision and multimodal analysis** | Image, video, OCR, or document modality support with defined size and duration limits. |
+| **Media generation** | Provider-specific asynchronous operations, durable artifact state, progress, cancellation, and terminal continuation. |
 
-This separation prevents a provider change from silently changing who the AI participant is, what it may read, or which product effects it may perform.
+One route can serve several workloads, but route admission remains specific to the request.
 
-## Routes are selected by the work, not one global ranking
+## Product request envelope
 
-A useful route decision asks what the current surface requires:
+Before calling a provider, Flip constructs a request containing:
 
-- A fast conversational reply may prioritize latency and reliable direct composition.
-- A research reply needs stable structured tool calls, sufficient working context, and good evidence use.
-- Conversation curation values schema and plan validity more than personality.
-- A document or vision task needs the required modality or a compatible dedicated tool.
-- A privacy-sensitive room may require local inference even when a hosted route is stronger.
+- AI identity and applicable instructions;
+- selected product context and external evidence;
+- admitted tool schemas and trusted runtime scope;
+- output and terminal-response requirements;
+- model and provider route identifiers;
+- modality and artifact references;
+- context, time, turn, usage, and cost limits;
+- activity and continuation identity;
+- tracing and evaluation metadata that does not expose private credentials.
 
-The same configured AI identity can use different execution routes without becoming a different participant. Persona, role, tone, permissions, and attribution are product state; the model is a replaceable resource used to realize them.
+The request is the product contract. A provider adapter should not load additional product data or expand the tool list independently.
 
-## The normalized request is a product-owned envelope
+## Route selection
 
-The runtime supplies selected context, product instructions, admitted schemas, output constraints, deadline, and the terminal-composition contract. The adapter converts that envelope to the provider’s shape.
+Route selection considers:
 
-Providers differ materially in streaming, tool-call encoding, forced-tool support, finish reasons, reasoning fields, token accounting, and error behavior. Adapters normalize those differences into the outcomes the runtime understands:
+- required modalities and output types;
+- context size and reserved tool or output budget;
+- tool-call and structured-output behavior;
+- privacy and local-processing requirements;
+- provider data-handling policy;
+- latency, throughput, and cost targets;
+- current endpoint health and queue state;
+- route-specific evaluation for the product surface;
+- configured fallback order and restrictions.
 
-```text
-assistant content
-validated tool calls
-finish state
-usage / latency evidence
-structured provider failure
-```
+A route that is healthy but lacks a required modality or tool protocol is not compatible. A cheaper route that changes privacy or evidence requirements is not an automatic fallback.
 
-Compatibility logic belongs at this boundary. Product contexts should not contain branches for every provider’s tool JSON or streaming protocol.
+## Provider adapters
 
-## Local and hosted inference remain interchangeable at the product boundary
+Adapters translate the product request to provider-specific APIs and normalize meaningful events:
 
-A HomeCloud-hosted endpoint can provide data locality, fixed hardware economics, version/quantization control, and independence from one hosted vendor. It also introduces finite slots, model load time, GPU/process health, context-memory tradeoffs, and operator responsibility.
+- text or structured-output deltas;
+- tool calls and tool-result continuation;
+- finish and stop reasons;
+- provider refusal and safety responses;
+- timeout, disconnect, protocol, and malformed-output failures;
+- usage and cost data where available;
+- asynchronous job identifiers, progress, callbacks, and terminal media results.
 
-Flip consumes that endpoint through the same route contract. HomeCloud decides how local capacity is scheduled; Flip retains identity, permissions, tools, evidence, and persistence.
+Adapters preserve provider differences in capability metadata. Emulated behavior is not reported as identical to native behavior when the distinction affects cancellation, continuation, or correctness.
 
-A local outage is therefore an AI-capability failure, not a corruption of chat or forum state. The product can queue, choose a policy-compatible route, or fail visibly while ordinary collaboration remains available.
+## Local inference
 
-## Fallback is constrained by the original contract
+Local routes can provide privacy, predictable marginal cost, control over model versions, and access when hosted services are unavailable. They also introduce operational limits:
 
-Fallback is not “try any model until something answers.” A replacement route must still satisfy modality, tool behavior, privacy, context, and terminal-composition requirements.
+- model process lifecycle and health;
+- finite GPU memory and throughput;
+- queue and concurrency management;
+- model loading and route warm-up;
+- context and batch limits;
+- local tool and multimodal compatibility;
+- host and network failure.
 
-A valid fallback may change latency or cost. It must not:
+Flip treats local endpoints as routes with explicit health and capability. It does not assume that a configured URL is available or that every local model can execute the same tools and output contracts.
 
-- send local-only context to a remote provider contrary to policy;
-- select a model unable to execute the admitted tools;
-- lose citations or artifacts already gathered in earlier rounds;
-- duplicate an effect that has already committed;
-- convert an authentication/configuration failure into indefinite retry;
-- persist provider protocol as user content.
+## Hosted inference
 
-When a provider fails after tools have already collected evidence, the runtime can preserve that evidence and attempt one bounded terminal composition through a compatible path.
+Hosted routes provide additional models, modalities, and managed capacity. They require controls for credentials, rate limits, provider outages, data handling, cost, and API behavior changes.
 
-## Route health and capability are different questions
+Credentials stay in application configuration and are not included in model-visible context, logs, or reader-facing activity. Provider-specific errors are classified into product-relevant states such as retryable unavailability, deterministic refusal, invalid request, quota, or incompatible output.
 
-An endpoint can be reachable but unsuitable. Route admission should distinguish:
+## Fallback
 
-- operational health and available capacity;
-- support for required input/output modalities;
-- structured tool-call reliability;
-- terminal drafting compatibility;
-- context and output limits under realistic latency;
-- deployment privacy and cost policy.
+Fallback is allowed only when the replacement route preserves the request's required properties.
 
-A route that writes fluent prose but mishandles product actions is not healthy for an action-heavy surface.
+A fallback check can include:
 
-## Context budgets are deployment decisions
+- same required modality and artifact support;
+- equivalent or sufficient tool protocol;
+- enough working context for the current state;
+- compatible privacy and data handling;
+- remaining deadline and budget;
+- ability to consume completed tool results and continue the existing activity;
+- evaluation status for the product surface.
 
-The advertised context window is not the working budget. Conversation history, retrieved evidence, document passages, artifact metadata, tool schemas, and terminal output all compete for capacity. Hosted latency or local GPU memory can make the useful budget much smaller than the model maximum.
+A route failure can also terminate the AI activity and preserve completed evidence and artifacts. Product chat, forum, and file state remain valid even when the AI reply cannot be completed.
 
-Flip therefore selects context before routing and reserves space for the final product response. A larger endpoint can improve capacity; it does not replace retrieval, relevance selection, or compaction discipline.
+## Context and usage accounting
 
-## Evaluation is surface-specific
+The runtime estimates or measures prompt, tool, and output usage per route. A working budget reserves space for:
 
-A route is evaluated against the work it may receive:
+- system and AI-identity instructions;
+- selected product context;
+- tool schemas;
+- accumulated tool results;
+- terminal output;
+- provider-specific overhead.
 
-- Does it select and call the admitted tools correctly?
-- Does it produce a valid terminal answer rather than protocol leakage?
-- Does it use citations near the claims they support?
-- Does it preserve uncertainty and source disagreement?
-- Does it produce valid curation plans?
-- Does it continue honestly after tool or provider failure?
-- Does it meet latency and capacity expectations for the deployment?
+Context is compacted or reduced before the provider limit is reached. The system should not depend on a provider truncating arbitrary product context.
 
-Results should be tied to model, route, adapter, configuration, and date. There is no useful global statement that one model is simply “the Flip model.”
+Usage records can support operational analysis by route, surface, workload, duration, outcome, and cost. Missing provider usage remains distinguishable from zero usage.
 
-## Audit boundary
+## Route evaluation
 
-Operational records can correlate the durable reply or artifact with the route, timing, usage where available, tool activity, terminal reason, and failure class. They should not retain credentials, unnecessary private content, hidden provider reasoning, or cross-community context.
+Evaluation is performed by workload and route, not by one general model score.
 
-## Architectural consequence
+Test sets can measure:
 
-Models are execution components inside a product-owned runtime. Flip can adopt better models, local capacity, or new providers without surrendering the semantics that make the AI participant safe, attributable, and useful.
+- conversation relevance and product-policy compliance;
+- context selection and information leakage;
+- tool-call choice, schema validity, and argument quality;
+- source use and citation correctness;
+- structured curation-plan validity;
+- document and data result accuracy;
+- media request and continuation behavior;
+- latency, throughput, cost, refusal, and failure recovery.
+
+Deterministic product tests verify identity, authorization, effect, persistence, and retry invariants independently of model quality. Model evaluation checks the variable behavior inside those controls.
+
+## Operations
+
+Route operations track endpoint health, recent failures, queue or capacity where available, latency, usage, and evaluation status. Configuration changes are versioned or otherwise attributable so an activity can be related to the route policy that admitted it.
+
+A provider response is stored with product-safe metadata. Credentials, hidden provider headers, private prompt state, and sensitive raw errors are excluded from user-visible projections.
+
+[Previous: Data, realtime, and clients](06-data-realtime-and-clients.md) · [Next: Product and synthetic environment boundary](08-production-and-demo-topology.md)

@@ -1,20 +1,26 @@
-# ADR 0008 — Durable citations and artifacts
+# ADR 0008: Durable citations and artifacts
 
 - **Status:** Accepted
-- **Decision scope:** Evidence and generated output
+- **Scope:** Evidence, files, charts, generated media, and other agent results
 
 ## Context
 
-A citation token, chart, image, document analysis, or video embedded only in model prose has no reliable lifecycle, validation, permission, or retry identity.
+A model reply can refer to web sources, product records, documents, tables, charts, files, images, videos, polls, and other results. Provider text alone cannot establish that these objects exist, completed successfully, remain visible to the user, or can be used by later workflows.
+
+Long-running media and document work can also finish after the original model turn.
 
 ## Decision
 
-Represent citations, source records, artifacts, provider requests, and asynchronous terminal state as durable product objects. The model receives stable identities and refers to them in the final reply. The renderer resolves only valid, visible objects.
+Store sources, citations, files, charts, generated media, polls, and other artifacts as application objects with stable identities, access state, lifecycle, and relationship to the AI activity or product object that created them.
+
+Validate terminal references against stored sources and artifacts. Long-running operations create pending objects before provider completion and can start one deduplicated continuation after terminal state.
 
 ## Consequences
 
-The product can validate evidence, deduplicate effects, show pending/failed state, continue asynchronous workflows, and apply retention policy. Additional schemas, cleanup, storage, and UI are required.
+The application manages artifact schemas, storage, cleanup, access, retries, provider attempts, and client rendering. Replies can show failure or pending state instead of presenting an invented completed result.
 
-## Revisit when
+Later users and workflows can inspect or reuse durable evidence and artifacts without replaying the original provider conversation.
 
-No expected reversal. Specific storage formats and provider abstractions may change.
+## Revision conditions
+
+New result types can use different storage or lifecycle systems, but they must expose stable application identities, access behavior, and terminal state to the agent runtime and clients.

@@ -1,0 +1,27 @@
+flowchart TB
+  A[Human or orchestrator] --> B[Shared run command bus\nCLI, MCP, web]
+  B --> C[Resident run application\ngoal, plan, status, answer, steer, stop, evidence, review, adopt, integrate]
+  C --> D[Task topology, waves, and workflow interpreter]
+  D --> E[Route capability and liveness]
+  E --> F1[Persistent Codex session]
+  E --> F2[Persistent Claude session]
+  E --> F3[Persistent GLM, Grok, Kimi, or other session]
+
+  C <--> G[(Coordination store and append-only events)]
+  D <--> G
+  F1 <--> G
+  F2 <--> G
+  F3 <--> G
+
+  G --> H[Questions, approvals, waits, checkpoints, messages, shared context]
+  H --> C
+
+  F1 --> I1[Owned Git worktree]
+  F2 --> I2[Owned Git worktree]
+  F3 --> I3[Owned Git worktree]
+  I1 --> J[Candidate results]
+  I2 --> J
+  I3 --> J
+  J --> K[Verification and review]
+  K --> L[Preserve, adopt, integrate, export, cleanup]
+  L --> G

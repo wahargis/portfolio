@@ -1,127 +1,163 @@
-# 02 — System Architecture
+# System architecture
 
-## Architectural thesis
+Flip is a Phoenix application with product contexts for identity, communities, chat, forums, search, media, AI activity, curation, and other application services. PostgreSQL stores durable state. Oban and supervised processes execute background work. LiveView, Channels, APIs, and durable client synchronization deliver state to web, desktop, and mobile surfaces.
 
-Flip is a modular Phoenix monolith because its differentiating behavior depends on relationships that cross ordinary product boundaries: a chat message can become source material for a forum artifact; an AI reply can cite external evidence and attach a durable artifact; a permission change must affect search, synchronization, and tool use consistently.
+The architecture is organized around product transactions and long-running workflows rather than around model providers.
 
-Those relationships are easier to make correct when identity, authorization, transactions, background work, and provenance share one application and one canonical database. The architecture is modular to preserve ownership and reasoning boundaries, but it is not distributed merely to look sophisticated.
+## System context
 
-<img src="../diagrams/service-container-map.svg" alt="Flip service and container map" width="900" />
+![Flip system context](../diagrams/system-context.svg)
 
-## The system is organized around four boundaries
+The application communicates with several external systems:
 
-### 1. Product authority
+- local and hosted model endpoints;
+- web search and direct source services;
+- document, image, video, storage, and media providers;
+- push, email, authentication, and connector services where configured;
+- desktop and mobile clients using the server's API, realtime, and synchronization contracts.
 
-The Phoenix application owns the social system: accounts, membership, chat, forum, moderation, settings, notifications, and the durable representation of AI-authored content. Domain contexts expose public operations rather than allowing clients, models, or background workers to mutate tables arbitrarily.
+External services do not own product identity, permissions, object lifecycle, or publication. They receive bounded requests and return results to application-owned records.
 
-The important boundary is not the number of contexts. It is that every effect passes through the context that understands its invariants. Sending a message, creating a forum thread, attaching a citation, and changing a room policy are different domain commands even when they share a database transaction.
+## Application structure
 
-### 2. Durable asynchronous work
+![Flip service and container map](../diagrams/service-container-map.svg)
 
-Oban carries work that cannot or should not complete inside an HTTP request: conversation curation, AI turns, linkback, recuration, provider-backed artifacts, continuation, and maintenance.
+### Product contexts
 
-A job is durable coordination state, not merely a retry wrapper. It records causal identity, attempt state, and the terminal product condition the workflow owes. A worker returning successfully is insufficient if the intended reply, linkback, or artifact state was never committed.
+Accounts, communities, chat, forums, search, media, and related contexts own their schemas and state transitions. AI operations call these contexts through application services rather than writing product tables directly.
 
-### 3. AI capability plane
+This keeps product rules in the same code paths for human and AI actions. For example, creating a poll or forum item from an AI turn uses the same target validation and persistence model as another server command, with additional activity and provenance state.
 
-The AI runtime sits inside the product rather than beside it. It receives product-derived context and authorization, exposes a server-computed capability set, routes model calls, isolates tool execution, persists citations and artifacts, and commits the final result through ordinary domain services.
+### AI execution services
 
-This prevents the model provider from becoming a second product backend. Models reason and choose among admitted actions; Flip decides what can be read, what can be changed, and what becomes durable.
+The agent runtime handles turn admission, context assembly, route selection, capability admission, model and tool rounds, terminal validation, activity records, and continuation. Retrieval, providers, tool execution, and artifact services are separate modules behind this runtime.
 
-### 4. Client projection
+The runtime does not own every product feature it can invoke. It owns the execution contract and calls the product context that owns each effect.
 
-Web, desktop, and mobile clients project one product state through three mechanisms with different semantics:
+### Background workflows
 
-- HTTP/domain commands for authoritative mutations;
-- Electric synchronization for recoverable durable records;
-- Phoenix channels/PubSub for ephemeral presence, typing, and transient progress.
+Oban jobs and supervised workers execute work that should not depend on an HTTP request remaining open. This includes curation, provider polling or callbacks, generated media, document processing, notifications, repair, and continuation after terminal artifacts.
 
-The split is intentional. A committed message must be recoverable after disconnect; a typing indicator should not become permanent database history.
+A background job refers to durable product or run state. The queue entry is not treated as the only record of the operation.
 
-## Why one PostgreSQL authority matters
+### Data and persistence
 
-Consider a chat discussion that becomes durable forum knowledge. The system may need to create a curation run, create or update a forum thread, preserve source-message and participant relationships, attach structural context, enqueue linkback, and later accept participant correction.
+PostgreSQL stores:
 
-In Flip, the durable part of that transition can be expressed with relational identities and transactions:
+- accounts, memberships, rooms, messages, forums, posts, reactions, polls, and media;
+- AI identities, activities, tool calls, source and citation records, route and usage state;
+- curation requests, runs, source relationships, feedback, and publication state;
+- generated and uploaded artifacts, provider attempts, progress, terminal results, and errors;
+- job-facing identities, idempotency keys, retries, and continuation state;
+- client synchronization records and other durable application state.
+
+Transactional boundaries are placed around product effects that must commit together. A job can be inserted in the same transaction as the durable request it will execute. A forum result and its source relationships can be committed together. Later stages such as linkback can have separate state so they can be retried without duplicating the forum mutation.
+
+## Main execution paths
+
+### Direct AI reply
 
 ```text
-chat messages + authorship
-        |
-        v
-validated curation plan
-        |
-        v
-forum artifact + source relationships
-        |
-        +--> linkback job
-        +--> feedback / recuration lineage
+Phoenix command or message event
+  -> resolve actor, AI identity, community, origin, and feature state
+  -> assemble bounded context
+  -> admit route and tools
+  -> execute model and tool rounds
+  -> validate terminal reply and references
+  -> commit AI activity and message
+  -> publish durable and realtime updates
 ```
 
-Foreign keys and uniqueness constraints make provenance part of the data model rather than an optional JSON annotation. PostgreSQL also supplies full-text search, Oban state, and the logical-replication foundation used by client synchronization.
+### Asynchronous artifact
 
-This choice concentrates responsibility in the database and migration discipline. That is preferable to introducing distributed consistency, duplicated authorization, and cross-service provenance before scale requires them.
+```text
+agent or product command
+  -> commit pending artifact and job
+  -> worker or provider updates attempt and progress
+  -> commit completed or failed artifact
+  -> schedule one continuation when applicable
+  -> continuation loads stored result and resumes product flow
+```
 
-## A representative cross-domain flow
+### Conversation curation
 
-An externally researched AI reply illustrates how the boundaries cooperate:
+```text
+selected source messages
+  -> commit curation request and run
+  -> load authorized source state
+  -> produce and validate destination plan
+  -> create or update forum objects and source relationships
+  -> record linkback, feedback, and repair state
+```
 
-1. A chat message is committed under the invoking member and room.
-2. A trigger creates one deduplicated AI job with causal identifiers.
-3. The runtime derives actor/community scope and selects bounded conversation context.
-4. The capability plane admits external retrieval and drafting tools appropriate to that surface.
-5. Tool execution retrieves sources and persists citation identities.
-6. The model composes an attributed reply using those identities.
-7. Output validation rejects protocol leakage or invalid evidence references.
-8. Chat persists the reply and its citation/artifact relationships.
-9. Durable synchronization and ephemeral notifications update clients.
+### Native-client command
 
-No layer independently owns the whole flow. Correctness comes from explicit contracts between them.
+```text
+client command with local transaction identity
+  -> server authenticates and authorizes
+  -> product context commits canonical object
+  -> command response and durable sync may arrive in either order
+  -> client reconciles by canonical and transaction identity
+  -> realtime events update ephemeral state
+```
 
-## Domain boundaries are defined by invariants
+## Authorization placement
 
-The most consequential boundaries are:
+Authorization is resolved at product ingress and enforced again at protected reads and effects.
 
-| Boundary | Invariant it protects |
-|---|---|
-| **Accounts / authorization** | The server, not the client or model, decides identity and visibility. |
-| **Conversation** | Chat chronology, replies, authorship, and room membership remain coherent. |
-| **Durable knowledge** | Forum structure can outlive chat velocity while retaining origin and correction history. |
-| **AI effects** | AI-authored content, citations, artifacts, and actions remain attributed and authorized. |
-| **Client projection** | Optimistic and synchronized views converge on canonical server state. |
+The application uses trusted server values for actor, community, origin object, and AI identity. Model-generated tool arguments can specify a user request such as a search term or poll options, but they cannot replace the trusted scope.
 
-As the public implementation has grown, some modules and workers have accumulated significant scope. That is implementation pressure to decompose around these contracts, not evidence that the domains should become network services.
+Cross-context reads consider both the destination and the origin. A curation-derived forum object can retain a restriction from its source room. Search and retrieval use the same visibility logic as direct product reads rather than indexing protected text into a globally available agent store.
+
+## Provider boundary
+
+The product constructs a provider-independent request containing selected context, instructions, tools, output requirements, deadlines, and route metadata. Adapters translate the request to each provider and normalize:
+
+- streaming text and structured events;
+- tool calls and tool-result continuation;
+- finish, stop, refusal, timeout, and protocol errors;
+- usage and route metadata where available;
+- asynchronous provider identifiers and callbacks for media work.
+
+Provider adapters do not decide which product data is eligible or which effect should be committed.
+
+## Client architecture
+
+The server-rendered web application can use the same Phoenix contexts directly. React-based clients use authenticated APIs, realtime channels, and durable synchronization.
+
+The server remains authoritative for:
+
+- authentication and active membership;
+- product object identity and lifecycle;
+- visibility and action permission;
+- accepted command state;
+- durable job, activity, and artifact state;
+- capability metadata for the current deployment and client protocol.
+
+Clients can own drafts, open views, and optimistic placeholders. These objects remain provisional until the server accepts the command and supplies the canonical identity.
+
+## Scaling and isolation
+
+The current architecture scales by separating workload classes before separating all product domains:
+
+- web and API requests can scale across application nodes;
+- Channels and PubSub distribute realtime events;
+- Oban queues separate interactive follow-up, curation, media, document, and maintenance work;
+- per-community or per-origin uniqueness prevents duplicate workflows;
+- provider and route concurrency can be limited independently;
+- large media objects use external object storage while PostgreSQL retains metadata and lifecycle;
+- local inference can be replaced or supplemented by hosted routes without changing product persistence.
+
+A domain becomes a candidate for independent deployment only when its contract and operating needs are stable enough to justify distributed failure, authorization, and transaction boundaries.
 
 ## Failure containment
 
-The architecture is designed so capability failure does not automatically become product failure:
+- A model or provider failure can fail one AI activity without invalidating ordinary chat or forum state.
+- A worker crash leaves the durable request, job, run, or artifact available for retry or repair.
+- A realtime disconnect does not remove the committed object; clients reload from durable state.
+- A failed linkback does not require deleting a completed forum result.
+- An unavailable optional connector or provider is removed from capability admission rather than causing unrelated product actions to fail.
+- A malformed model result is rejected before becoming a product effect.
+- A revoked membership is applied at read and action time even when a client has an old local copy.
 
-- a model endpoint can be unavailable while ordinary chat and forum writes continue;
-- one tool can fail honestly while the AI turn uses already gathered evidence;
-- a linkback failure does not erase a committed forum artifact;
-- a media provider can leave a durable failed artifact rather than a broken message;
-- a sync disconnect does not change PostgreSQL authority;
-- a Phoenix process can restart under BEAM supervision without inventing durable success.
-
-Database unavailability is different because the database is the product authority. In that case Flip must reject or queue writes rather than publish phantom state.
-
-## Scaling seams
-
-The modular monolith does not require one process or one machine forever. Phoenix nodes can scale horizontally; Oban roles can be isolated; read models and media storage can be separated; PostgreSQL can be tuned, replicated, or partitioned.
-
-A service boundary is justified when a domain demonstrates an independent scaling, release, security, or team-ownership requirement. It is not justified merely because a module has a name.
-
-## Security boundary
-
-Several rules follow from the architecture:
-
-1. Clients cannot choose their authorization scope.
-2. Model tool calls are parsed as data and dispatched through known handlers.
-3. Internal retrieval requires trusted actor/community scope and fails closed without it.
-4. External content is untrusted input and passes URL, network, size, and rendering controls.
-5. Provider credentials remain server-side.
-6. Administrative configuration cannot be rewritten through AI-authored content.
-7. Durable publication occurs only after the relevant domain transaction succeeds.
-
-## Deliberate tradeoff
-
-A modular monolith requires active boundary discipline. The alternative would make the same product semantics depend on network availability, duplicated policy, and eventual consistency. Flip accepts internal refactoring pressure in exchange for stronger product coherence and provenance.
+[Previous: Product and agent use cases](01-product-and-problem.md) · [Next: Agent runtime](03-agent-runtime.md)

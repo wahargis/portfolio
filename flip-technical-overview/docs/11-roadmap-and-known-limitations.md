@@ -1,100 +1,92 @@
-# 11 — Status, Pressure Points, and Limitations
+# Status and limitations
 
-## What is implemented
+This page separates current system behavior from engineering work that remains. It describes technical scope, not product usage or business performance.
 
-Flip is already a broad product system rather than an architecture proposal. The public description groups implemented behavior by the product contract it serves instead of reproducing every module or tool name.
+## Current implementation
 
-| Area | Implemented system |
-|---|---|
-| **Community product** | Authenticated communities with real-time chat, threaded forums, membership/authorization, search, notifications, settings, moderation-related controls, and durable PostgreSQL/Oban state. |
-| **Conversation-to-knowledge path** | Source selection, model-assisted topic/destination planning, validated forum creation/append/merge, source-message and participant provenance, linkback, feedback, and bounded recuration. |
-| **AI participation** | Explicit AI identities, product-event triggering, context selection, route policy, server-computed capabilities, internal/external/document/data retrieval, citations, durable artifacts/actions, terminal composition, recovery, and asynchronous continuation. |
-| **Client and deployment** | Phoenix web, React/TypeScript client architecture, Electric durable synchronization, native desktop packaging, mobile packaging path, provider-compatible local/hosted inference, and a separate synthetic technical environment. |
+### Product and identity
 
-This breadth is real, but it creates architectural pressure. The next work is primarily about making the existing product easier to reason about, evaluate, and control—not attaching more disconnected model features.
+The application includes accounts, community membership, chat rooms, messages and replies, reactions, polls, forums, search, media, notifications, settings, and administrative and moderation-related controls. AI identities participate through the same product model and are configured for selected surfaces and behavior.
 
-## Current pressure points
+### Agent runtime
 
-### AI runtime decomposition
+The runtime admits turns from product events, resolves actor and origin scope, assembles bounded context, selects a route and capability catalog, executes model and tool rounds, validates terminal output, stores activity and references, and commits user-visible results.
 
-The direct-reply runtime coordinates triggers, context, providers, many tool/effect types, evidence, terminal composition, artifacts, games/specialized lanes, and recovery. The public architecture already separates those contracts conceptually; the implementation should continue moving toward smaller typed components around admission, working state, effects, terminal state, and persistence.
+Internal retrieval uses product scope. External research supports discovery and direct source reading. Document, PDF, structured data, chart, image, video, and other tools can create durable results and artifacts. Product actions pass through typed application services.
 
-The goal is not microservices. It is making failures local and tests meaningful inside the modular monolith.
+### Background work and continuation
 
-### Capability coherence
+Durable jobs and runs represent asynchronous work, retries, terminal state, and stale-work recovery. Long-running provider-backed artifacts can complete after the originating process and start one deduplicated continuation under stored product scope.
 
-As the capability plane expands, several facts must remain single-sourced: whether a tool is reachable on a surface, what trusted scope it requires, whether it is read-only or effectful, how long it may run, what durable identity it returns, and which client renderer understands the result.
+### Curation and provenance
 
-A tool that exists but is unreachable, or is exposed without the right authorization or artifact UI, is not harmless inventory—it is a broken contract.
+Conversation curation has durable source selection, planning, destination resolution, forum mutation, source-message and participant relationships, linkback, feedback, and recuration state. Direct AI authorship and curation of human content remain distinct.
 
-### Route and model evaluation
+### Clients and operations
 
-Authorization and lifecycle can be tested deterministically. Model behavior cannot. Route changes need versioned surface-specific evidence for tool correctness, citation use, curation validity, terminal composition, failure honesty, latency, and local capacity behavior.
+The system supports Phoenix web and realtime surfaces and a React-based desktop and mobile client. Durable synchronization, ephemeral channels, optimistic reconciliation, capability negotiation, activity records, structured failures, deterministic tests, and model-route evaluation are part of the architecture.
 
-Without that discipline, provider flexibility becomes silent product drift.
+## Current limitations and engineering pressure
 
-### Client parity and offline behavior
+### Route semantics vary by provider
 
-A shared React codebase and native wrappers do not guarantee behavioral parity. Desktop and mobile have different background, notification, storage, permission, and connectivity constraints.
+Provider adapters normalize common request and event behavior, but they cannot make all models and services equivalent. Tool-call formatting, stream interruption, context handling, media lifecycle, usage reporting, and structured-output reliability still require route-specific behavior and evaluation.
 
-Offline mutation remains deliberately command-specific. Further work requires explicit idempotency, conflict, ordering, revocation, and user-visible pending semantics rather than a blanket “offline-first” claim.
+**Engineering work:** keep provider differences explicit in route metadata and tests; avoid fallback that changes privacy, tool, modality, or evidence requirements.
 
-### Long-running artifact lifecycle
+### Context selection is a continuing product problem
 
-Media and other provider-backed work need reliable cancellation, provider/request receipts, attempt and cost accounting, partial-chain state, deduplicated continuation, and durable user control. The product already represents asynchronous artifacts; the pressure is to make every provider path conform to one comprehensible lifecycle.
+Bounded conversation and scoped retrieval prevent unbounded access, but relevance, compression, source ranking, and context-budget allocation can still improve. Large context windows increase available capacity but do not decide which product records should be included.
 
-### Moderation and abuse
+**Engineering work:** evaluate context selection by task and surface, improve traceable compaction, and retain direct links from included context to durable product objects.
 
-AI participation expands the product threat model: retrieved prompt injection, cross-community data probing, abusive media generation, spam, impersonation, citation laundering, and misuse of product actions. Capability growth must remain coupled to authorization, audit, rendering, and policy rather than treated as a model-only problem.
+### Tool coverage and effect policy are uneven
 
-## Known limitations
+Read-only retrieval, analysis, product actions, and asynchronous generation have different risk and lifecycle profiles. Some capabilities have richer idempotency, approval, or repair behavior than others.
 
-### The modular monolith can concentrate complexity
+**Engineering work:** standardize capability metadata, effect identities, retry classes, operator repair paths, and denial behavior without erasing domain-specific rules.
 
-Shared transactions and policy are valuable, but large contexts and workers can become difficult to change safely. The architecture depends on maintaining real domain APIs and decomposing internal orchestration where complexity accumulates.
+### Asynchronous workflows create partial outcomes
 
-### Upstream providers remain uncertain
+Media, documents, and curation can complete some stages and fail later stages. A single success or failure flag is insufficient.
 
-Model, search, document, structured-data, and media providers can fail, change contracts, or return inconsistent results. Flip can normalize failure and preserve product state; it cannot eliminate upstream uncertainty.
+**Engineering work:** continue moving complex operations toward explicit stage state, stage-specific retry, durable compensation or repair, and user-visible partial results.
 
-### Citation verification is not truth verification
+### Client convergence needs continuing end-to-end testing
 
-The system can verify that a selected passage exists in a retrieved source and is attached to a claim. It cannot automatically establish that the source is correct, current, or sufficient for the model’s inference.
+Server-rendered web, realtime channels, APIs, and durable native synchronization can deliver related state in different orders. Permission changes and optimistic objects add additional cases.
 
-### Retrieval can be authorized and still be poor
+**Engineering work:** expand scenario coverage for reordered delivery, reconnect, revoked access, duplicate commands, stale clients, background completion, and cross-client artifact updates.
 
-Full-text, relational, semantic, external, and document retrieval each have recall and ranking failures. Permission correctness prevents leakage; it does not guarantee that the best context was selected.
+### Evidence quality is route- and task-dependent
 
-### Local inference trades external dependence for operational burden
+The system can store sources and citations, but source discovery, direct-read quality, document parsing, citation placement, and model use of evidence vary by workload.
 
-Self-hosting provides control and data locality but introduces finite slots, model capability differences, GPU/process failure, context/latency tradeoffs, and operator responsibility. The product must respect actual deployment capacity.
+**Engineering work:** maintain retrieval and citation evaluation sets, validate references against stored evidence, expose incomplete evidence state, and distinguish source quality from answer fluency.
 
-### Offline semantics are incomplete by design
+### Evaluation does not reduce to one score
 
-Durable synchronization supports caching and reconnect, but not every command has a defined offline conflict policy. Flip does not claim that all writes can originate authoritatively on a device.
+Conversation quality, research accuracy, tool behavior, product effects, latency, cost, privacy, and recovery require different measurements. A route that performs well on one surface may be unsuitable for another.
 
-### Model behavior remains non-deterministic
+**Engineering work:** maintain route- and surface-specific evaluation, deterministic product invariants, failure injection, and operational evidence instead of one global model ranking.
 
-Bounds, tools, evidence, terminal validation, and correction paths reduce the impact of failures. They do not turn model reasoning into deterministic software. Honest uncertainty and participant correction remain required product features.
+### The private implementation limits direct source review
 
-### The portfolio is curated, not a source mirror
+The public portfolio cannot rely on readers opening private modules or product environments.
 
-The canonical implementation is public at <https://github.com/wahargis/flip>. The portfolio groups stable product contracts, architecture, and limitations for review rather than duplicating every implementation module, test, migration, provider adapter, or issue history. Source-level verification and reproduction belong in the canonical repository.
+**Engineering work:** keep public diagrams, decisions, synthetic scenarios, status, and architecture descriptions detailed enough to support technical review without private source links or internal data.
 
-## Next work by outcome
+## Boundaries not claimed
 
-| Desired outcome | Architectural direction |
-|---|---|
-| **More trustworthy research replies** | Stronger route-specific evaluation, claim-to-citation review, source-quality/disagreement representation, and correction feedback. |
-| **More reliable actions and artifacts** | One effect envelope and lifecycle across product actions and provider-backed work, with cancellation and receipt semantics. |
-| **Clearer administrator control** | Single capability/policy representation with surface visibility, audit, and explicit degradation state. |
-| **More resilient clients** | Command-specific offline queues, convergence tests, permission revocation, push/native lifecycle, and large-artifact behavior. |
-| **Lower AI-runtime complexity** | Decompose around stable admission, context, dispatch, evidence, terminal, and persistence contracts. |
-| **Better durable community knowledge** | Stronger curation review, duplicate detection, participant correction, and source-retention behavior. |
-| **Evidence-based scaling** | Isolate queue or storage workloads only after capacity and failure evidence justifies the boundary. |
+- The documentation does not claim public repository access for the Flip implementation.
+- It does not claim a specific community scale, latency, reliability percentage, or model-quality score without published measurement.
+- It does not claim that every tool has identical approval, retry, or compensation behavior.
+- It does not claim that all provider routes support the same context, tools, modalities, or interruption semantics.
+- It does not claim that curation automatically produces a correct publication without review and correction paths.
+- It does not claim that the synthetic environment is a production mirror.
 
-## What would materially change the architecture
+## Public technical material
 
-The current shape should be revisited if measured load requires independent data/worker planes, if a domain needs regulatory or release isolation, if offline conflict semantics justify client-authoritative commands, if PostgreSQL-based retrieval is measurably inadequate, or if provider-neutral standards remove meaningful adapter work.
+The public Flip material includes this technical series, architecture decision records, diagrams, and the synthetic environment specification. Product data, user content, private source, credentials, provider keys, host identifiers, deployment topology, prompt and persona state, and administrative authority remain outside the portfolio.
 
-The roadmap is organized around product outcomes and contracts. It should not become a list of fashionable model capabilities or implementation issue numbers.
+[Previous: Architecture decisions](10-architecture-decisions.md) · [Back to the Flip case study](../README.md)

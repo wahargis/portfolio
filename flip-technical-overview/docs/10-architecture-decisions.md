@@ -1,118 +1,115 @@
-# 10 — Architecture Decisions
+# Architecture decisions
 
-## The decisions are organized around product integrity
+This page records the main decisions that shape Flip's product and agent runtime. Each decision includes the operating reason, current cost, and conditions that would justify revision.
 
-Flip’s architecture is not a collection of fashionable technologies. Its major choices follow from three product requirements:
+## 1. Keep the main product as a modular Phoenix application
 
-1. live conversation and durable knowledge must remain connected;
-2. AI participation must not erase authorship or bypass permissions;
-3. asynchronous and model-driven work must still converge on one inspectable product state.
+**Decision:** Chat, forums, identity, authorization, search, synthesis, AI activity, media, jobs, and other product capabilities remain in one Phoenix and Ecto application with explicit context boundaries.
 
-The public ADRs preserve the stable rationale. This page shows how the choices fit together.
+**Reason:** The main workflows cross product domains and require transactional coordination. An AI reply depends on identity, room visibility, chat state, model route, activity records, and final message persistence. Curation crosses chat, background work, forum publication, source relationships, and linkback. Splitting these paths across independently deployed services would add distributed transaction and authorization problems without a demonstrated scaling requirement.
 
-## 1. Chat and forum are one product lifecycle
+**Cost:** Teams and modules must maintain clear application boundaries inside one repository. Expensive workloads require queue and process isolation. Large contexts can create coupling if domain ownership is not enforced.
 
-**Decision:** Keep live rooms and durable threaded discussion in one product and one identity/provenance model.
+**Revisit when:** A workload requires independent deployment or scaling, has a stable contract, and no longer needs cross-context transactions in the request path.
 
-**Why:** Chat captures the social and causal path of a discussion; forums make the result searchable and extendable. Separating them into unrelated products would make the transition manual and provenance fragile.
+## 2. Use PostgreSQL as the durable authority
 
-**Cost:** Flip must maintain two interaction models and the cross-domain rules that connect them.
+**Decision:** Durable product, agent, workflow, artifact, and client-synchronization state is committed to PostgreSQL. Realtime streams and provider conversations are not treated as the durable record.
 
-**Rejected alternative:** “Summarize the chat into a post.” A summary alone loses participant wording, reply structure, source navigation, and correction history.
+**Reason:** Users and workers can disconnect or restart. Durable identity and lifecycle are required for deduplication, authorization, retry, recovery, continuation, and client convergence.
 
-## 2. Use a modular Phoenix monolith with PostgreSQL authority
+**Cost:** Workflows must define transaction boundaries and explicit state transitions. Streaming and optimistic clients need reconciliation against stored objects.
 
-**Decision:** Keep product domains in one Phoenix application, one migration path, one authorization model, and one canonical PostgreSQL database. Use Oban for durable asynchronous work.
+**Revisit when:** A specific state class has demonstrated requirements that PostgreSQL cannot meet and can be separated without weakening product consistency.
 
-**Why:** Message-to-forum provenance, AI replies, citations, artifacts, linkback, notifications, and client synchronization all benefit from shared identities and transactions. An external message broker or early service split would add network failure and eventual consistency before a demonstrated need.
+## 3. Represent AI as product identities and activities
 
-**Cost:** The application can accumulate large contexts and workers. Boundary tests and refactoring discipline are mandatory.
+**Decision:** AI participants have explicit product identities. Each execution has durable activity state related to the invoking actor, origin object, route, tools, sources, artifacts, and terminal outcome.
 
-**Revisit when:** A domain demonstrates an independent scaling, regulatory, release, or team-ownership requirement that outweighs distributed consistency cost.
+**Reason:** Attribution, access, diagnosis, and user-visible provenance require more than a provider response string. The system must distinguish the human request, AI identity, provider attempt, tool activity, and final product object.
 
-## 3. Separate curation from AI authorship
+**Cost:** The application maintains more lifecycle and provenance data than a simple chat-completions integration.
 
-**Decision:** Model conversation curation and direct AI participation as different workflows and content semantics.
+**Revisit when:** The identity or activity model no longer supports a required product surface. Revision should extend the model rather than move authority into provider metadata.
 
-**Why:** Curation should preserve human words and source identity while changing structure. An AI reply is new composition and must be attributed to the AI participant. One generic “synthesis” path makes authorship ambiguous.
+## 4. Separate direct AI authorship from conversation curation
 
-**Cost:** Two lifecycle models, explicit content types, and more provenance-aware UI.
+**Decision:** Direct AI replies and curation of human messages use different workflows and provenance.
 
-**Rejected alternative:** Rely on a prompt saying “do not rewrite users.” Product integrity must survive model error and therefore requires durable source relationships.
+**Reason:** A direct reply creates new AI-authored content. Curation reorganizes selected human content and must retain source authorship, message references, destination planning, and correction state. Treating both as generic generation would make attribution and access unclear.
 
-## 4. Keep the capability plane server-authoritative
+**Cost:** The product maintains separate data and workflow paths for related AI capabilities.
 
-**Decision:** Compute the available tool catalog from surface, feature state, actor/community authorization, object context, and provider availability. Pass trusted scope into child tool tasks and fail closed for protected retrieval.
+**Revisit when:** A new content mode has clearly defined authorship and provenance that cannot be represented by either existing path.
 
-**Why:** Prompt instructions are not permission enforcement. Internal search, product actions, and provider-backed effects need the same authorization and audit guarantees as ordinary user commands.
+## 5. Keep capability selection and authorization on the server
 
-**Cost:** Catalog coherence, effect classification, scope propagation, and parity tests become substantial engineering work.
+**Decision:** The application builds a turn-specific capability catalog from actor scope, product surface, feature state, route support, and available services. The model can call only those capabilities.
 
-**Rejected alternative:** Give the model a generic database or CRUD tool. That would bypass domain validation, idempotency, and product-specific effect lifecycles.
+**Reason:** A global tool list exposes irrelevant or unsafe operations and encourages the model to supply trusted scope. Product permissions and current service availability are application state.
 
-## 5. Persist evidence and artifacts outside model prose
+**Cost:** Capability admission adds code and tests for each product surface and tool class.
 
-**Decision:** Citations, source records, charts, generated media, polls, and asynchronous requests receive durable product identities and lifecycle state.
+**Revisit when:** A more general policy engine can express the same trusted inputs and refusal behavior without moving scope into model-generated arguments.
 
-**Why:** A token or URL embedded only in a model response cannot be validated, deduplicated, permissioned, retried, continued, or rendered reliably. Durable objects make evidence and effects inspectable after the model context is gone.
+## 6. Split durable, asynchronous, ephemeral, and local client state
 
-**Cost:** More schemas, storage, cleanup, retention, and UI state.
+**Decision:** Durable product state, durable background state, ephemeral realtime state, and local client interaction state use separate ownership and delivery paths.
 
-**Rejected alternative:** Treat generated output as opaque markdown attachments. That hides pending/failure state and loses causal inputs.
+**Reason:** A message, an image-generation job, a typing indicator, and a draft have different replay, consistency, and recovery requirements. Using one transport or store for all four creates either unnecessary persistence or unrecoverable product behavior.
 
-## 6. Split durable synchronization from ephemeral realtime
+**Cost:** Clients and server code must reconcile several state channels and preserve canonical identities.
 
-**Decision:** Use server-authoritative commands for mutations, Electric for recoverable durable projections, and Phoenix channels/PubSub for presence, typing, and transient progress.
+**Revisit when:** A state class changes its durability or replay requirements. The replacement still needs an explicit source of truth and ordering behavior.
 
-**Why:** Durable messages and artifacts need replay and reconnect; ephemeral interaction does not. One websocket stream cannot provide both semantics cleanly.
+## 7. Use provider-compatible inference behind product-owned routes
 
-**Cost:** Clients coordinate several transports and must test ordering and reconnection explicitly.
+**Decision:** Flip defines a product request envelope and route requirements. Provider adapters translate that request to local or hosted services and normalize streams, tool calls, usage, terminal state, and failures.
 
-**Rejected alternative:** Let the client own a local product database and sync later by default. Membership, moderation, and cross-user conflicts remain server-authoritative; offline mutation must be specified per command.
+**Reason:** Provider and model changes should not redefine product context, permissions, tool schemas, artifact identities, or persistence. Different workloads also need different route profiles.
 
-## 7. Keep models and providers replaceable
+**Cost:** Adapters must preserve meaningful provider differences and require route-specific evaluation.
 
-**Decision:** Place model routing and provider adapters behind a product-owned request, tool, evidence, and terminal-composition contract.
+**Revisit when:** A provider capability cannot be represented by the current request or event contract. Extend the contract with explicit semantics rather than bypassing the product runtime.
 
-**Why:** Chat, curation, research, documents, and media have different execution needs, and provider APIs change. Product identity and permissions should not change when a route changes or local inference replaces a hosted endpoint.
+## 8. Store citations and artifacts as application objects
 
-**Cost:** Adapters must normalize incompatible streaming, tool-call, finish, forced-tool, and error behavior. Routes require surface-specific evaluation.
+**Decision:** Sources, citations, files, charts, images, videos, polls, and other generated or retrieved artifacts receive durable application identities and lifecycle state.
 
-**Rejected alternative:** Choose one “best model” for every feature. A route strong at long research may be unsuitable for low-latency chat or structured curation.
+**Reason:** The product must validate what a final reply refers to, display completion or failure, support later access checks, and continue workflows after the model turn ends.
 
-## 8. Reserve an explicit terminal composition step
+**Cost:** Artifact and citation schemas, storage, cleanup, and access control require application code beyond text generation.
 
-**Decision:** Distinguish working/tool rounds from the user-visible reply and validate the terminal draft before persistence.
+**Revisit when:** New artifact classes require different storage or lifecycle behavior. They should still expose stable application references to the agent runtime and clients.
 
-**Why:** Tool-using models can end with internal intent, hidden protocol, or an incomplete draft. The product needs a bounded point where gathered evidence becomes the actual attributed response.
+## 9. Use durable jobs and continuation for long-running work
 
-**Cost:** Additional latency and provider-specific compatibility work.
+**Decision:** Operations that may outlive a request create durable jobs or artifacts. Terminal completion can start one deduplicated continuation under the original product scope.
 
-## 9. Separate public technical review from product authority
+**Reason:** Provider polling, callbacks, and media processing can complete after HTTP requests, workers, or application nodes restart. The original model session cannot be the only continuation mechanism.
 
-**Decision:** Maintain a synthetic environment and publish a curated architecture path without copying production data, credentials, or the complete source tree into the portfolio.
+**Cost:** The application must manage uniqueness, stale work, terminal events, partial failure, and continuation state.
 
-**Why:** Reviewers need relationally realistic evidence, not production access. The canonical source repository remains available for implementation review; the portfolio explains the product and architecture without becoming a second, stale source mirror or an operational/security dump.
+**Revisit when:** A workload becomes reliably synchronous within the product deadline or requires a different multi-stage state machine.
 
-**Cost:** Synthetic fixtures and a separate deployment require maintenance, and the portfolio must be kept aligned with the source as the implementation evolves.
+## 10. Maintain a private implementation and a public technical portfolio
 
-## Decision criteria
+**Decision:** The implementation repository remains private. Public material contains architecture descriptions, diagrams, decisions, status, and synthetic technical scenarios without source links to the private repository.
 
-Across these choices, Flip optimizes for:
+**Reason:** Public technical review does not require access to product data, credentials, private deployment state, provider keys, prompt and persona state, or administrative controls. The portfolio should explain the engineering without creating an unavailable or misleading source path.
 
-- visible and correct authorship;
-- server-enforced authorization;
-- durable provenance and correction;
-- coherent failure and recovery;
-- one canonical product state;
-- model/provider replaceability;
-- client convergence;
-- reviewability without private-data exposure.
+**Cost:** Public documentation must be maintained deliberately and cannot rely on readers following internal module links.
 
-Feature count is not the optimization target.
+**Revisit when:** The product's source-availability policy changes. Any publication still requires a separate audit for data, secrets, licensing, operational authority, and environment-specific configuration.
 
-## Revisit discipline
+## 11. Use a separate synthetic technical environment
 
-Architecture should change when evidence changes: measured database or queue limits, explicit offline conflict requirements, independent regulatory boundaries, route evaluation, artifact workload isolation, or a material change in how the public source and portfolio review path are organized.
+**Decision:** Public scenarios use synthetic identities, communities, content, artifacts, and provider fixtures in a separate environment and namespace.
 
-A change should preserve the original decision record rather than rewriting history. The ADRs explain why the current choice was correct under the constraints that produced it.
+**Reason:** Architecture and failure behavior can be exercised without copying product data or granting product authority. A synthetic environment also supports deterministic cases for retries, access changes, provider failures, and client reconciliation.
+
+**Cost:** Fixtures and scenario assertions require maintenance as product contracts change.
+
+**Revisit when:** A different public evaluation method can provide equivalent contract coverage without exposing product state or coupling to production operations.
+
+[Previous: Testing, evaluation, and operations](09-evaluation-testing-and-operations.md) · [Next: Status and limitations](11-roadmap-and-known-limitations.md)

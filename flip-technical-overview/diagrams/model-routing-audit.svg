@@ -1,56 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="730" viewBox="0 0 1280 730" role="img" aria-labelledby="title desc">
-<title id="title">Model routing and provider isolation</title>
-<desc id="desc">Flip owns the product contract; route policy and adapters select compatible hosted or local inference and normalize results.</desc>
-<defs>
-          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-            <path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/>
-          </marker>
-          <style>
-            .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}
-            .soft{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:16}
-            .decision{fill:#fff;stroke:#30343b;stroke-width:2}
-            .title{font:700 25px Arial,sans-serif;fill:#17191d}
-            .head{font:700 16px Arial,sans-serif;fill:#20242a}
-            .body{font:14px Arial,sans-serif;fill:#454b55}
-            .small{font:12px Arial,sans-serif;fill:#555d68}
-            .label{font:700 12px Arial,sans-serif;fill:#30343b;letter-spacing:1px}
-            .arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
-            .dash{stroke:#646b75;stroke-width:2;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
-            .line{stroke:#30343b;stroke-width:2;fill:none}
-          </style>
-        </defs>
-<rect class="bg" width="1280" height="730"/>
-<text x="45" y="45" class="title">Model routing and provider isolation</text>
-<rect class="box" x="55" y="100" width="330" height="150"/>
-<text x="75" y="131" class="head">Product runtime</text>
-<text x="75" y="157" class="body">identity · context · admitted tools</text>
-<text x="75" y="179" class="body">terminal composition · persistence</text>
-<rect class="soft" x="475" y="100" width="330" height="150"/>
-<text x="495" y="131" class="head">Route policy</text>
-<text x="495" y="157" class="body">surface requirements</text>
-<text x="495" y="179" class="body">privacy · latency · health</text>
-<text x="495" y="201" class="body">local / hosted preference</text>
-<rect class="box" x="895" y="100" width="330" height="150"/>
-<text x="915" y="131" class="head">Provider adapter</text>
-<text x="915" y="157" class="body">request/stream normalization</text>
-<text x="915" y="179" class="body">tool and finish compatibility</text>
-<path class="arrow" d="M385 175 L475 175"/>
-<path class="arrow" d="M805 175 L895 175"/>
-<rect class="box" x="160" y="420" width="330" height="130"/>
-<text x="180" y="451" class="head">Hosted inference</text>
-<text x="180" y="477" class="body">provider capability and capacity</text>
-<text x="180" y="499" class="body">bounded credentials</text>
-<rect class="box" x="790" y="420" width="330" height="130"/>
-<text x="810" y="451" class="head">Local / HomeCloud inference</text>
-<text x="810" y="477" class="body">health · slots · GPU placement</text>
-<text x="810" y="499" class="body">provider-compatible endpoint</text>
-<path class="arrow" d="M1060 250 L1060 350 L325 350 L325 420"/>
-<path class="arrow" d="M1060 250 L955 420"/>
-<rect class="box" x="475" y="610" width="330" height="85"/>
-<text x="495" y="641" class="head">Normalized result + correlation</text>
-<text x="495" y="667" class="body">content · tool calls · usage · error class</text>
-<path class="arrow" d="M325 550 L325 575 L640 575 L640 610"/>
-<path class="arrow" d="M955 550 L955 575 L640 575"/>
-<path class="dash" d="M640 610 L640 570 L220 570 L220 250"/>
-<text x="225" y="562" class="small">returns to product runtime</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="930" viewBox="0 0 1500 930" role="img" aria-labelledby="title desc">
+<title id="title">Model routing, provider adaptation, and activity records</title><desc id="desc">Workload requirements select a compatible local or hosted route while product context, tools, effects, and persistence remain unchanged.</desc>
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
+<style>.h1{font:700 31px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}.band{font:700 15px Inter,Arial,sans-serif;letter-spacing:.8px}.nt{font:700 16px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 13.5px Inter,Arial,sans-serif;fill:#334155}.railtitle{font:700 13px Inter,Arial,sans-serif;fill:#334155;letter-spacing:.5px}.rail{font:400 13px Inter,Arial,sans-serif;fill:#475569}.arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.drop{stroke:#64748b;stroke-width:1.8;fill:none;marker-end:url(#arrow)}</style></defs>
+<rect width="1500" height="930" fill="#f8fafc"/>
+<text x="70" y="58" class="h1">Model routing, provider adaptation, and activity records</text><text x="70" y="88" class="sub">Workload requirements select a compatible local or hosted route while product context, tools, effects, and persistence remain unchanged.</text>
+<rect x="50" y="120" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="155" class="band" fill="#c2410c">ROUTE EXECUTION</text>
+<rect x="50" y="435" width="1400" height="285" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="70" y="470" class="band" fill="#6d28d9">AUDIT, FALLBACK, AND EVALUATION</text>
+<rect x="70.0" y="205" width="206.7" height="145" rx="13" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+<text x="86.0" y="236" class="nt">Workload profile</text>
+<text x="86.0" y="263" class="nc">Conversation, research, curation,</text>
+<text x="86.0" y="284" class="nc">documents, vision or generation</text>
+<path class="arrow" d="M276.7 277.5 H296.7"/>
+<rect x="300.7" y="205" width="206.7" height="145" rx="13" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+<text x="316.7" y="236" class="nt">Route requirements</text>
+<text x="316.7" y="263" class="nc">Modality, context, tools, privacy,</text>
+<text x="316.7" y="284" class="nc">latency, cost and evaluation status</text>
+<path class="arrow" d="M507.3 277.5 H527.3"/>
+<rect x="531.3" y="205" width="206.7" height="145" rx="13" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+<text x="547.3" y="236" class="nt">Route selection</text>
+<text x="547.3" y="263" class="nc">Compatible healthy model, provider,</text>
+<text x="547.3" y="284" class="nc">endpoint, limits and fallback policy</text>
+<path class="arrow" d="M738.0 277.5 H758.0"/>
+<rect x="762.0" y="205" width="206.7" height="145" rx="13" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+<text x="778.0" y="236" class="nt">Provider adapter</text>
+<text x="778.0" y="263" class="nc">Translate request, normalize streams,</text>
+<text x="778.0" y="284" class="nc">tool calls, finish and failure state</text>
+<path class="arrow" d="M968.7 277.5 H988.7"/>
+<rect x="992.7" y="205" width="206.7" height="145" rx="13" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+<text x="1008.7" y="236" class="nt">Local or hosted execution</text>
+<text x="1008.7" y="263" class="nc">Finite local capacity or managed</text>
+<text x="1008.7" y="284" class="nc">provider rate and service limits</text>
+<path class="arrow" d="M1199.3 277.5 H1219.3"/>
+<rect x="1223.3" y="205" width="206.7" height="145" rx="13" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+<text x="1239.3" y="236" class="nt">Normalized terminal state</text>
+<text x="1239.3" y="263" class="nc">Reply, refusal, timeout, protocol</text>
+<text x="1239.3" y="284" class="nc">error, usage and asynchronous job</text>
+<rect x="70.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="86.0" y="551" class="nt">Activity record</text>
+<text x="86.0" y="578" class="nc">Route, attempts, timing, usage, tools,</text>
+<text x="86.0" y="599" class="nc">sources, artifacts and outcome</text>
+<rect x="416.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="432.0" y="551" class="nt">Compatible fallback</text>
+<text x="432.0" y="578" class="nc">Preserve modality, tools, privacy,</text>
+<text x="432.0" y="599" class="nc">context, deadline and evidence state</text>
+<rect x="762.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="778.0" y="551" class="nt">Route evaluation</text>
+<text x="778.0" y="578" class="nc">Workload-specific accuracy, tool use,</text>
+<text x="778.0" y="599" class="nc">latency, cost and failure behavior</text>
+<rect x="1108.0" y="520" width="322.0" height="145" rx="13" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="1124.0" y="551" class="nt">Visible failure</text>
+<text x="1124.0" y="578" class="nc">Preserve product state and completed</text>
+<text x="1124.0" y="599" class="nc">evidence when no compatible route remains</text>
+<path class="drop" d="M1326.7 350 V430 H231.0 V520"/>
+<path class="drop" d="M634.7 350 V430 H577.0 V520"/>
+<path class="drop" d="M634.7 350 V430 H923.0 V520"/>
+<path class="drop" d="M1326.7 350 V430 H1269.0 V520"/>
+<rect x="50" y="755" width="1400" height="105" rx="14" fill="#e2e8f0"/><text x="75" y="797" class="railtitle">BOUNDARY</text><text x="75" y="828" class="rail">Provider adapters never decide which product records are eligible or which model-requested effect becomes a committed object.</text>
 </svg>

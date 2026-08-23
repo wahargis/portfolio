@@ -1,170 +1,168 @@
 # HomeCloud
 
-> A local-first AI application and operations platform that turns finite GPU hardware into dependable inference, agent, research, and multimodal services.
+HomeCloud is a supervised local-first AI application runtime. It operates model services, GPU capacity, agent execution, research workflows, documents, connectors, browser and search tools, and multimodal workloads as parts of one Phoenix and OTP application.
 
-## At a glance
+The current deployment is built around four NVIDIA V100 32 GB accelerators. The software does not treat that hardware as four independent model processes. It maintains model-instance capacity, workload priority, GPU ownership, service transitions, agent workspaces, checkpoints, health, and application state so several AI capabilities can share the machine without each feature implementing its own process and resource control.
 
-| | |
+## System scope
+
+| Area | Current system |
 |---|---|
-| **Product** | A supervised runtime and application platform for self-hosted models, agent execution, research workflows, documents, connectors, and media services. |
-| **Users** | A technical operator and the applications or agents that need reliable access to local and remote AI capability. |
-| **Core problem** | Local accelerators provide valuable compute but not an operating model. Applications still need model lifecycle, capacity allocation, priority, health, recovery, isolation, and a coherent API over heterogeneous backends. |
-| **Engineering focus** | GPU claims, model-instance pools, priority-aware routing, workload scheduling, sandboxed tools, recoverable agent loops, verification, and supervised application services. |
-| **Primary implementation** | Elixir/OTP and Phoenix with PostgreSQL/Ash, local and remote inference adapters, system process integration, containers, telemetry, and LiveView application surfaces. |
-| **Source** | [`wahargis/home-cloud`](https://github.com/wahargis/home-cloud) |
-
-## The product problem
-
-Running a model locally is straightforward compared with operating a useful local AI platform.
-
-A single inference server does not answer:
-
-- Which model service should be running on which accelerator?
-- How many concurrent requests can the healthy hardware actually support?
-- Should an interactive user request preempt a research benchmark or background job?
-- How does an application check out a model instance and return it safely?
-- What happens when a server process is unhealthy or a GPU is already claimed?
-- How are long-running agents isolated, observed, checkpointed, and resumed?
-- How do document, connector, research, and media workloads share the same infrastructure?
-- When should the system use a local model, a different local backend, or a remote provider?
-
-HomeCloud treats those as one runtime problem. It combines infrastructure control with application-level AI services so that local compute becomes a dependable capability rather than a collection of manually started model processes.
-
-The platform is local-first, not local-only. Its abstractions allow local model servers and remote providers to participate in the same application while preserving the operational distinctions that matter: capacity, latency, cost, health, privacy, and tool support.
-
-## Representative workflow
-
-A representative agent request proceeds as follows:
-
-1. **A request enters through an application surface.** It may originate from the web application, an internal workflow, a connector, or a research process.
-2. **The runtime selects an inference path.** Model and inference routers consider configuration, backend type, workload priority, and current capacity.
-3. **A healthy instance is checked out.** The instance pool tracks local model-server slots, affinities, load, health, and restart state. Concurrency is derived from healthy infrastructure rather than supplied as an arbitrary caller constant.
-4. **GPU authority is respected.** Claim and scheduling services prevent incompatible workloads from treating the same accelerator as unowned. Interactive, research, and background priorities shape admission and model-service changes.
-5. **The execution environment is prepared.** Agent work receives a containerized sandbox and a durable workspace. The execution engine builds context, discovers permitted tools, dispatches model turns, executes tools, and detects loops or quality regressions.
-6. **State is checkpointed.** Message history, plan state, loop state, and engine state can be persisted by phase so a long-running task can resume after interruption instead of restarting from turn zero.
-7. **Results return to product state.** The outcome can be validated, stored, presented in the UI, used by a research workflow, placed in the document vault, delivered through a connector, or handed to a media service.
-8. **Capacity is released or returned to baseline.** Checked-out instances and GPU claims are reconciled so later interactive and background work sees accurate availability.
-
-This workflow connects hardware reality to application behavior. The user asks for an AI capability; the platform handles the model, process, resource, tool, recovery, and persistence concerns required to deliver it.
+| **Supervised application** | OTP supervision for database access, PubSub, HTTP clients, model services, instance pools, GPU monitoring and scheduling, agent processes, research, connectors, browser and search services, model installation, health, notifications, media services, and Phoenix endpoints. |
+| **Inference runtime** | Local and remote model adapters, route selection, model-instance checkout and return, slot capacity, affinity, priority queues, health, restart state, throughput and telemetry. |
+| **GPU operations** | Hardware monitoring, explicit claims, queue state, workload ownership, idle and cooldown checks, controlled model-service transitions, locks, and return to baseline capacity. |
+| **Agent execution** | Autonomous, interactive, and plan-only modes; context assembly; tool discovery by profile; model and tool loop; streaming events; repetition, regression, plateau, and turn limits; lifecycle and result persistence. |
+| **Isolation and recovery** | Containerized workspaces, validated file paths, durable workspace storage, soft resource controls, cleanup, phase-aware checkpoints, and resumable messages, plans, context, loop state, and engine state. |
+| **Application services** | Research and evaluation, document and file workflows, connectors, browser and search tools, model management, OCR, notifications, image and video services, and other local AI application surfaces. |
 
 ## Architecture
 
-<img src="assets/diagrams/architecture.svg" alt="HomeCloud local-first AI platform architecture" width="1050" />
+<img src="assets/diagrams/architecture.svg" alt="HomeCloud supervision, inference capacity, GPU control, agent execution, tools, checkpoints, and application services" width="1100" />
 
-### 1. Supervised application platform
+The diagram separates application requests, resource admission, and agent execution. A model request reaches the execution engine only after route, instance, and GPU state permit it. Agent state and application results are persisted independently of the model-server process.
 
-HomeCloud runs as an OTP application with a broad supervision tree. Database access, PubSub, HTTP clients, model instances, GPU monitors, schedulers, connectors, browser services, model installation, agent execution, research processes, health monitoring, and the Phoenix endpoint are started and supervised according to configuration.
+## Supervised application runtime
 
-This matters because the platform is not a script that assumes every dependency is already available. Components have lifecycle, restart behavior, optional configuration, and a place in the application’s operational state.
+HomeCloud runs as an OTP application rather than a collection of shell scripts. The supervision tree starts core database and communication services, model and infrastructure controllers, tool and modality registries, agent and research supervisors, connectors, browser services, media queues, health monitoring, and the Phoenix endpoint according to configuration.
 
-### 2. Model and instance control
+This structure provides explicit process ownership and restart behavior. Optional services can be enabled or disabled without making the rest of the application assume that every model backend, connector, browser, or media provider is present. Process failure becomes visible application state and telemetry instead of an unexplained missing endpoint.
 
-The instance pool manages local inference-server processes as check-out resources. It tracks available and busy slots, request priority, model affinity, health, and restart state. User, research, and background work can be treated differently without requiring each caller to implement its own queue.
+The supervision tree also determines which component owns each long-lived responsibility. Model-server lifecycle belongs to the model and instance control layer. GPU changes belong to the claim and workload scheduler. Agent tasks belong to the agent and execution supervisors. Application features request these services through stable interfaces instead of managing operating-system processes and hardware independently.
 
-The routing layer can choose between local server types and remote providers while presenting a coherent inference interface to higher-level workflows. Backend-specific behavior remains in adapters rather than leaking into every application feature.
+## Workload classes and admission
 
-### 3. GPU claims and workload scheduling
+HomeCloud serves different kinds of work:
 
-A GPU is not available merely because a process has not recently logged activity. HomeCloud represents claims and workload ownership explicitly, polls hardware and queue state, and applies cooldown and idle checks before changing a model service.
+- interactive requests from a user-facing application;
+- long-running autonomous or interactive agent tasks;
+- research, benchmark, optimization, and evaluation jobs;
+- document, search, connector, browser, and data workflows;
+- image, video, OCR, and other multimodal operations;
+- background maintenance and model-management work.
 
-The scheduler can preserve an interactive baseline, move to a requested workload when the hardware is safely idle, and return capacity after work drains. Priority and ownership therefore shape model lifecycle instead of allowing each script to start or stop heavyweight services independently.
+These workloads do not have the same latency, duration, model, tool, or resource requirements. Admission considers workload class, priority, selected route, model capability, healthy instance capacity, current queues, and GPU ownership.
 
-### 4. Recoverable agent execution
+User work has explicit priority over research and background work. Lower-priority tasks can use spare capacity without being allowed to make interactive service unpredictable. Batch concurrency is derived from healthy available inference slots rather than a caller-provided number that may exceed the machine's actual capacity.
 
-The execution engine supports autonomous, interactive, and plan-only modes. It builds context, discovers tools by profile, dispatches inference, executes tool calls, streams phase and result events, and monitors repeated actions, repeated output, score regression, and stalled improvement.
+A request that cannot obtain the required route, instance, or GPU state remains queued or fails with a visible reason. It does not start a competing model process or assume that an accelerator is free because recent utilization is low.
 
-Agent tasks run in containerized workspaces with relevant toolchains. The engine owns cleanup and records lifecycle telemetry so a setup failure or helper-process crash does not become an unexplained disappearance.
+## Model routing and instance pools
 
-Checkpointing persists turn history and execution state in PostgreSQL. Phase-specific snapshots allow plan, implementation, and critique work to coexist and allow the freshest valid state to be resumed after a crash.
+Higher-level services use a stable inference interface while adapters handle local and remote backend differences. Route selection can consider modality, context requirements, tool support, privacy, latency, cost, and current health.
 
-### 5. Research, verification, and evaluation
+Local model servers are managed as instance pools. The pool tracks:
 
-The same runtime supports research and optimization work that would otherwise compete informally with interactive use. Research jobs can operate at a lower priority, use shared inference routing, and feed results into persisted application state.
+- available and busy slots;
+- which model or route a slot serves;
+- workload priority and wait queues;
+- model or session affinity where reuse is useful;
+- health and restart state;
+- checkout ownership and return;
+- aggregate healthy capacity used to set parallelism.
 
-The platform includes tooling for evaluation, verification, optimization, code and CUDA research, and autonomous programs. These are presented as workloads over the runtime—not as unrelated scripts—so they inherit model routing, resource management, telemetry, and recovery behavior.
+Checking out an instance creates a temporary ownership relationship between the request and a healthy slot. Returning the instance updates queue and capacity state. If a process becomes unhealthy, the slot is not left available only because its record still exists.
 
-### 6. Product services above the runtime
+Remote providers can be used through explicit adapters when their capabilities or operating properties are appropriate. They are not presented as identical to local capacity: provider availability, cost, privacy, rate limits, and tool or modality support remain part of routing and telemetry.
 
-HomeCloud extends beyond infrastructure management. The source tree includes document-vault behavior, connectors, browser and search tools, cinema/media workflows, OCR, model installation, notifications, and multimodal adapters.
+## GPU ownership and workload scheduling
 
-Those features are not listed to inflate scope. They demonstrate why the runtime exists: multiple product capabilities can reuse the same supervised model, GPU, agent, tool, and persistence layer instead of each shipping its own fragile AI stack.
+GPU control is represented as application state. Monitoring alone is insufficient because low utilization does not prove that a model process or workload has released its claim.
 
-## Key design decisions
+The GPU layer maintains hardware state, claims, workload ownership, queue state, locks, idle thresholds, and cooldown periods. The workload scheduler can preserve a configured interactive baseline, wait for the hardware and request queues to become safely idle, transition a model service for an admitted workload, and return the machine to baseline after work drains.
 
-### Derive concurrency from healthy infrastructure
+A service transition is therefore a controlled state change:
 
-Callers do not decide that three jobs may run merely because they request three. Batch concurrency is derived from available inference capacity. This aligns application parallelism with the model servers and accelerator slots that can actually serve it.
+1. identify the requested workload and required accelerator set;
+2. verify route and model configuration;
+3. inspect claims, active requests, queues, utilization, and cooldown state;
+4. acquire the required lock and workload ownership;
+5. stop or change model services through the designated controller;
+6. verify the new service health before admitting work;
+7. track completion and release;
+8. reconcile the previous or baseline service when capacity is no longer needed.
 
-### Give user work explicit priority
+This prevents independent subsystems from starting incompatible processes on the same accelerators or treating a partially stopped service as free capacity.
 
-The instance pool and scheduler distinguish user, research, and background work. Priority is part of the runtime contract, which allows exploratory or maintenance workloads to use spare capacity without making interactive behavior unpredictable.
+## Agent execution engine
 
-### Represent GPU ownership
+The execution engine supports autonomous, interactive, and plan-only tasks. It prepares an execution from persisted application state rather than sending one prompt directly to a model endpoint.
 
-Claims and scheduling state prevent multiple subsystems from assuming the same accelerator is free. Model-service transitions occur through a controller that can inspect idleness, queues, locks, and cooldown state.
+A task can include:
 
-### Isolate agent tools
+- selected messages and application records;
+- a plan and phase-specific state;
+- a model route and request limits;
+- a tool profile resolved from the current task and policy;
+- a containerized workspace and durable file area;
+- lifecycle, progress, and result subscribers;
+- turn, repetition, plateau, quality, time, and resource limits.
 
-Agent execution receives a container and workspace rather than unrestricted host execution. File operations are constrained to the mounted workspace, and resource reservations let tool work yield under pressure while still using idle host capacity.
+During execution, the engine dispatches model turns, parses tool requests, invokes permitted tools, records results, emits phase and lifecycle events, and evaluates whether the task is progressing. It tracks repeated actions, repeated output, score regression, stalled improvement, and turn limits so an agent loop can stop or surface a warning before consuming unbounded time and compute.
 
-### Checkpoint semantic state, not only logs
+The engine also supports infrastructure-derived batch execution. It uses healthy instance capacity and workload policy to determine how much parallel work can run, rather than assuming that all configured GPUs or model services are available to every task.
 
-A recoverable agent needs more than its printed transcript. Checkpoints include message history, plan and context variables, loop-detection state, and engine state. Resumption can continue the execution model rather than replaying the entire task from the beginning.
+## Context, tools, and application state
 
-### Keep local and remote inference behind explicit adapters
+Context is assembled from the application and task rather than inferred only from a model transcript. It can include stored messages, plans, prior tool results, research records, documents, files, connector data, browser results, model and infrastructure status, and phase-specific checkpoint data.
 
-A local llama.cpp server, another local backend, and a remote provider have different operational properties. Adapters give higher-level features a stable interface without erasing backend-specific health and capacity.
+Tools are discovered through profiles and registries. A task receives the tools appropriate to its purpose and workspace. Browser, search, file, code, document, media, and other services remain application capabilities with their own validation, lifecycle, and result state.
 
-### Supervise optional capability
+The tool broker and registries allow new application services to reuse the same execution, telemetry, and policy infrastructure. This is the main reason HomeCloud includes product services above raw inference: a document workflow, research job, image operation, or connector task should not ship another independent model process, tool loop, and recovery mechanism.
 
-Many HomeCloud services depend on deployment configuration. The application starts optional components deliberately and exposes health and telemetry rather than assuming that every connector, model service, or accelerator is present.
+## Sandboxes and workspace control
 
-## Reliability and failure handling
+Agent tasks use containerized workspaces with selected toolchains. The runtime creates or attaches the workspace, mounts durable task storage, validates file operations against the assigned root, applies soft resource controls, and owns cleanup.
 
-The implementation addresses failure at several layers:
+The container boundary reduces accidental host mutation and gives different tasks reproducible tool environments. It does not by itself grant authority to external services or protected application data; those capabilities still require an admitted tool and application-level scope.
 
-- **Unhealthy model instance:** pool health and restart state prevent a failed server from remaining an apparently available slot.
-- **GPU contention:** claim and scheduler state gate model-service changes and concurrent workloads.
-- **Agent loop:** repeated actions, repeated output, quality regression, and plateaus can trigger warnings or stopping behavior.
-- **Tool or setup failure:** execution lifecycle events and status updates preserve diagnostic state; cleanup is designed to run on exceptional paths.
-- **Process interruption:** turn-level, phase-aware checkpoints preserve enough state for resumption.
-- **Sandbox leakage:** workspaces are mounted into containers, file operations are validated against the workspace, and generated workspaces can use durable, quota-controlled storage.
-- **Deployment variance:** optional components and inference backends are configuration-driven rather than assumed.
-- **Background starvation of users:** priority queues and baseline-return behavior keep interactive work visible to the scheduler.
+Workspace state can outlive one model turn or engine process. This supports multi-phase work, inspection after failure, and resumption without reconstructing every generated file from the conversation history.
 
-## Implementation evidence
+## Checkpoint and recovery model
 
-| Source | What it demonstrates |
+Long-running agent work stores more than logs. Checkpoints can include:
+
+- message and turn history;
+- current plan and phase;
+- context variables and selected records;
+- tool and event state;
+- repetition and loop-detection state;
+- quality or score history;
+- engine mode, limits, and progress;
+- references to the durable workspace and result records.
+
+Phase-aware snapshots allow planning, implementation, critique, research, or other stages to retain separate current state. After a process interruption, the runtime can select the freshest valid checkpoint and resume the execution model instead of replaying every turn from the beginning.
+
+OTP supervision restarts failed processes, while persisted task and checkpoint state determines whether the work should resume, fail, or wait for operator action. Model-server restart and agent-task recovery are separate concerns and can proceed independently.
+
+## Research, evaluation, documents, connectors, and media
+
+HomeCloud's research and evaluation services use the same routing, capacity, sandbox, event, and persistence infrastructure as interactive agent work. Lower-priority research can run when capacity permits and stop yielding to user work without requiring a separate batch platform.
+
+Document, connector, browser, search, OCR, image, and video features operate as application workloads over the shared runtime. Their requests and artifacts remain durable product state. A media or document job can continue asynchronously, report progress, fail with diagnostic state, and return a stored result to another application workflow.
+
+This common runtime also supports experimentation with model routes, prompts, tools, optimizers, code and CUDA work, and other local AI research. Experimental workloads remain distinguishable from interactive application services through priority, routing, and lifecycle state.
+
+## Failure and recovery
+
+| Problem | System behavior |
 |---|---|
-| [`lib/home_cloud/application.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/application.ex) | The supervised application topology spanning database, model services, GPU control, agents, research, connectors, browser/media services, health, and the Phoenix endpoint. |
-| [`lib/home_cloud/intelligence/instance_pool.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/instance_pool.ex) | Model-instance checkout and return, priority queues, affinity, health, restart behavior, and multi-slot capacity. |
-| [`lib/home_cloud/infrastructure/gpu_workload_scheduler.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/infrastructure/gpu_workload_scheduler.ex) | GPU-aware workload selection, idle and cooldown checks, controlled model-service transitions, locks, and return to baseline. |
-| [`lib/home_cloud/intelligence/execution_engine.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/execution_engine.ex) | Autonomous, interactive, and plan-only agent modes; infrastructure-derived batch concurrency; sandbox ownership; context, tools, loop safety, and lifecycle events. |
-| [`lib/home_cloud/intelligence/execution_engine/checkpointer.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/execution_engine/checkpointer.ex) | Phase-aware persistence of message, plan, loop, event, and engine state for crash recovery. |
-| [`lib/home_cloud/intelligence/agent_sandbox.ex`](https://github.com/wahargis/home-cloud/blob/main/lib/home_cloud/intelligence/agent_sandbox.ex) | Containerized agent workspaces, durable storage, soft resource controls, tool execution, and workspace path validation. |
+| Model process fails health checks | The instance becomes unavailable, restart state is recorded, and queued work is not assigned until health is restored. |
+| GPU ownership is disputed | Claims, locks, active requests, and queue state block a service transition until ownership is resolved. |
+| Research competes with interactive work | Priority queues and baseline policy preserve user-facing capacity and defer lower-priority jobs. |
+| Agent repeats actions or output | Loop, plateau, regression, and turn controls warn or stop the execution according to policy. |
+| Tool or setup fails | Lifecycle and tool results remain stored; cleanup runs on exceptional paths and the task becomes failed, retryable, or resumable. |
+| Execution process restarts | Persisted task state and phase-aware checkpoints provide the resume point. |
+| Container or workspace is missing | Workspace validation fails before tool execution or resumption; the task is not silently continued in a new arbitrary directory. |
+| Optional service is not configured | Capability and health state keep unavailable connectors, models, or media services out of admitted routes and tools. |
+| Remote provider fails | Route policy can select a compatible alternative or return a visible failure without changing local GPU ownership. |
+| Work completes but capacity is not released normally | Checkout, claim, scheduler, and reconciliation state support cleanup and return to baseline. |
 
-## What the project demonstrates
+## Current implementation and boundaries
 
-For an infrastructure or general software reviewer, HomeCloud demonstrates OTP supervision, process lifecycle, resource ownership, scheduling, health, adapters, persistence, containers, telemetry, and application integration around heterogeneous hardware.
+The current implementation includes the OTP application structure, model and instance control, GPU monitoring and workload scheduling, agent execution modes, context and tool infrastructure, containerized workspaces, checkpointing, research and evaluation services, documents, connectors, browser and search tools, and multimodal application services.
 
-For an AI technical lead, it demonstrates the operational substrate that model-centric demos usually omit: inference capacity, priority, tool isolation, loop safety, checkpoint recovery, evaluation workloads, and the ability to reuse those services across multiple product domains.
+HomeCloud is not a public multi-tenant cloud scheduler or a replacement for Kubernetes. It is a self-hosted application and operations platform for owned AI hardware and selected remote services. Hardware- and provider-specific configuration remains part of the private deployment and is not exposed in this portfolio.
 
-For a recruiter or product reviewer, the value can be stated simply: HomeCloud turns owned AI hardware into a usable platform rather than requiring every feature or user to understand how to start, route, monitor, and recover model processes manually.
+The implementation repository is private. This page and its diagram are the public technical description and do not link to private source paths, credentials, host identifiers, model-service names, provider keys, or administrative endpoints.
 
-## Scope and boundaries
-
-- HomeCloud is a self-hosted application platform, not a general-purpose replacement for Kubernetes or a public multi-tenant cloud scheduler.
-- Hardware- and model-specific configuration exists in the implementation, but this portfolio page intentionally describes the reusable control model rather than private deployment details.
-- Not every optional service is required in every deployment.
-- Local-first does not mean every workload must run locally; remote providers remain valid routes where their capabilities or operating characteristics are appropriate.
-- This page emphasizes the platform architecture. It does not inventory every agent, research module, connector, media workflow, or UI feature present in the repository.
-
-## Review paths
-
-**Five minutes:** read **The product problem**, **Representative workflow**, and **Key design decisions**.
-
-**Twenty minutes:** continue through **Architecture**, **Reliability and failure handling**, and the six source links.
-
-**Deep review:** trace one request from application startup and routing through instance checkout, GPU scheduling, sandboxed execution, checkpointing, and result persistence.
-
-[← Back to portfolio](../README.md) · [View source repository](https://github.com/wahargis/home-cloud)
+[Back to the portfolio](../README.md)

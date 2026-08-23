@@ -1,71 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="860" viewBox="0 0 1320 860" role="img" aria-labelledby="title desc">
-  <title id="title">HomeCloud local-first AI platform architecture</title>
-  <desc id="desc">Application requests enter a supervised runtime that routes inference, checks out healthy instances, coordinates GPU claims and workload priority, executes agent tools in sandboxes, checkpoints long-running work, and supports documents, connectors, research, and media services.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1120" viewBox="0 0 1500 1120" role="img" aria-labelledby="title desc">
+  <title id="title">HomeCloud supervised AI application runtime</title>
+  <desc id="desc">Application, agent, research, document, connector, and media requests pass through workload classification, route policy, model-instance capacity, and GPU ownership before reaching the execution engine. Agent context, tools, sandboxes, checkpoints, results, and capacity release are supervised and persisted.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}
-      .title{font:700 27px Arial,sans-serif;fill:#17191d}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 18px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .h1{font:700 32px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}
+      .band{font:700 15px Inter,Arial,sans-serif;fill:#c2410c;letter-spacing:.8px}.nt{font:700 17px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 14px Inter,Arial,sans-serif;fill:#334155}.small{font:400 13px Inter,Arial,sans-serif;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.both{stroke:#475569;stroke-width:2.2;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.line{stroke:#64748b;stroke-width:2;fill:none}
     </style>
   </defs>
-  <rect class="bg" width="1320" height="860"/>
-  <text x="55" y="52" class="title">HomeCloud: local-first AI operations and application runtime</text>
+  <rect width="1500" height="1120" fill="#f8fafc"/>
+  <text x="70" y="62" class="h1">HomeCloud: supervised local AI application runtime</text>
+  <text x="70" y="92" class="sub">Application work is admitted through route, model-instance, and GPU state before agent and tool execution.</text>
 
-  <rect class="box" x="105" y="88" width="1110" height="88"/>
-  <text x="135" y="118" class="label">REQUESTS AND WORKLOADS</text>
-  <text x="135" y="148" class="head">interactive applications · connectors · agents · research · documents · media</text>
+  <rect x="55" y="125" width="1390" height="190" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="158" class="band">APPLICATION REQUESTS</text>
+  <g transform="translate(90 195)"><rect width="210" height="80" rx="12" fill="#ffedd5" stroke="#fdba74"/><text x="18" y="30" class="nt">Interactive</text><text x="18" y="56" class="nc">User-facing inference</text></g>
+  <g transform="translate(325 195)"><rect width="210" height="80" rx="12" fill="#ffedd5" stroke="#fdba74"/><text x="18" y="30" class="nt">Agent</text><text x="18" y="56" class="nc">Autonomous or interactive</text></g>
+  <g transform="translate(560 195)"><rect width="210" height="80" rx="12" fill="#ffedd5" stroke="#fdba74"/><text x="18" y="30" class="nt">Research</text><text x="18" y="56" class="nc">Evaluation and optimization</text></g>
+  <g transform="translate(795 195)"><rect width="210" height="80" rx="12" fill="#ffedd5" stroke="#fdba74"/><text x="18" y="30" class="nt">Documents</text><text x="18" y="56" class="nc">Files, search, browser, OCR</text></g>
+  <g transform="translate(1030 195)"><rect width="210" height="80" rx="12" fill="#ffedd5" stroke="#fdba74"/><text x="18" y="30" class="nt">Connectors</text><text x="18" y="56" class="nc">External application workflows</text></g>
+  <g transform="translate(1265 195)"><rect width="130" height="80" rx="12" fill="#ffedd5" stroke="#fdba74"/><text x="14" y="30" class="nt">Media</text><text x="14" y="56" class="nc">Image, video</text></g>
 
-  <path class="arrow" d="M660 176 L660 220"/>
-  <rect class="group" x="65" y="220" width="1190" height="205"/>
-  <text x="90" y="250" class="label">INFERENCE AND RESOURCE CONTROL</text>
+  <rect x="55" y="345" width="1390" height="295" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="378" class="band">ADMISSION, INFERENCE CAPACITY, AND GPU AUTHORITY</text>
 
-  <rect class="box" x="95" y="280" width="250" height="110"/>
-  <text x="120" y="312" class="head">Route and admit</text>
-  <text x="120" y="341" class="body">backend · model · priority</text>
-  <text x="120" y="365" class="body">local or remote capability</text>
+  <g transform="translate(85 430)"><rect width="270" height="145" rx="14" fill="#fff7ed" stroke="#fb923c"/><text x="20" y="34" class="nt">Workload and route policy</text><text x="20" y="62" class="nc">Workload class and priority</text><text x="20" y="84" class="nc">Model, modality, context, tools</text><text x="20" y="106" class="nc">Local or remote backend</text><text x="20" y="128" class="nc">Latency, privacy, cost, and limits</text></g>
+  <path class="arrow" d="M355 502 H415"/>
+  <g transform="translate(420 415)"><rect width="310" height="175" rx="14" fill="#fffbeb" stroke="#fcd34d"/><text x="20" y="34" class="nt">Model instance pool</text><text x="20" y="62" class="nc">Healthy available and busy slots</text><text x="20" y="84" class="nc">User, research, and background queues</text><text x="20" y="106" class="nc">Affinity, checkout, return, restart state</text><text x="20" y="128" class="nc">Healthy capacity sets batch parallelism</text><text x="20" y="153" class="small">Local processes and remote adapters remain distinct routes</text></g>
+  <path class="arrow" d="M730 502 H790"/>
+  <g transform="translate(795 415)"><rect width="310" height="175" rx="14" fill="#fffbeb" stroke="#fcd34d"/><text x="20" y="34" class="nt">GPU claims and scheduler</text><text x="20" y="62" class="nc">Hardware state and workload ownership</text><text x="20" y="84" class="nc">Active requests, queues, locks, cooldown</text><text x="20" y="106" class="nc">Controlled model-service transitions</text><text x="20" y="128" class="nc">Interactive baseline and return policy</text><text x="20" y="153" class="small">Low utilization alone does not release a claim</text></g>
+  <path class="arrow" d="M1105 502 H1165"/>
+  <g transform="translate(1170 430)"><rect width="235" height="145" rx="14" fill="#fff7ed" stroke="#fb923c"/><text x="20" y="34" class="nt">Admitted capacity</text><text x="20" y="62" class="nc">Healthy route and slot</text><text x="20" y="84" class="nc">Required GPU ownership</text><text x="20" y="106" class="nc">Queue and priority accepted</text><text x="20" y="128" class="nc">Execution resources reserved</text></g>
+  <path class="line" d="M750 315 V345"/><path class="line" d="M220 315 V430"/><path class="line" d="M575 315 V415"/><path class="line" d="M950 315 V415"/><path class="line" d="M1288 315 V430"/>
 
-  <rect class="box" x="385" y="280" width="250" height="110"/>
-  <text x="410" y="312" class="head">Instance pool</text>
-  <text x="410" y="341" class="body">checkout · affinity · health</text>
-  <text x="410" y="365" class="body">restart and multi-slot capacity</text>
+  <rect x="55" y="670" width="1390" height="330" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="703" class="band">AGENT EXECUTION, TOOLS, ISOLATION, AND RECOVERY</text>
 
-  <rect class="box" x="675" y="280" width="250" height="110"/>
-  <text x="700" y="312" class="head">GPU authority</text>
-  <text x="700" y="341" class="body">claims · queues · idle checks</text>
-  <text x="700" y="365" class="body">controlled model lifecycle</text>
+  <g transform="translate(85 750)"><rect width="300" height="180" rx="14" fill="#eef2ff" stroke="#a5b4fc"/><text x="20" y="34" class="nt">Execution engine</text><text x="20" y="62" class="nc">Autonomous, interactive, or plan-only</text><text x="20" y="84" class="nc">Model turns and tool dispatch</text><text x="20" y="106" class="nc">Phase and lifecycle events</text><text x="20" y="128" class="nc">Turn, repetition, plateau, and quality limits</text><text x="20" y="153" class="small">Runs only after route and capacity admission</text></g>
+  <path class="arrow" d="M385 840 H445"/>
+  <g transform="translate(450 735)"><rect width="300" height="210" rx="14" fill="#f5f3ff" stroke="#c4b5fd"/><text x="20" y="34" class="nt">Context and tools</text><text x="20" y="62" class="nc">Messages, plans, application records</text><text x="20" y="84" class="nc">Documents, research, browser and connector data</text><text x="20" y="106" class="nc">Tool profile and modality registry</text><text x="20" y="128" class="nc">Validated tool results return to the loop</text><text x="20" y="154" class="nt">Containerized workspace</text><text x="20" y="181" class="nc">Durable storage, path checks, toolchain,</text><text x="20" y="202" class="nc">soft resource controls, and cleanup</text></g>
+  <path class="arrow" d="M750 840 H810"/>
+  <g transform="translate(815 735)"><rect width="300" height="210" rx="14" fill="#ecfeff" stroke="#67e8f9"/><text x="20" y="34" class="nt">Checkpoint and task state</text><text x="20" y="62" class="nc">Messages and turns</text><text x="20" y="84" class="nc">Plan, phase, and context variables</text><text x="20" y="106" class="nc">Tool and event state</text><text x="20" y="128" class="nc">Loop, score, limits, and engine state</text><text x="20" y="154" class="nt">PostgreSQL persistence</text><text x="20" y="181" class="nc">Freshest valid phase snapshot supports</text><text x="20" y="202" class="nc">resume after process or provider failure</text></g>
+  <path class="arrow" d="M1115 840 H1175"/>
+  <g transform="translate(1180 750)"><rect width="225" height="180" rx="14" fill="#f0fdf4" stroke="#86efac"/><text x="20" y="34" class="nt">Application result</text><text x="20" y="62" class="nc">User response, research,</text><text x="20" y="84" class="nc">document, connector, media,</text><text x="20" y="106" class="nc">artifact, or stored program state</text><text x="20" y="136" class="nt">Resource release</text><text x="20" y="162" class="nc">Return slot, claim, workspace,</text><text x="20" y="182" class="nc">and reconcile baseline service</text></g>
+  <path class="arrow" d="M1288 930 V985 H955 V945"/>
+  <text x="970" y="980" class="small">result and cleanup state remain part of the supervised application record</text>
+  <path class="arrow" d="M1288 575 V670"/>
 
-  <rect class="box" x="965" y="280" width="250" height="110"/>
-  <text x="990" y="312" class="head">Operations</text>
-  <text x="990" y="341" class="body">supervision · health · telemetry</text>
-  <text x="990" y="365" class="body">configuration and degradation</text>
-
-  <path class="arrow" d="M660 425 L660 470"/>
-  <rect class="group" x="65" y="470" width="1190" height="190"/>
-  <text x="90" y="500" class="label">AGENT AND RESEARCH EXECUTION</text>
-
-  <rect class="box" x="95" y="535" width="210" height="88"/>
-  <text x="120" y="567" class="head">Context</text>
-  <text x="120" y="592" class="body">task state · retrieval</text>
-
-  <rect class="box" x="325" y="535" width="210" height="88"/>
-  <text x="350" y="567" class="head">Sandbox</text>
-  <text x="350" y="592" class="body">workspace · toolchains</text>
-
-  <rect class="box" x="555" y="535" width="210" height="88"/>
-  <text x="580" y="567" class="head">Tool loop</text>
-  <text x="580" y="592" class="body">dispatch · loop safety</text>
-
-  <rect class="box" x="785" y="535" width="210" height="88"/>
-  <text x="810" y="567" class="head">Checkpoint</text>
-  <text x="810" y="592" class="body">history · plan · engine state</text>
-
-  <rect class="box" x="1015" y="535" width="210" height="88"/>
-  <text x="1040" y="567" class="head">Verify and persist</text>
-  <text x="1040" y="592" class="body">results · evidence · lifecycle</text>
-
-  <path class="arrow" d="M660 660 L660 705"/>
-  <rect class="group" x="105" y="705" width="1110" height="105"/>
-  <text x="135" y="735" class="label">SHARED APPLICATION SERVICES</text>
-  <text x="135" y="766" class="head">document vault · browser/search · connectors · model installation · OCR · media/cinema · UI</text>
-  <text x="135" y="792" class="small">The services reuse one supervised resource, inference, execution, and persistence substrate.</text>
+  <rect x="55" y="1025" width="1390" height="55" rx="12" fill="#e2e8f0"/>
+  <text x="80" y="1059" class="nt">OTP supervision and health:</text>
+  <text x="335" y="1059" class="nc">database · PubSub · model services · instance pool · GPU controllers · tools · agent supervisors · research · connectors · browser · media · Phoenix endpoint</text>
 </svg>

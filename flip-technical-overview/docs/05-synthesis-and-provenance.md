@@ -1,107 +1,119 @@
-# 05 — Curation, Authorship, and Provenance
+# Curation and provenance
 
-## Flip uses models in two roles with different integrity rules
+Flip supports direct AI-authored content and curation of selected human conversation. These operations have different authorship, source, access, and correction requirements and therefore use separate workflows.
 
-The most important distinction in Flip is not between “chat AI” and “forum AI.” It is between **restructuring human-authored conversation** and **creating new AI-authored content**.
+![Chat-to-forum curation](../diagrams/synthesis-pipeline.svg)
 
-- **Conversation curation** organizes existing discussion into durable forum structure while preserving who said what.
-- **AI participation** creates a new reply or artifact under an explicit AI identity and supports its claims with evidence.
+## Direct AI authorship
 
-A generic “synthesis” label hides that distinction and makes it easy to turn a model into an invisible co-author of community history.
+A direct AI reply is new content attributed to an AI identity. The associated activity records the invoking actor, origin, route, tools, sources, artifacts, and terminal outcome. The reply can include citations or generated artifacts, but its authorship remains the AI identity.
 
-## Conversation curation changes structure, not authorship
+Direct authorship is appropriate for answers, analysis, generated descriptions, product assistance, and other content that did not previously exist as selected participant messages.
 
-<img src="../diagrams/synthesis-pipeline.svg" alt="Conversation-to-forum curation flow" width="900" />
+## Conversation curation
 
-A curation run begins with an eligible source set: messages, participant identities, reply relationships, room policy, and existing forum/linkback state. The model can help identify coherent topics, propose a destination, order source material, and add bounded bridge context.
+Curation turns selected conversation into durable forum structure. The source content remains attributable to the original participants.
 
-The resulting plan is not applied blindly. Code checks that every referenced message belongs to the eligible set, the destination exists and is allowed, the plan does not duplicate an already represented topic, and the proposed effect preserves source identity.
+A curation run can:
 
-After validation, the product can create a new forum thread, append to an existing discussion, merge related source groups, or defer ambiguous placement. The transaction records the forum objects and their source-message relationships. Linkback occurs as a separate durable job so a failed room notification does not erase an already committed forum artifact.
+1. identify the source room and selected messages;
+2. load the messages under current actor and source visibility;
+3. classify or group the material into topics;
+4. propose destination forums, threads, and ordering;
+5. validate destinations and publication rules;
+6. create or update forum objects;
+7. attach participant and source-message relationships;
+8. create linkback to the source conversation;
+9. record run, feedback, and repair state.
 
-### Why the data model matters
+Generated headings or bridge text can be stored as AI-authored additions when allowed. They do not replace the authorship of selected messages.
 
-A prompt instruction such as “do not rewrite the users” is insufficient. The durable model must keep distinct identities for:
+## Durable run state
 
-- participant-authored source text;
-- the forum object that presents or links it;
-- short AI-generated structural context;
-- the curation run and destination decision;
-- later participant feedback and recuration.
+Curation is represented as a multi-stage run rather than one prompt call. State can include:
 
-That schema lets the UI render authorship honestly and lets a correction trace back to the material it changes.
+- requesting actor and source room;
+- selected messages and selection version;
+- target community and allowed destinations;
+- current stage and worker ownership;
+- proposed topic and destination plan;
+- validation errors and operator decisions;
+- created or updated forum objects;
+- participant and message provenance;
+- linkback and notification status;
+- feedback, correction, and recuration history;
+- retry, stale-work, failure, and completion state.
 
-## AI participation creates new attributed content
+A run identity prevents duplicate publication and supports repair after process interruption.
 
-An AI participant is allowed to interpret, paraphrase, and compose because the result is visibly its own. The reply is persisted under an explicit AI identity, linked to the triggering message or thread, and associated with any citations, source records, artifacts, or product actions used to produce it.
+## Source selection
 
-Integrity therefore comes from a different contract:
+Selection can be explicit or produced by a product workflow. The server records the selected message identities and validates that the requesting actor can read them when the run is admitted and again before publication.
 
-| Curation | AI participation |
+The run operates on the stored selection rather than a later unbounded room transcript. If the source changes, the system can record a new selection or recuration version instead of silently changing the evidence used by an existing publication.
+
+## Planning and validation
+
+A model can propose topics, titles, summaries, ordering, and destinations. The application validates the proposal against:
+
+- available communities, forums, and thread types;
+- current actor and source access;
+- allowed creation and update operations;
+- source-message coverage and duplication;
+- title and content constraints;
+- provenance requirements;
+- current state of existing destination objects.
+
+Invalid or stale destinations are resolved or rejected before forum mutation. The model does not receive direct authority to create arbitrary forum structure.
+
+## Publication transaction
+
+Forum objects and their source relationships should commit in a transaction appropriate to the operation. A newly created thread should not become visible without the provenance records required by the product.
+
+Later stages such as source-room linkback, notifications, or optional media can commit separately. Their state remains attached to the run so failure can be repaired without repeating the completed forum mutation.
+
+## Origin-aware access
+
+A curation-derived forum object retains a relationship to its source messages and room. Access resolution considers both the destination and the source boundary.
+
+A broader destination does not automatically make restricted source content public. The most restrictive applicable boundary remains effective unless a separate authorized workflow creates a new publication with appropriate review and provenance.
+
+Search, direct reads, AI retrieval, and client synchronization use this effective access rather than only the destination forum's default visibility.
+
+## Feedback and correction
+
+Users and operators need correction paths because topic grouping, destination choice, bridge text, and message selection can be wrong even when the workflow completes technically.
+
+Feedback can be attached to the run or published object. A correction can update generated framing, adjust destination or organization, add or remove selected material, or start a bounded recuration from an explicit source version.
+
+Corrections preserve earlier run and publication history. The system should not erase which source selection and model result produced the earlier state.
+
+## Partial failure
+
+Curation contains several effects that can fail independently:
+
+| Failure | Recovery behavior |
 |---|---|
-| Preserve human source identity and wording. | Make AI authorship explicit. |
-| Organize existing discussion into durable structure. | Create a new answer, analysis, or artifact. |
-| Source-message relationships are primary provenance. | Citation, artifact, trigger, and action records are primary provenance. |
-| Structural bridge text must remain bounded and distinguishable. | Original composition is expected but must remain evidence-aware and authorized. |
+| Source load or authorization failure | Stop before planning or publication and retain the failed run. |
+| Invalid model plan | Repair or rerun planning without creating forum objects. |
+| Forum mutation failure | Retry under the same run and operation identities where safe. |
+| Provenance commit failure | Fail the transaction so a publication is not left without required source relationships. |
+| Linkback or notification failure | Keep the completed forum result and retry only the failed later stage. |
+| Worker crash | Recover the run from its last durable stage and ownership state. |
+| Duplicate request | Return or continue the existing run rather than publish again. |
+| Source visibility changes | Recheck access before reading or publishing and stop when the original scope is no longer valid. |
 
-These paths can meet in the same forum or room without collapsing their semantics.
+## Provenance queries
 
-## Provenance is layered because readers ask different questions
+The stored relationships support questions such as:
 
-### Conversation provenance
+- Which messages and participants produced this forum item?
+- Which AI-generated headings or bridge text were added?
+- Which curation run and selection version created the current publication?
+- Was the source room more restrictive than the destination?
+- Which feedback or recuration changed the result?
+- Which publication objects were affected by a failed or retried run?
 
-A reader of a curated forum thread should be able to determine which chat messages produced it, who authored them, how they related in the original exchange, and whether the durable representation omitted or reordered material.
+These are product queries over durable state rather than explanations reconstructed from a provider transcript.
 
-### Curation provenance
-
-The product must know which run selected the material, which destination and merge decision applied, whether linkback completed, and what feedback caused a later recuration. This explains how the structure evolved without presenting internal model deliberation as the record.
-
-### Evidence provenance
-
-An AI-authored claim may rely on an external page, a document passage, typed data, or authorized internal content. The durable citation records the source identity and selected support; the reply refers to that identity near the claim.
-
-### Artifact and action provenance
-
-A chart, image, video, poll, or platform action has its own request and effect lifecycle. Provenance links the initiating user/event, AI participant, tool call, source inputs, provider or domain result, terminal state, and conversation attachment.
-
-These are related but not interchangeable. A source-message link proves derivation from a conversation; a citation supports an AI claim; an artifact dependency explains how an output was produced.
-
-## A representative curation scenario
-
-A room debates a product decision across several interleaved replies. The curation workflow identifies one coherent decision thread and proposes appending it to an existing forum topic.
-
-Before applying the plan, Flip checks that the selected messages are visible and eligible, that their authors remain attached, and that the target thread is correct. The transaction adds the durable structure and source links. A later participant flags that one reply was taken out of context; that feedback creates a bounded recuration path rather than silently overwriting history.
-
-The final forum artifact can be searched and extended while the reader can still navigate to the original exchange and see which text came from participants versus the curator.
-
-## Deduplication is part of knowledge quality
-
-Automatically creating a new thread for every interesting exchange would replace chat entropy with forum entropy. The curation layer can therefore recommend creation, append, merge, skip, link, or defer.
-
-The model contributes semantic judgment; code validates object identities and applies the effect transactionally. Ambiguity can remain explicit rather than being forced into a confident placement.
-
-## Correction and recuration
-
-Participant feedback is not merely a model-quality score. It is product input that can identify missing context, incorrect grouping, poor destination, duplicated content, or inappropriate structural text.
-
-Recuration is bounded and causally linked to the prior result. When automated attempts are exhausted, the state moves to human review rather than allowing an infinite rewrite loop. Earlier source and decision relationships remain inspectable.
-
-## Privacy, visibility, and deletion
-
-Provenance creates obligations as well as trust. If a source message becomes inaccessible, is redacted, or is removed under account/community policy, a derived forum view cannot continue exposing the private text merely because a foreign key still exists.
-
-The implementation therefore needs explicit behavior for visibility changes, deletion/redaction, account removal, artifact retention, citation caching, synchronization tombstones, and audit access. Those policies are deployment-specific, but the architecture must make them enforceable.
-
-## Failure behavior
-
-- An invalid topic plan is repaired or rejected before a forum effect.
-- A missing source relationship prevents unattributed copied text.
-- A failed forum transaction produces no phantom linkback.
-- A failed linkback preserves the forum result and retries independently.
-- Conflicting feedback remains a review state rather than an invisible overwrite.
-- An invalid citation causes the AI claim to be repaired or removed.
-- A failed asynchronous artifact remains a durable failed artifact and can trigger one honest continuation.
-
-## Why this is the product distinction
-
-Many systems keep only a generated summary. Flip keeps the live conversation, the durable structure, the AI-authored contributions, and the relationships among them. The aim is not to make the model sound like the community; it is to make community knowledge durable without erasing how it was produced.
+[Previous: Retrieval, evidence, and tools](04-retrieval-search-and-tools.md) · [Next: Data, realtime, and clients](06-data-realtime-and-clients.md)

@@ -1,137 +1,93 @@
-# Flip architecture scenarios
+# Synthetic technical environment
 
-The synthetic technical environment is intended to make architectural behavior inspectable without production data. These scenarios focus on product contracts rather than scripted reviewer choreography.
+The synthetic environment exercises Flip's product and agent contracts without using product data, private credentials, or administrative authority. It is intended for architecture review, deterministic testing, and failure analysis.
 
-Product reference: <https://flip.engineering>  
-Synthetic technical environment: <https://flip.tech-demo.dev>
+It is not a copy of production. It uses synthetic identities, communities, rooms, forums, messages, documents, sources, artifacts, model outputs, and provider events under a separate namespace and data store.
 
-Endpoint availability is not required to use the case study; the expected state transitions are documented below.
+## Environment boundary
 
-## Scenario 1 — Current-information answer with citations
+| Shared with the product architecture | Kept separate |
+|---|---|
+| Domain schemas and state transitions | Product accounts, communities, messages, and media |
+| Authorization and origin rules | Product authentication and administrator sessions |
+| Agent admission, context, tools, and terminal validation | Product provider credentials and route configuration |
+| Job, run, artifact, retry, and continuation behavior | Product queues, callbacks, storage buckets, and deployment state |
+| Realtime and durable client contracts | Product push credentials, deep links, and client release channels |
+| Deterministic and provider-fixture evaluation paths | Product telemetry, billing, and user activity |
 
-### Request
+The environment must fail closed when a product-only dependency is requested. It should not proxy unknown reads or effects to a product deployment.
 
-Ask an AI participant a question that requires current external evidence and at least two sources.
+## Synthetic data
 
-### Inspect
+Fixtures use clearly non-production identifiers and content. The fixture set can include:
 
-1. The user invokes an explicit AI identity.
-2. The runtime exposes search and source-reading tools.
-3. Search results are followed by direct page reads.
-4. Source records/citations are minted before the final answer.
-5. The final reply contains rendered citation links or a source ledger.
-6. Tool/provider failure is described honestly rather than replaced by fabricated evidence.
+- human and AI identities with different community and room membership;
+- public, private, and restricted rooms and forums;
+- conversation threads with replies, media references, and source-selection candidates;
+- documents, web-source fixtures, data tables, charts, images, and video job records;
+- curation destinations and source relationships;
+- provider streams, tool calls, timeouts, malformed output, and asynchronous completion events;
+- web and native client identities with controlled capability metadata.
 
-### Architecture pages
+No fixture should be derived from copied product content or a product database export.
 
-- [Agent Runtime](../docs/03-agent-runtime.md)
-- [Retrieval, Search, and Tools](../docs/04-retrieval-search-and-tools.md)
-- [Model Routing and Inference](../docs/07-model-routing-and-inference.md)
+## Scenario set
 
-## Scenario 2 — Authorization-scoped internal retrieval
+### Direct AI reply
 
-### Request
+A member invokes an AI identity in an allowed room. The scenario verifies actor and origin resolution, bounded context, route and tool admission, activity state, terminal reply validation, and client delivery.
 
-Ask about prior discussion in a room or forum the current user can read. Compare with a room the user cannot read, where the synthetic role model permits this test.
+Variants cover unavailable AI identity, revoked room access, duplicate trigger, invalid tool request, provider failure, and a response that refers to a missing citation or artifact.
 
-### Inspect
+### Scoped internal retrieval
 
-1. The worker derives actor and origin-community scope from product state.
-2. Internal search receives trusted scope outside model arguments.
-3. Readable content is returned with product-native identifiers.
-4. Missing or denied scope produces no cross-community results.
-5. The final answer links to accessible content only.
+A user asks for information available in one permitted room while similar content exists in another restricted room. The scenario verifies that retrieval uses trusted actor and community scope and that the restricted record is not included or discoverable through model arguments.
 
-### Architecture pages
+### External research and citation
 
-- [Product and Problem](../docs/01-product-and-problem.md)
-- [Retrieval, Search, and Tools](../docs/04-retrieval-search-and-tools.md)
-- [Quality, Evaluation, and Operations](../docs/09-evaluation-testing-and-operations.md)
+A request requires search, direct source reads, and a final cited response. The scenario verifies the separation of discovery from evidence reads, durable source records, citation validation, incomplete-source handling, and the reader-facing evidence projection.
 
-## Scenario 3 — Chat-to-forum curation
+### Product action
 
-### Request
+The model requests a typed product action such as a poll or forum operation. The scenario verifies target validation, idempotent effect identity, committed product state, returned tool result, and rejection of a target outside the actor's scope.
 
-Use a seeded chat exchange containing a coherent decision or explanation and invoke or observe its curation into forum structure.
+### Asynchronous artifact
 
-### Inspect
+A media or document operation creates a pending artifact, receives progress, completes or fails after the originating turn, and starts at most one continuation. The scenario verifies restart, duplicate provider events, retry, cancellation, missing output, and final client state.
 
-1. The source messages and participants remain identifiable.
-2. The durable forum result is attributed as sourced/curated, not presented as if the AI authored the participants’ statements.
-3. Structural bridge text is distinguishable from source content.
-4. The forum artifact links back to the originating chat.
-5. Feedback or recuration state is visible where the scenario includes it.
+### Conversation curation
 
-### Architecture pages
+Selected source messages enter a curation run. The scenario verifies destination planning, source author and message relationships, origin-aware access, partial stage failure, linkback, feedback, and recuration without duplicate publication.
 
-- [Synthesis and Provenance](../docs/05-synthesis-and-provenance.md)
-- [System Architecture](../docs/02-system-architecture.md)
+### Client convergence
 
-## Scenario 4 — Structured data or artifact
+Web and native clients submit a command and receive a response, durable synchronization, and realtime updates in several orders. The scenario verifies canonical identity, optimistic reconciliation, reconnect, duplicate suppression, and removal of data after access revocation.
 
-### Request
+## Evidence produced by a scenario
 
-Ask for a chart, rich-data view, document analysis, or configured media artifact.
+A scenario should leave inspectable state rather than only a screenshot or generated answer. Depending on the path, this can include:
 
-### Inspect
+- product object and canonical identity;
+- actor, AI identity, origin, and visibility inputs;
+- AI activity and tool-call records;
+- selected sources, citations, and artifacts;
+- job or run lifecycle and retry state;
+- continuation identity and deduplication state;
+- client-visible durable and realtime events;
+- deterministic assertions and provider-fixture evaluation output.
 
-1. The AI invokes a typed tool rather than embedding an invented artifact in prose.
-2. The product creates a durable artifact/request identity.
-3. The UI distinguishes pending, completed, and failed state.
-4. A completed asynchronous result can trigger one continuation turn.
-5. Inputs, source records, and the conversation attachment remain linked.
+## Safety controls
 
-### Architecture pages
+- Separate database, queues, storage, credentials, hostnames, and callback routes.
+- Synthetic-only account and community namespaces.
+- No product administrator tokens or copied sessions.
+- No provider key shared with a product environment unless the key is independently scoped and approved for the synthetic environment.
+- Deny product hostnames, storage roots, and callback targets at configuration and network boundaries where practical.
+- Redact or reject secret-shaped content in fixtures and exported evidence.
+- Keep generated reports free of hidden prompts, credentials, private routes, and internal host identifiers.
 
-- [Retrieval, Search, and Tools](../docs/04-retrieval-search-and-tools.md)
-- [Agent Runtime](../docs/03-agent-runtime.md)
-- [Data, Realtime, and Clients](../docs/06-data-realtime-and-clients.md)
+## Relationship to the portfolio
 
-## Scenario 5 — Realtime convergence
+The synthetic environment supports the public diagrams and technical descriptions by exercising the same contracts with non-sensitive data. It does not establish product scale, production reliability, or access to the private implementation repository.
 
-### Request
-
-Open the same synthetic room or forum in two client sessions, then create a message/reply or reaction.
-
-### Inspect
-
-1. The initiating client may display optimistic state.
-2. The server authorizes and commits the mutation.
-3. Durable synchronization delivers the canonical record.
-4. The initiating client reconciles rather than duplicating it.
-5. Ephemeral typing/presence remains separate from durable message state.
-6. Reconnect rebuilds from server truth.
-
-### Architecture pages
-
-- [Data, Realtime, and Clients](../docs/06-data-realtime-and-clients.md)
-- [Quality, Evaluation, and Operations](../docs/09-evaluation-testing-and-operations.md)
-
-## Scenario 6 — Controlled failure
-
-A technically credible demo should include failure state.
-
-Possible synthetic conditions:
-
-- external source unavailable;
-- one tool times out;
-- model endpoint unavailable;
-- artifact provider returns terminal failure;
-- invalid citation/output is rejected;
-- curation linkback fails after forum creation.
-
-Inspect whether the product preserves the durable state that did succeed, labels the failed stage, avoids duplicate effects, and gives the user an honest next state.
-
-## Expected evidence
-
-A scenario is convincing when a reviewer can inspect:
-
-- the durable product object;
-- authorship and source relationships;
-- citation/artifact identities;
-- visible lifecycle state;
-- actor/community authorization outcome;
-- realtime convergence;
-- a failure or correction path.
-
-A polished model answer alone is not sufficient evidence of the architecture.
+[Back to the Flip case study](../README.md)

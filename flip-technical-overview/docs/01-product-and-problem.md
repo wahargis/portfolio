@@ -1,77 +1,99 @@
-# 01 — Product and Problem
+# Product and agent use cases
 
-## Chat and forums solve opposite halves of community knowledge
+Flip is a community product in which people communicate through realtime rooms and durable forums. AI identities can participate in those product surfaces, use retrieval and tools, create artifacts, and assist with curation. The application must keep user-visible behavior, data access, and durable effects consistent across human actions, model turns, background work, and web and native clients.
 
-Chat is effective because it is immediate, contextual, and socially low-friction. Its weakness appears later: search returns fragments, decisions detach from rationale, and important explanations remain buried in chronology.
+## Product roles
 
-Forums preserve durable, navigable discussion. Their weakness is activation energy. Participants do not naturally stop a live exchange, reconstruct its context, and publish a polished thread every time something useful happens.
+| Role | Relevant product state |
+|---|---|
+| **Community member** | Account, community membership, room and forum access, messages, replies, reactions, polls, uploads, AI requests, artifacts, and notification state. |
+| **Moderator or operator** | Product configuration, feature availability, community and content controls, AI identity configuration, activity and failure inspection, and repair of incomplete workflows. |
+| **AI identity** | Attributed product participant with selected instructions, route policy, permitted product surfaces, tools, and persistent activity records. |
+| **Background worker** | Executes a specific durable job or run under stored application scope and updates its lifecycle state. |
+| **Web or native client** | Renders authorized product state, submits commands, receives durable synchronization and ephemeral events, and reconciles optimistic UI state. |
 
-Flip treats this as one lifecycle:
+An AI identity is not a privileged system account. It is a configured product actor whose behavior is admitted by the server for a specific turn. The invoking human actor and origin object still determine which data and effects are allowed.
 
-```text
-live exchange
-  -> topic, insight, or decision signal
-  -> durable forum structure linked to the source
-  -> later discovery and continuation
-  -> new live exchange
-```
+## Use case: AI participation in conversation
 
-Chat remains chat and forum remains forum. The product creates an explicit bridge rather than flattening both into one feed or a generated summary.
+A member mentions or replies to an AI identity in a room. The server verifies that the feature is available, that the member can read and participate in the room, and that the selected AI identity is enabled for the surface.
 
-## The model participates in the social system, not above it
+The runtime then assembles a bounded context. This can include recent room messages, same-room reply ancestry, direct references, room-specific information, and selected artifact state. Platform events and content outside the current room are not included merely because they are stored by the application.
 
-Flip has members, administrators, explicitly configured AI participants, and background workflows. Their authority differs.
+The model can answer directly or use admitted tools. A final reply is attributed to the AI identity and stored as a normal product object with related AI activity and source state. Users see a product participant and its reply, not a raw provider transcript.
 
-A member can act within community membership and content rules. An administrator configures membership, moderation, feature access, curation, and AI behavior. An AI participant can answer or act only through capabilities admitted for its current surface and the invoking actor’s scope. A curation workflow can restructure eligible discussion but cannot impersonate the participants. Background jobs can retry work but cannot invent a product effect outside the domain transaction they owe.
+## Use case: internal and external research
 
-These differences are product semantics, not prompt personalities.
+A user can ask for research that requires product-native records, external sources, documents, or structured data.
 
-## The central user journeys
+Internal retrieval is performed under trusted actor and community scope. External research separates discovery from direct source reading so the final response can refer to the material actually retrieved. Document and PDF tools maintain a relationship between the selected file or passage, the tool result, and the final response. Structured data operations return typed tables, statistics, or charts rather than unverifiable prose.
 
-### Preserve a valuable live discussion
+The product stores relevant citations, tool outcomes, files, and artifacts outside the model context. A later user can inspect the visible evidence and result state without requiring the original provider conversation.
 
-Members debate an issue in chat. A curation run selects the relevant source set and proposes how it should appear in the forum. Flip validates the participant and message identities, destination, and duplicate state before committing the durable structure. The source room receives a linkback, and participants can correct or request recuration later.
+## Use case: product actions
 
-The outcome is searchable knowledge with an inspectable path back to the conversation.
+AI participation can include product-native actions such as creating a poll, preparing a forum item, attaching a file, generating a chart, or invoking another admitted application service.
 
-### Ask a current-information question
+The model does not commit these effects directly. It produces a typed request. The server applies the trusted actor and origin scope, validates the request against domain rules, performs the operation through the owning application context, and returns the durable result to the turn.
 
-A member invokes an AI participant. The server derives the room and actor scope, selects bounded context, and admits external retrieval. The model discovers and reads sources; the product stores the selected evidence as citation records. The final answer is attributed to the AI and rendered with a source ledger.
+This allows the AI to participate in product workflows without giving the provider arbitrary access to internal APIs or database records.
 
-The outcome is not “the model searched the web.” It is a durable product reply whose evidence can be inspected independently of the provider conversation.
+## Use case: generated media and long-running work
 
-### Ask about prior community knowledge
+Image and video generation, editing, and related media operations often complete asynchronously. The user should see a durable pending artifact, progress or provider state, and an explicit completion or failure result.
 
-The same AI participant can retrieve chat or forum records the invoking actor is allowed to read. Authorization travels into the child tool task; the model cannot select another community in its JSON arguments. The answer links to product-native content and no valid scope means no protected results.
+The product creates the artifact before the provider call becomes an accepted effect. A worker or callback updates the artifact and job. A completed result can start one continuation that posts the result or resumes a larger workflow. A failure remains visible and can be retried or repaired without duplicating already completed stages.
 
-The outcome is internal knowledge assistance without a global cross-community search backdoor.
+## Use case: chat-to-forum curation
 
-### Create or continue an artifact
+A member or moderator selects a portion of conversation for durable organization. A curation run identifies source messages, proposes topic or destination structure, validates the proposal, and creates or updates forum content.
 
-A member may ask for a chart, document analysis, image, video, poll, or another product-native artifact. The AI can gather inputs and invoke a typed capability. Flip creates a durable request/artifact identity, represents pending or failed state, and can run one continuation when asynchronous provider work completes.
+The durable result retains the selected participants and source-message relationships. The application can use generated bridge text where appropriate, but it does not rewrite source authorship. Linkback and feedback connect the forum result to the conversation and support later correction or recuration.
 
-The outcome remains part of the conversation even when the producing model turn is long gone.
+The destination's default visibility does not override a more restrictive source boundary.
 
-## Product invariants
+## Use case: web, desktop, and mobile clients
 
-### Authorship remains visible
+The Phoenix application and React-based clients share product state but do not use one transport for every kind of update.
 
-Human source text remains attached to the human author. AI-authored replies remain attached to the AI identity. Structural curation text is distinguishable from both. A reader should not need an internal agent trace to know who produced what.
+Durable objects are stored in PostgreSQL and delivered through server-authoritative APIs and synchronization. Realtime channels carry presence, typing, transient progress, and other non-replayable state. Clients can use optimistic placeholders for responsive interaction, but the server response or durable synchronization supplies the canonical identity and final status.
 
-### Authorization follows the effect
+Capability negotiation tells a client which authentication, upload, push, deep-link, synchronization, and AI features are available in the current deployment and protocol version. A client does not expose a control merely because another deployment supports it.
 
-Membership and visibility are checked by server code. Internal retrieval receives trusted actor/community scope. Product actions pass through domain services. A client or model cannot widen authority by changing arguments or local state.
+## Product requirements for agent execution
 
-### User-visible effects are durable
+The use cases above impose specific system requirements.
 
-Replies, forum artifacts, citations, generated artifacts, and product actions have identities and lifecycle outside the model context. Retried background work converges on one intended effect when duplication would be harmful.
+### Identity and scope
 
-### Failure remains honest
+Every turn must have a resolved invoking actor, AI identity, community, origin object, and feature configuration. Protected retrieval and effects must use these server-owned values.
 
-Tool or provider failure does not authorize fabricated evidence. An invalid terminal reply is repaired or rejected before persistence. A failed asynchronous artifact remains visibly failed rather than being presented as completed. A transaction failure produces no phantom client update.
+### Bounded context
 
-## What Flip deliberately is not
+The runtime must select relevant product and external context under a working budget. It cannot assume that all available data belongs in the model prompt or that a large context window removes ranking and privacy requirements.
 
-Flip is not a general autonomous agent detached from product context, a vector-database wrapper, a transcript summarizer that silently replaces member language, a client-authoritative offline database, a model-hosting platform, a long-horizon research truth-maintenance system, or a coding-agent fleet driver.
+### Typed capabilities
 
-Those are distinct problems addressed, where relevant, by HomeCloud, Project Manager, and Baton. Keeping those boundaries explicit allows Flip to expand AI capability without losing its identity as a community product.
+Tools need schemas, trust classification, authorization, timeouts, lifecycle, idempotency where required, and stable result identities. Read-only, effectful, and asynchronous capabilities require different control paths.
+
+### Durable evidence and artifacts
+
+Citations, files, charts, generated media, polls, and other artifacts need product records independent of provider text. A final response can refer only to results the application can identify and render.
+
+### Recoverable background work
+
+Long-running operations need jobs or runs with explicit pending, active, completed, failed, and cancellation state. The application must be able to retry or continue after a worker or server restart.
+
+### Realtime convergence
+
+Web and native clients need a consistent path from optimistic state to canonical durable objects. Reordered command responses, synchronization, and realtime events must not create duplicates or preserve revoked access.
+
+### Inspectable operation
+
+Operators need to determine which route ran, which tools were called, which durable effects occurred, why an artifact failed, whether a continuation was scheduled, and which evidence is safe to show to a user.
+
+## Public technical boundary
+
+The public Flip material documents system behavior, architecture decisions, data and control boundaries, and synthetic scenarios. It does not publish private implementation source, product data, user content, credentials, provider keys, host configuration, prompt and persona state, or administrative endpoints.
+
+[Previous: Executive overview](00-executive-overview.md) · [Next: System architecture](02-system-architecture.md)

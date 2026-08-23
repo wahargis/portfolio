@@ -1,0 +1,20 @@
+flowchart LR
+  A[Session, experiment, review, or decision] --> B[Validated typed project update]
+  B --> C[(SQLite project store)]
+  C --> D[Evidence, causal, branch, merge, and temporal graph]
+  D --> E[Retrieval and session orientation]
+  D --> F[Review and truth maintenance]
+  C --> G[Phase execution DAG]
+  F --> H[Explicit project update]
+  H --> C
+  G --> I[Dependency-ready work]
+  E --> J[Human or agent session]
+  I --> J
+  J --> A
+
+  K[CLI] --> B
+  L[MCP] --> B
+  M[Web] --> B
+  C --> K
+  C --> L
+  C --> M

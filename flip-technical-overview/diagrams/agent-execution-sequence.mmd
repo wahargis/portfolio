@@ -1,23 +1,24 @@
-sequenceDiagram
-    autonumber
-    participant E as Product event
-    participant J as Durable job
-    participant R as AI runtime
-    participant M as Model route
-    participant T as Governed tools
-    participant P as Product contexts
-
-    E->>J: enqueue once with causal identity
-    J->>R: actor/community scope + trigger
-    R->>R: assemble context and capability catalog
-    loop Working rounds under deadline
-        R->>M: messages + admitted tools
-        M-->>R: assistant content or tool calls
-        R->>T: validate and dispatch with trusted scope
-        T-->>R: result, citation, artifact, or honest failure
-    end
-    R->>M: terminal composition / bounded repair
-    M-->>R: attributed user-facing draft
-    R->>R: validate output and evidence identities
-    R->>P: persist reply, citations, artifacts, and lifecycle
-    P-->>J: durable completion or explicit failure
+flowchart LR
+  subgraph TOP["TURN ADMISSION AND EXECUTION"]
+    T0["1. Product trigger\nMention, reply, product command,; or artifact continuation"]
+    T1["2. Resolve scope\nActor, AI identity, community,; origin, visibility, feature state"]
+    T0 --> T1
+    T2["3. Build context\nConversation, authorized retrieval,; sources, documents and artifacts"]
+    T1 --> T2
+    T3["4. Admit route and tools\nModel capability, trusted scope,; deadlines and effect policy"]
+    T2 --> T3
+    T4["5. Run model and tools\nWorking rounds, typed calls,; validated results and limits"]
+    T3 --> T4
+    T5["6. Commit terminal result\nValidate reply and references,; store activity and publish object"]
+    T4 --> T5
+  end
+  subgraph BOTTOM["DURABLE OUTCOME AND RECOVERY"]
+    B0["Activity and evidence\nRoute, rounds, tool state, sources,; citations, artifacts and failure class"]
+    B1["Product object\nMessage, forum update, action, file,; chart, poll or generated artifact"]
+    B2["Client convergence\nAPI response, durable sync, realtime; event and optimistic reconciliation"]
+    B3["Continuation\nPending artifact completes later and; starts one deduplicated scoped turn"]
+  end
+  T5 --> B0
+  T5 --> B1
+  T5 --> B2
+  T4 --> B3

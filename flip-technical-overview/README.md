@@ -1,186 +1,165 @@
 # Flip
 
-> A real-time community platform in which people and AI participate in conversation, and useful discussion can become durable, reviewable forum knowledge.
+Flip is a real-time community product with integrated AI participants. The application combines chat, forums, search, identity, membership, moderation-related controls, media, background workflows, and web and native clients. Its AI runtime supports conversation, internal and external research, document and data work, product actions, image and video operations, generated artifacts, and chat-to-forum curation.
 
-## At a glance
+The engineering problem is to run these agent capabilities inside the existing product model. An AI participant cannot receive all stored content, call every available service, or publish an effect because a model requested it. Each turn is tied to a product actor, an AI identity, an origin object, current access rules, a selected context, an admitted capability set, and durable records of the resulting activity.
 
-| | |
+## System scope
+
+| Area | Current system |
 |---|---|
-| **Product** | Community chat, forums, media, and scoped AI participation in one Phoenix application. |
-| **Users** | Community members, moderators, and operators who need both immediate conversation and durable shared knowledge. |
-| **Core problem** | Fast-moving chat is socially useful but difficult to retrieve, govern, or preserve. Adding AI increases the value of context while also increasing the consequences of context leakage, unclear authorship, and untraceable tool use. |
-| **Engineering focus** | Real-time state, transactional background workflows, cross-context authorization, bounded AI context, provenance, and web/native-client compatibility. |
-| **Primary implementation** | Elixir, Phoenix, LiveView and Channels, PostgreSQL/Ecto, Oban, and Electric-based client synchronization. |
-| **Source** | [`wahargis/flip`](https://github.com/wahargis/flip) |
+| **Community product** | Accounts, communities, membership, chat rooms, messages, replies, reactions, polls, forums, search, notifications, media, settings, and administrative and moderation-related controls. |
+| **AI participation** | Explicit AI identities; message and reply triggers; room-specific behavior; bounded context; local and hosted model routes; multi-turn tools; direct replies; structured product actions; activity and source records. |
+| **Research and analysis** | Internal product retrieval, web search and direct source reading, document and PDF analysis, structured data work, charts, evidence assembly, citations, and source-aware terminal replies. |
+| **Multimodal work** | Image and video description, generation and editing, asynchronous provider requests, durable artifacts, progress and failure state, and continuation after completion. |
+| **Conversation curation** | Selection of source messages, topic and destination planning, validated forum creation or update, participant and source-message provenance, linkback, feedback, and recuration. |
+| **Application runtime** | Elixir and Phoenix, PostgreSQL and Ecto, Oban workflows, LiveView and Channels, server-authoritative APIs, and durable synchronization for React-based desktop and mobile clients. |
 
-## The product problem
+## Product surfaces
 
-Most community software separates chat and forums into different products or treats one as a secondary view of the other. That leaves a structural gap:
+<table>
+<tr>
+<td width="50%"><img src="assets/flip.engineering.png" alt="Flip community product interface" /></td>
+<td width="50%"><img src="assets/flip.tech-demo.dev.png" alt="Flip synthetic technical environment" /></td>
+</tr>
+<tr>
+<td><strong>Community product</strong><br />Realtime conversation, forums, media, member interaction, and AI participation are presented in one product interface.</td>
+<td><strong>Synthetic technical environment</strong><br />Non-production identities and data exercise agent, curation, authorization, artifact, failure, and client-state contracts.</td>
+</tr>
+</table>
 
-- Chat is immediate, participatory, and suited to live coordination.
-- Forums are durable, searchable, attributable, and better suited to accumulated knowledge.
-- AI can help participants reason, retrieve, summarize, and create, but a useful AI response depends on context that may be private, temporary, or specific to one room.
+## Execution architecture
 
-Flip treats those concerns as one product architecture. Conversation remains conversation. Durable knowledge is created through an explicit synthesis lifecycle rather than by silently turning every message into an index. AI participates inside the same social and authorization model as the rest of the product instead of operating as an omniscient process outside it.
+<img src="diagrams/platform-execution.svg" alt="Flip product-integrated agent execution architecture" width="1100" />
 
-The resulting system is not “chat with an LLM added.” Its central work is preserving the meaning and boundaries of content as that content moves through live interaction, AI generation, asynchronous processing, review, and publication.
+The diagram follows one AI request through product admission, agent execution, durable effects, and client updates. It also shows the asynchronous continuation path used by media, documents, and other work that cannot finish inside one model turn.
 
-## Representative workflow
+## Direct AI turn
 
-A typical path through the system looks like this:
+A direct reply follows a controlled application path:
 
-1. **Members converse in a room.** Messages, replies, reactions, polls, media, membership, and room visibility are handled as real-time product state.
-2. **A participant explicitly invokes Flip.** An `@flip` mention or reply can trigger an AI response where the feature is enabled. The trigger is visible in the conversation rather than inferred from ambient surveillance.
-3. **Context is assembled within the room boundary.** The reply path revalidates the actor’s access, loads a bounded window of recent messages, follows only same-room reply ancestry, and can apply a room-specific briefing. It does not perform implicit cross-room recall.
-4. **The AI responds as an identifiable participant.** Generation and tool activity are recorded. A reader-safe source ledger can expose the status and tool-use record associated with the posted reply without exposing the full administrative trace.
-5. **Useful discussion can enter synthesis.** Selected chat content is claimed by an asynchronous workflow, processed into a structured artifact, and advanced through explicit run states.
-6. **A durable forum artifact is created.** The resulting thread remains linked to its source context. A synthesis-origin thread cannot become more public than the channel from which it was produced.
-7. **The community continues from durable state.** The thread can support later reading and discussion without requiring a future participant to reconstruct the original live room from an unbounded transcript.
+1. **A product event starts the turn.** A member mentions or replies to an AI identity, uses an AI-enabled product surface, or receives a continuation from completed asynchronous work.
+2. **The server resolves the operating scope.** The runtime identifies the invoking actor, AI identity, community, room or forum object, feature configuration, and current visibility. The model does not supply these values as trusted arguments.
+3. **Context is assembled for this turn.** The runtime selects recent conversation, same-room reply ancestry, room briefing, linked artifacts, relevant product records, prior tool results, and other allowed context. Stored data that is outside the actor's scope is not eligible.
+4. **A route and capability catalog are selected.** The route must satisfy the turn's modality, context, tool, latency, privacy, and provider requirements. The tool catalog is computed from the product surface, actor scope, feature configuration, and available services.
+5. **The model and tool loop executes.** The model can compose directly, retrieve more context, read sources, analyze documents or data, request generated media, or call typed product capabilities. Tool results are validated and added to the turn state.
+6. **Effects pass through application services.** Product mutations, citations, polls, files, generated artifacts, and other effects receive server-owned identities and lifecycle state. Provider output is not itself a committed product action.
+7. **The terminal response is validated and stored.** The runtime separates working rounds from the user-visible reply, rejects incomplete protocol or invalid references, persists the reply and associated activity, and publishes the resulting product event.
+8. **Clients converge on committed state.** Web and native clients receive durable records through their synchronization path and transient updates through realtime channels.
 
-This workflow is the product’s core value: it connects conversational participation, AI assistance, and community memory without collapsing them into one undifferentiated feed.
+This path allows model behavior to vary without moving identity, authorization, effect ownership, or persistence into the provider conversation.
 
-## Architecture
+## Admission, identity, and authorization
 
-```text
-Members and AI participants
-          |
-          v
-Phoenix LiveView / Channels / API
-          |
-          v
-Chat domain --------------------> Actor-aware authorization
-  |                                      |
-  | selected content                     | audience and origin checks
-  v                                      v
-Synthesis workflow ---- Oban ----> Forum domain
-  |                                      |
-  | AI generation and tools              | durable thread/reply state
-  v                                      v
-LLM activity + source ledger       Search / sync / client surfaces
-```
+Flip has human accounts, product roles, room and forum visibility, and explicit AI identities. The AI identity determines attribution and configured behavior. The invoking actor determines which product state is eligible for the turn and which actions can be requested.
 
-### 1. Real-time community state
+Authorization is applied before protected retrieval and again when a read or effect occurs. This matters because a model may attempt to broaden a search, follow a link into a different community, or construct a product action whose target is outside the original scope. Trusted actor, community, and origin identifiers are carried by the runtime rather than accepted from model-generated tool arguments.
 
-The chat domain owns rooms, messages, replies, memberships, reactions, polls, and the other state required for live participation. Phoenix Channels and LiveView provide immediate interaction, while the database remains the durable source of truth.
+Cross-domain provenance also affects access. A forum item derived from restricted chat cannot become readable only because its destination forum has broader default visibility. The source relationship remains part of the authorization decision.
 
-This matters because the AI path is not a separate demo endpoint. It receives and produces the same kinds of room-scoped content that human participants do, and it must obey the same visibility and lifecycle rules.
+## Context and retrieval
 
-### 2. Synthesis as a durable workflow
+The runtime uses several context sources with different operating rules:
 
-Synthesis is modeled as a stateful background process rather than a single prompt call. Work is claimed, executed, retried, completed, and persisted through explicit run state. Transaction boundaries prevent the database artifact and the queued work from drifting apart.
+- **Conversation context** includes a bounded recent window, same-room reply ancestry, direct references, and configured room information.
+- **Internal retrieval** searches product-native content under current actor and community scope and returns stable product references.
+- **External research** separates discovery from direct source reading. Search results identify candidate sources; page or document tools retrieve the evidence used by the final answer.
+- **Document and PDF work** creates a durable relationship between the uploaded or referenced document, extracted or selected passages, the AI activity, and the resulting answer or artifact.
+- **Structured data work** uses typed requests and results for data access, analysis, tables, and charts instead of asking the model to invent a data product in prose.
+- **Artifact context** lets a later turn inspect the state and result of an image, video, file, poll, chart, or other product object without replaying the original provider exchange.
 
-That design addresses several practical failures:
+Context is selected before model execution and remains subject to a working budget. The configured model's advertised context size does not remove the need to rank, compact, and reserve space for tool schemas and the final response.
 
-- A request can be retried without silently creating duplicate durable content.
-- An operator can distinguish pending, active, completed, and failed work.
-- A worker crash does not erase the fact that work was claimed.
-- Publication can preserve source references and the audience inherited from the originating room.
+## Route and provider control
 
-### 3. AI participation with bounded context
+Different Flip workloads require different model behavior. Low-latency conversation, evidence-heavy research, structured curation, document interpretation, image understanding, and media generation do not share one useful route profile.
 
-Flip’s AI response path is intentionally scoped. The system can use recent room messages and same-room reply ancestry to answer in conversational continuity, but it does not equate “the platform stores this” with “the model may read this.”
+The product-owned request envelope includes selected context, AI identity and instructions, admitted tools, output requirements, deadlines, and terminal behavior. Provider adapters translate that request to local or hosted model services and normalize streams, tool calls, completion state, usage, and failures. A route change therefore does not grant new product access or change how replies and effects are stored.
 
-The context boundary is enforced before retrieval. Room access is rechecked for the triggering actor, platform machinery is excluded from the conversational window, and durable community memory is handled through the forum/synthesis model rather than hidden global recall.
+Fallback remains constrained by the original request. A replacement route must preserve privacy requirements, modality, tool support, working context, and the ability to complete the existing evidence and artifact state. The system should fail the AI capability visibly rather than route protected content through an incompatible provider.
 
-### 4. Cross-context authorization
+## Tools and effects
 
-Chat and forum content have different domain models, but a forum artifact synthesized from chat still carries obligations from its origin. The authorization layer sits above those contexts and resolves the effective audience.
+Flip's tool system is part of the application layer. It includes read-only retrieval, analysis, product-native commands, and asynchronous provider-backed work. The runtime distinguishes these categories because their authorization, timeout, retry, and persistence requirements differ.
 
-The most restrictive boundary wins. In particular, a thread derived from a private or restricted channel cannot become readable merely because the forum containing it has a broader default audience. That rule converts provenance into an enforceable security property rather than a descriptive field.
+A read tool can return scoped product records or external evidence. An analysis tool can create structured results from selected data. An effectful tool can request a product mutation, but the mutation still passes through domain validation and receives a durable product identity. A long-running tool can create a pending artifact or job and return control before the provider finishes.
 
-### 5. Product and client capability negotiation
+The tool loop records enough state to answer operational questions after the model context has ended:
 
-Flip supports web and native-client surfaces whose available features depend on deployment configuration and protocol compatibility. Capability metadata lets clients conditionally expose authentication, push, deep-link, upload, reaction, emoji, and synchronization behavior instead of assuming every deployment has the same credentials or service configuration.
+- which capability was admitted and called;
+- which trusted scope was applied;
+- whether the call was read-only or effectful;
+- which durable result or artifact was created;
+- whether the operation completed, failed, timed out, or remained pending;
+- which citations or artifacts were used by the final reply;
+- whether a later continuation was scheduled.
 
-This is an example of a broader design principle in the project: optional capability should be represented explicitly, not discovered by letting a user encounter a broken action.
+Reader-facing source information is separated from the more detailed administrative activity record. Users can inspect relevant evidence and failure state without receiving provider credentials, hidden arguments, or internal diagnostics.
 
-## Key design decisions
+## Asynchronous continuation and multimodal work
 
-### AI is a participant, not an invisible observer
+Image, video, document, and other provider-backed operations can outlive the model turn that requested them. Flip represents these operations as durable jobs and artifacts with explicit states such as pending, active, completed, failed, or cancelled.
 
-A visible mention or reply supplies a clear interaction boundary. It tells the user why the AI is speaking and limits the tendency to treat all community activity as ambient model input.
+A completed operation can produce one deduplicated continuation event. That continuation resolves the original product context, loads the completed artifact, and starts a new bounded turn. It does not depend on the original process or provider stream remaining alive. Failures remain attached to the artifact and can be shown to the user without fabricating a completed result.
 
-The design still supports richer product behavior—tool calls, room briefings, game-specific interaction, reactions, and synthesis—but those behaviors remain attached to explicit product state and policy.
+This design is also used for staged media workflows in which one result becomes input to a later step. Each stage has an identity, provider or model route, inputs, status, and stored result. The application can resume from the last completed stage and avoid repeating an effect that already committed.
 
-### Live context and durable memory are different resources
+## Chat-to-forum curation
 
-Recent chat context is bounded and ephemeral. Durable knowledge is represented through forum and synthesis artifacts with source lineage. This avoids building a product whose “memory” is merely an ever-growing prompt assembled from whatever text happens to be available.
+Flip maintains separate semantics for direct AI authorship and curation of human conversation.
 
-### Authorization is resolved at ingress and across domain boundaries
+A direct AI reply is new content attributed to the AI identity. Curation selects and reorganizes existing participant messages into durable forum structure. The curation workflow can use a model to propose topics, destinations, ordering, or limited bridge text, but the application preserves the original authors and message references and validates the resulting plan before publication.
 
-Read and act permission is centralized so REST, LiveView, Channels, search, polls, forum views, reactions, and AI tools do not each invent their own interpretation of access. Cross-context reads resolve the parent server, subforum policy, membership, role, and source-channel restriction.
+The workflow includes source selection, a durable run, destination resolution, forum creation or update, source-message and participant relationships, linkback to the conversation, feedback, and bounded recuration. Partial failure is represented explicitly. For example, a forum update can remain committed even when a later linkback step fails, allowing the failed stage to be repaired without duplicating the forum content.
 
-### Background work has explicit ownership and terminal state
+## Realtime and client state
 
-Synthesis work is claimed and completed transactionally, with stale-work recovery and retry behavior represented in code. This is more reliable than treating a queued job as proof that a durable artifact exists or treating a model response as proof that publication succeeded.
+Flip has server-rendered web surfaces and a React and TypeScript client used for desktop and mobile packaging. The clients share product state but use different delivery mechanisms for different classes of data:
 
-### AI output carries inspectable execution evidence
-
-Administrative traces and reader-facing source ledgers serve different audiences. The full trace supports diagnosis; the public projection gives a user useful information about generation and tool outcomes without leaking internal arguments, provider metadata, or sensitive errors.
-
-## Reliability and failure handling
-
-The implementation treats common AI-product failure modes as expected operating conditions:
-
-- **Duplicate submission:** creation and enqueue operations are coordinated transactionally, and work has explicit identities and statuses.
-- **Worker interruption:** claimed runs can be identified and recovered rather than disappearing inside a transient process.
-- **Authorization drift:** access is resolved when content is read or acted upon, not assumed from an old link or previously loaded page.
-- **Context leakage:** reply context is same-room and actor-authorized, with bounded ancestry and a bounded recent-message window.
-- **Tool or provider failure:** activity and tool-call outcomes are recorded and can be projected as warnings instead of being presented as an unqualified successful answer.
-- **Partially configured deployments:** capability checks allow clients and endpoints to fail deliberately rather than expose unusable controls.
-
-## Implementation evidence
-
-| Source | What it demonstrates |
+| State | Authority and delivery |
 |---|---|
-| [`lib/flip/chat.ex`](https://github.com/wahargis/flip/blob/main/lib/flip/chat.ex) | The central real-time community domain and the state AI participation must integrate with. |
-| [`lib/flip/synthesis.ex`](https://github.com/wahargis/flip/blob/main/lib/flip/synthesis.ex) | Transactional synthesis creation, background-job coupling, run claiming, completion, retry, and recovery. |
-| [`lib/flip/authz.ex`](https://github.com/wahargis/flip/blob/main/lib/flip/authz.ex) | Actor-aware authorization across chat, forum, search, polls, reactions, and AI-related reads; source-channel restrictions for synthesized content. |
-| [`lib/flip/synthesis/ai_reply_detector.ex`](https://github.com/wahargis/flip/blob/main/lib/flip/synthesis/ai_reply_detector.ex) | Explicit AI triggers, authorized room-scoped context, bounded reply ancestry, recent-message grounding, and room briefings. |
-| [`lib/flip/llm/source_ledger.ex`](https://github.com/wahargis/flip/blob/main/lib/flip/llm/source_ledger.ex) | Reader-safe projection of AI activity and tool-call evidence, separate from the detailed administrative trace. |
-| [`lib/flip/capabilities.ex`](https://github.com/wahargis/flip/blob/main/lib/flip/capabilities.ex) | Deployment capability and client-compatibility metadata for optional authentication, push, deep-link, upload, reaction, and sync features. |
+| **Durable product state** | PostgreSQL is canonical. Server commands authorize and commit changes; clients receive authorized durable projections. |
+| **Durable asynchronous state** | PostgreSQL and Oban own jobs, runs, artifacts, retries, and terminal outcomes. Clients render lifecycle state. |
+| **Ephemeral realtime state** | Phoenix Channels and PubSub carry typing, presence, and transient progress that does not require replay. |
+| **Local interaction state** | Clients own drafts, open views, and optimistic placeholders until the server accepts or rejects a command. |
 
-## Detailed technical overview
+Optimistic clients reconcile against canonical object and transaction identities. A sync event can arrive before or after the command response without creating a duplicate. Permission changes require cached data and controls to be removed or rebuilt from the currently authorized projection.
 
-The case-study page is the orientation layer. The existing technical series provides the in-depth path without forcing a first-time reader to infer an order from filenames.
+## Failure and recovery
 
-| Page | Focus |
+| Failure | System behavior |
 |---|---|
-| **[00 — Executive overview](docs/00-executive-overview.md)** | The product, its three defining design problems, and the shortest technical review path. |
-| **[01 — Product and problem](docs/01-product-and-problem.md)** | User journeys, product invariants, and why AI participates inside the social system rather than above it. |
-| **[02 — System architecture](docs/02-system-architecture.md)** | Modular-monolith boundaries, PostgreSQL authority, asynchronous work, client projection, scaling seams, and failure containment. |
-| **[03 — AI participant runtime](docs/03-agent-runtime.md)** | Admission, bounded context, capability selection, tool execution, terminal composition, persistence, continuation, and failure semantics. |
-| **[04 — Retrieval, evidence, and capability plane](docs/04-retrieval-search-and-tools.md)** | Internal/external retrieval, typed tools, trusted scope, durable citations, effects, retries, and security consequences. |
-| **[05 — Curation, authorship, and provenance](docs/05-synthesis-and-provenance.md)** | The distinction between restructuring human conversation and creating new AI-authored content. |
-| **[06 — Data, realtime, and client convergence](docs/06-data-realtime-and-clients.md)** | Durable, asynchronous, ephemeral, and local state across Phoenix web and React/native clients. |
-| **[07 — Model routing as execution policy](docs/07-model-routing-and-inference.md)** | Product-owned inference contracts, surface-specific routing, adapters, fallback, local/hosted capacity, and evaluation. |
-| **[08 — Product and synthetic environment boundary](docs/08-production-and-demo-topology.md)** | Public technical review without production data, credentials, or administrative authority. |
-| **[09 — Quality and evaluation strategy](docs/09-evaluation-testing-and-operations.md)** | Deterministic invariants, model-route evaluation, end-to-end convergence, operations, and evidence discipline. |
-| **[10 — Architecture decisions](docs/10-architecture-decisions.md)** | Major decisions, rationale, tradeoffs, rejected alternatives, and conditions for revisiting them. |
-| **[11 — Status, pressure points, and limitations](docs/11-roadmap-and-known-limitations.md)** | Implemented scope, current architectural pressure, known limitations, and outcome-oriented next work. |
+| Duplicate product trigger | Stable request identities and job uniqueness prevent duplicate visible effects. |
+| Worker or application process interruption | Durable run, job, activity, and artifact state identifies incomplete work and supports retry or repair. |
+| Provider or route failure | The turn can use a policy-compatible route, preserve completed tool evidence, or fail visibly without corrupting ordinary chat or forum state. |
+| Tool timeout or invalid result | The tool outcome is recorded separately from the final reply; effectful work is not assumed complete. |
+| Invalid citation or artifact reference | Terminal validation rejects or removes references that do not correspond to stored results. |
+| Authorization change | Access is rechecked when content is retrieved or acted upon; an old link or client cache does not preserve authority. |
+| Asynchronous completion after restart | Durable artifact and continuation state allows the product workflow to resume without the original process. |
+| Client disconnect or reordered delivery | Clients reconnect from durable state and deduplicate by canonical identity. |
+| Partial curation failure | Completed stages remain recorded; repair targets the failed stage instead of recreating successful work. |
 
-## What the project demonstrates
+## Technical documentation
 
-For a software or IT reviewer, Flip shows the design of a large stateful Phoenix application whose AI behavior is integrated with authorization, persistence, asynchronous work, and client contracts.
+| Page | Content |
+|---|---|
+| **[Executive overview](docs/00-executive-overview.md)** | System scope, major execution paths, and the relationship between the product and agent runtime. |
+| **[Product and agent use cases](docs/01-product-and-problem.md)** | Product roles, AI workloads, user-visible state, and system requirements. |
+| **[System architecture](docs/02-system-architecture.md)** | Phoenix application boundaries, PostgreSQL authority, asynchronous work, clients, providers, and failure containment. |
+| **[Agent runtime](docs/03-agent-runtime.md)** | Admission, context, tools, working rounds, terminal response, persistence, continuation, and recovery. |
+| **[Retrieval, evidence, and tools](docs/04-retrieval-search-and-tools.md)** | Internal and external retrieval, trusted scope, citations, typed tools, effects, and security controls. |
+| **[Curation and provenance](docs/05-synthesis-and-provenance.md)** | Direct AI authorship, conversation curation, source relationships, correction, and publication. |
+| **[Data, realtime, and clients](docs/06-data-realtime-and-clients.md)** | Durable, asynchronous, ephemeral, and local state across web and native clients. |
+| **[Model routing and inference](docs/07-model-routing-and-inference.md)** | Route requirements, provider adapters, local and hosted inference, fallback, and evaluation. |
+| **[Synthetic technical environment](docs/08-production-and-demo-topology.md)** | Public technical scenarios that exercise product contracts without product data or authority. |
+| **[Testing, evaluation, and operations](docs/09-evaluation-testing-and-operations.md)** | Deterministic invariants, model-route evaluation, end-to-end convergence, security tests, and telemetry. |
+| **[Architecture decisions](docs/10-architecture-decisions.md)** | Major system choices, costs, rejected alternatives, and conditions for revision. |
+| **[Status and limitations](docs/11-roadmap-and-known-limitations.md)** | Implemented scope, current engineering pressure, known limitations, and next work. |
 
-For an AI technical reviewer, the important point is not the presence of a model call. It is the surrounding control system: why generation is triggered, which context is eligible, how tool activity is recorded, how generated content becomes durable, and how source access continues to constrain the result.
+## Source availability and scope
 
-For a product reviewer, Flip demonstrates a coherent answer to a recognizable user problem: communities generate valuable knowledge in conversation, but they need a deliberate path for preserving it without sacrificing the social immediacy of chat.
+Flip's implementation repository is private. This portfolio contains the public system description, architecture diagrams, decision records, and synthetic scenarios. It does not link to private source paths or expose product data, credentials, host configuration, provider keys, prompt and persona state, or administrative authority.
 
-## Scope and boundaries
+The documentation distinguishes current system behavior from further engineering work. It does not claim usage scale, route quality, or production guarantees without corresponding measurements.
 
-- Flip does not describe AI as a replacement for community governance or moderation.
-- A synthesis run is a curation and publication workflow, not a claim that every conversation should be automatically summarized.
-- The AI reply context is deliberately narrower than all data available to the application.
-- The portfolio does not claim performance or community-scale metrics that are not established by repository evidence.
-- This page focuses on the load-bearing product architecture. The implementation repository contains substantially more community, media, account, billing, game, notification, search, and client-support behavior than can be usefully inventoried here.
-
-## Review paths
-
-**Five minutes:** read **The product problem**, **Representative workflow**, and **Key design decisions**.
-
-**Twenty minutes:** continue through **Architecture**, **Reliability and failure handling**, and the first five source links.
-
-**Deep review:** inspect the linked implementation modules alongside the repository’s tests and domain-specific specifications.
-
-[← Back to portfolio](../README.md) · [View source repository](https://github.com/wahargis/flip)
+[Back to the portfolio](../README.md)

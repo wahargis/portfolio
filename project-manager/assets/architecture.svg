@@ -1,52 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
-  <title id="title">Project Manager architecture</title>
-  <desc id="desc">CLI, MCP, and web surfaces share a Rust application core. A typed evidence graph, separate contradiction and confidence review, and a deterministic execution DAG persist in SQLite.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1020" viewBox="0 0 1500 1020" role="img" aria-labelledby="title desc">
+  <title id="title">Project Manager project state, review, retrieval, and execution architecture</title>
+  <desc id="desc">Sessions and technical work produce validated typed updates. SQLite stores project objects, graph relationships, phase state, reviews, and sessions. Retrieval, truth maintenance, and deterministic scheduling prepare the next human or agent session.</desc>
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#30343b"/></marker>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#475569"/></marker>
     <style>
-      .bg{fill:#fbfbfc}.box{fill:#fff;stroke:#30343b;stroke-width:2;rx:14}.group{fill:#f3f4f6;stroke:#646b75;stroke-width:1.5;rx:18}.note{fill:#fff;stroke:#646b75;stroke-width:1.5;stroke-dasharray:7 6;rx:12}
-      .title{font:700 27px Arial,sans-serif;fill:#17191d}.label{font:700 13px Arial,sans-serif;fill:#30343b;letter-spacing:1px}.head{font:700 18px Arial,sans-serif;fill:#20242a}.body{font:14px Arial,sans-serif;fill:#454b55}.small{font:13px Arial,sans-serif;fill:#555d68}.arrow{stroke:#30343b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .h1{font:700 32px Inter,Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Inter,Arial,sans-serif;fill:#475569}
+      .band{font:700 15px Inter,Arial,sans-serif;fill:#6d28d9;letter-spacing:.8px}.nt{font:700 17px Inter,Arial,sans-serif;fill:#0f172a}.nc{font:400 14px Inter,Arial,sans-serif;fill:#334155}.small{font:400 13px Inter,Arial,sans-serif;fill:#475569}
+      .arrow{stroke:#475569;stroke-width:2.2;fill:none;marker-end:url(#arrow)}.line{stroke:#64748b;stroke-width:2;fill:none}
     </style>
   </defs>
-  <rect class="bg" width="1200" height="760"/>
-  <text x="55" y="52" class="title">Project Manager: durable reasoning and deterministic execution control</text>
+  <rect width="1500" height="1020" fill="#f8fafc"/>
+  <text x="70" y="62" class="h1">Project Manager: project reasoning and execution state</text>
+  <text x="70" y="92" class="sub">Typed project history, review, retrieval, phase scheduling, and session continuity share one persisted model.</text>
 
-  <rect class="group" x="55" y="85" width="1090" height="118"/>
-  <text x="80" y="113" class="label">INTERFACES</text>
-  <rect class="box" x="90" y="132" width="285" height="48"/><text x="210" y="163" class="head">CLI</text>
-  <rect class="box" x="458" y="132" width="285" height="48"/><text x="566" y="163" class="head">MCP</text>
-  <rect class="box" x="825" y="132" width="285" height="48"/><text x="925" y="163" class="head">Web</text>
+  <rect x="55" y="125" width="1390" height="185" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="158" class="band">PROJECT INPUT AND VALIDATION</text>
+  <g transform="translate(90 190)"><rect width="300" height="88" rx="12" fill="#ede9fe" stroke="#c4b5fd"/><text x="18" y="31" class="nt">Technical work</text><text x="18" y="57" class="nc">Experiment, finding, hypothesis, decision,</text><text x="18" y="77" class="nc">constraint, phase, review, handoff, or artifact</text></g>
+  <path class="arrow" d="M390 234 H460"/>
+  <g transform="translate(465 190)"><rect width="300" height="88" rx="12" fill="#f5f3ff" stroke="#c4b5fd"/><text x="18" y="31" class="nt">Validated typed update</text><text x="18" y="57" class="nc">Project scope, object and edge types,</text><text x="18" y="77" class="nc">references, lifecycle, branch, and session</text></g>
+  <path class="arrow" d="M765 234 H835"/>
+  <g transform="translate(840 177)"><rect width="280" height="112" rx="14" fill="#ddd6fe" stroke="#a78bfa" stroke-width="1.5"/><text x="20" y="34" class="nt">Shared Rust application</text><text x="20" y="62" class="nc">Validation and project operations</text><text x="20" y="84" class="nc">used by CLI, MCP, and web</text></g>
+  <path class="arrow" d="M1120 234 H1190"/>
+  <g transform="translate(1195 177)"><rect width="190" height="112" rx="14" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/><text x="18" y="34" class="nt">SQLite store</text><text x="18" y="62" class="nc">Canonical project,</text><text x="18" y="84" class="nc">session, graph, review,</text><text x="18" y="104" class="nc">and phase state</text></g>
 
-  <path class="arrow" d="M600 203 L600 245"/>
-  <rect class="group" x="55" y="245" width="1090" height="320"/>
-  <text x="80" y="275" class="label">SHARED RUST APPLICATION CORE</text>
+  <rect x="55" y="340" width="1390" height="355" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="373" class="band">PROJECT STATE AND COMPUTATION</text>
 
-  <rect class="box" x="85" y="305" width="310" height="155"/>
-  <text x="110" y="338" class="head">Typed evidence graph</text>
-  <text x="110" y="367" class="body">findings · experiments · decisions</text>
-  <text x="110" y="391" class="body">hypotheses · constraints · feedback</text>
-  <text x="110" y="423" class="small">support · contradiction · supersession</text>
-  <text x="110" y="446" class="small">derivation · testing · provenance</text>
+  <g transform="translate(85 420)"><rect width="360" height="200" rx="14" fill="#f5f3ff" stroke="#a78bfa" stroke-width="1.5"/><text x="20" y="34" class="nt">Evidence and project graph</text><text x="20" y="64" class="nc">Support, contradiction, supersession,</text><text x="20" y="86" class="nc">derivation, production, testing, dependency,</text><text x="20" y="108" class="nc">causal, branch, merge, and provenance edges</text><text x="20" y="142" class="nc">Retains historical and competing lines of work</text><text x="20" y="164" class="nc">without replacing them with the latest prose</text></g>
 
-  <rect class="box" x="445" y="305" width="310" height="155"/>
-  <text x="470" y="338" class="head">Review analysis</text>
-  <text x="470" y="367" class="body">contradiction candidates</text>
-  <text x="470" y="391" class="body">numeric confidence scoring</text>
-  <text x="470" y="423" class="small">review evidence for people and agents</text>
-  <text x="470" y="446" class="small">not an automatic scheduler gate</text>
+  <g transform="translate(500 400)"><rect width="300" height="110" rx="14" fill="#eef2ff" stroke="#a5b4fc"/><text x="20" y="34" class="nt">Retrieval and orientation</text><text x="20" y="62" class="nc">Lexical and graph-aware context,</text><text x="20" y="84" class="nc">branch, phase, experiment, session,</text><text x="20" y="104" class="nc">and current-state selection</text></g>
+  <g transform="translate(500 535)"><rect width="300" height="110" rx="14" fill="#eef2ff" stroke="#a5b4fc"/><text x="20" y="34" class="nt">Review and truth maintenance</text><text x="20" y="62" class="nc">Explicit conflicts and supersession,</text><text x="20" y="84" class="nc">confidence, advisory candidates,</text><text x="20" y="104" class="nc">stale and orphaned state</text></g>
 
-  <rect class="box" x="805" y="305" width="310" height="155"/>
-  <text x="830" y="338" class="head">Execution DAG</text>
-  <text x="830" y="367" class="body">phase dependencies · completion</text>
-  <text x="830" y="391" class="body">topological order · cycle checks</text>
-  <text x="830" y="423" class="small">ready phases filtered by dependencies</text>
-  <text x="830" y="446" class="small">and ordered by impact</text>
+  <g transform="translate(860 420)"><rect width="360" height="200" rx="14" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/><text x="20" y="34" class="nt">Phase execution DAG</text><text x="20" y="64" class="nc">Persisted phases and prerequisites</text><text x="20" y="86" class="nc">Topological ordering and cycle detection</text><text x="20" y="108" class="nc">Dependency satisfaction and ready phases</text><text x="20" y="130" class="nc">Impact ordering and stagnation checks</text><text x="20" y="164" class="nc">Review can inform an explicit update;</text><text x="20" y="186" class="nc">it does not silently rewrite the DAG</text></g>
 
-  <rect class="note" x="270" y="490" width="660" height="48"/>
-  <text x="326" y="520" class="body">Analysis informs review and planning; the current DAG remains deterministic and separately controlled.</text>
+  <g transform="translate(1270 440)"><rect width="130" height="160" rx="14" fill="#f8fafc" stroke="#cbd5e1"/><text x="18" y="33" class="nt">Interfaces</text><text x="18" y="66" class="nc">CLI</text><text x="18" y="92" class="nc">MCP</text><text x="18" y="118" class="nc">Web</text><text x="18" y="146" class="small">same model</text></g>
 
-  <path class="arrow" d="M600 565 L600 615"/>
-  <rect class="box" x="245" y="615" width="710" height="86"/>
-  <text x="510" y="649" class="head">SQLite persistence</text>
-  <text x="330" y="678" class="body">typed nodes and edges · phase state · migrations · retrieval and session records</text>
+  <path class="arrow" d="M445 485 H500"/>
+  <path class="arrow" d="M445 555 H500"/>
+  <path class="arrow" d="M800 455 H860"/>
+  <path class="arrow" d="M800 590 H860"/>
+  <path class="arrow" d="M1220 520 H1270"/>
+  <path class="line" d="M1288 400 V310"/>
+  <path class="line" d="M980 310 V420"/>
+  <path class="line" d="M265 310 V420"/>
+
+  <rect x="55" y="725" width="1390" height="235" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="80" y="758" class="band">SESSION CONTINUITY</text>
+  <g transform="translate(90 800)"><rect width="300" height="110" rx="12" fill="#fff7ed" stroke="#fdba74"/><text x="18" y="32" class="nt">Session start</text><text x="18" y="58" class="nc">Current objectives, recent deltas,</text><text x="18" y="80" class="nc">active experiment, open review,</text><text x="18" y="102" class="nc">ready phases, and branch context</text></g>
+  <path class="arrow" d="M390 855 H470"/>
+  <g transform="translate(475 785)"><rect width="480" height="140" rx="14" fill="#fffbeb" stroke="#fcd34d"/><text x="20" y="34" class="nt">Human or agent work</text><text x="20" y="64" class="nc">Inspect, retrieve, analyze, test, decide, and update the project</text><text x="20" y="88" class="nc">through typed operations rather than a private transcript</text><text x="20" y="116" class="nc">New evidence and decisions return through validation and persistence</text></g>
+  <path class="arrow" d="M955 855 H1035"/>
+  <g transform="translate(1040 800)"><rect width="350" height="110" rx="12" fill="#fff7ed" stroke="#fdba74"/><text x="18" y="32" class="nt">Session end and handoff</text><text x="18" y="58" class="nc">Changed objects and relationships,</text><text x="18" y="80" class="nc">affected decisions and phases,</text><text x="18" y="102" class="nc">open work and next-session state</text></g>
+  <path class="arrow" d="M1215 800 V665 H650 V645"/>
+  <text x="850" y="686" class="small">handoff and project updates become input to later retrieval, review, and scheduling</text>
 </svg>

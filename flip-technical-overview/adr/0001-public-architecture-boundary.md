@@ -1,40 +1,46 @@
-# ADR 0001 — Curated portfolio boundary
+# ADR 0001: Private implementation and public architecture portfolio
 
 - **Status:** Accepted
-- **Decision scope:** Portfolio publication
+- **Scope:** Public technical material for Flip
 
 ## Context
 
-Flip has a public source repository, but a technical portfolio still needs a curated explanation of the product rather than a second, partial copy of the source tree. The source also contains implementation chronology, deployment-specific configuration, tests, provider integrations, and operational detail that do not all belong in the reviewer path.
+Flip is implemented in a private repository and operates with product data, credentials, provider integrations, deployment configuration, prompt and persona state, and administrative controls that are not part of a public portfolio.
 
-A shallow marketing page is insufficient; duplicating the repository is unnecessary and creates drift.
+Technical review still requires enough information to understand the product architecture, agent runtime, data and authorization boundaries, failure handling, client behavior, and engineering decisions. Linking to an unavailable private source repository is misleading and does not provide useful public evidence.
 
 ## Decision
 
-The portfolio publishes:
+Keep the implementation repository private. Publish a separate technical portfolio containing:
 
-- product aims and actor model;
-- domain, data, process, client, and deployment boundaries;
-- sanitized lifecycles and failure semantics;
-- architecture diagrams and stable decisions;
-- implemented/evolving/experimental status;
-- representative synthetic scenarios;
-- honest limitations;
-- a link to the canonical public source repository.
+- project and system descriptions;
+- execution and state diagrams;
+- architecture decision records;
+- status and limitation documentation;
+- synthetic technical scenarios;
+- local links between the public portfolio pages.
 
-The portfolio does not publish or duplicate:
-
-- production data or copied private messages;
-- credentials, host paths, tokens, or security-sensitive thresholds;
-- deployment-specific secrets and private operational state;
-- prompt/persona content that is not required to understand architecture;
-- internal campaign logs or issue chronology as the main narrative;
-- claims requiring evidence that is not included.
+Do not link the public portfolio to private implementation repository paths. Do not include product data, user content, credentials, provider keys, private deployment state, host identifiers, prompt and persona state, or administrative endpoints.
 
 ## Consequences
 
-Reviewers can move from a stable architecture narrative to the canonical source when they need implementation detail. The portfolio remains readable and avoids drifting into a stale mirror.
+The public material must explain the system without assuming source access. Diagrams and prose need enough technical detail to show real execution, state ownership, and failure handling rather than only naming components.
 
-## Revisit when
+The portfolio can describe implementation classes and technologies at the system level, but code-level claims that require private inspection should be presented as architecture and current behavior, not as publicly verifiable source links.
 
-The public source structure or portfolio audience changes enough that a different review path is more useful.
+Changes to the private system that affect public contracts require corresponding updates to the portfolio, diagrams, decisions, and synthetic scenarios.
+
+## Verification
+
+A documentation audit should check for:
+
+- links to private Flip source paths;
+- copied product identifiers, data, or screenshots containing sensitive content;
+- credentials, tokens, provider keys, and internal hostnames;
+- environment-specific deployment details that grant or reveal authority;
+- claims that the private implementation is publicly available;
+- diagrams that imply access or integrations not represented by the public material.
+
+## Revision conditions
+
+Reconsider this decision only if the source-availability policy changes. Any source publication requires a separate review of data, secrets, licensing, operational authority, generated assets, and deployment-specific configuration.

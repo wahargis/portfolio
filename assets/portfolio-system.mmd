@@ -1,0 +1,28 @@
+flowchart TB
+  subgraph FLIP[Flip — product-integrated agent execution]
+    F1[Product event and actor] --> F2[Identity, access, and context]
+    F2 --> F3[Retrieval, route, and tools]
+    F3 --> F4[Reply, action, or artifact]
+    F4 --> F5[Durable product state and client updates]
+  end
+
+  subgraph PM[Project Manager — project reasoning and execution state]
+    P1[Session, experiment, or decision] --> P2[Typed objects and causal relationships]
+    P2 --> P3[Retrieval, review, and truth maintenance]
+    P3 --> P4[Dependency-satisfied phase selection]
+    P4 --> P5[Handoff and next session]
+  end
+
+  subgraph BATON[Baton — persistent coding-agent fleet control]
+    B1[Approved goal and plan] --> B2[Run, wave, and workflow scheduling]
+    B2 --> B3[Route and persistent harness sessions]
+    B3 --> B4[Interactions, shared context, and worktrees]
+    B4 --> B5[Results, evidence, adoption, and integration]
+  end
+
+  subgraph HC[HomeCloud — supervised local AI execution]
+    H1[Application, agent, research, or media request] --> H2[Priority, route, and instance admission]
+    H2 --> H3[GPU claims and model-service capacity]
+    H3 --> H4[Context, tools, model loop, and sandbox]
+    H4 --> H5[Checkpoint, persisted result, and capacity release]
+  end
