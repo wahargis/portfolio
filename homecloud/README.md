@@ -1,10 +1,12 @@
 # HomeCloud
 
-**A local-first AI operations platform that turns finite heterogeneous compute into supervised inference, recoverable agent execution, research, and application services.**
+**A local-first GPU inference architecture and custom agent harness for autonomous research and technical work on finite self-hosted hardware.**
 
-HomeCloud treats local AI as an operating-system problem rather than a model-server installation problem. Applications need more than an endpoint: they need model and backend policy, healthy capacity, request priority, accelerator ownership, process lifecycle, tool isolation, durable execution state, failure recovery, and a common application surface over local and remote capability.
+HomeCloud combines local model serving, GPU capacity control, supervised agent execution, autoresearch, repository-bound coding work, durable workspaces, documents, connectors, browser and search tools, and media services in one application. The user-facing system is an environment for directing, inspecting, interrupting, resuming, and reusing long-running AI work; the inference and operations layer exists to make that work viable on owned hardware rather than becoming a separate infrastructure console.
 
-The platform is implemented as a supervised Elixir application. Interactive products, connectors, agents, research programs, document workflows, browser automation, OCR, and media generation use the same routing, resource, execution, persistence, and telemetry substrate instead of starting independent model processes and competing for hardware informally.
+The largest body of functionality is autoresearch. Guided research, coding research, and managed project runs can plan work, run experiments, call tools in isolated workspaces, verify outputs, persist findings and artifacts, checkpoint semantic state, and recover after interruption. HomeCloud can operate with Project Manager: Project Manager preserves questions, hypotheses, evidence, decisions, phase dependencies, and handoffs, while HomeCloud supplies model execution, tools, sandboxes, measurement, and GPU control.
+
+The platform is implemented as a supervised Elixir application. Interactive inference, research programs, document workflows, browser automation, OCR, media generation, and external connectors use the same model-routing, resource, execution, persistence, and telemetry substrate. Model-instance pools, quantization-aware GPU claims, request priority, scheduling and eviction, process lifecycle, and checkpoint recovery allow those workloads to share finite hardware without starting unrelated model processes or maintaining incompatible execution state.
 
 ## Logical platform architecture
 
@@ -28,6 +30,44 @@ The active private deployment provides a concrete implementation of that archite
 - **Flip is hosted as an application workload and can consume HomeCloud-served local inference while retaining its own community authorization, context, tools, and content authority.**
 
 The diagram does not assert a physical interconnect topology that is not part of the public evidence. It records the deployed accelerator inventory and system roles without turning one hardware arrangement into the definition of HomeCloud.
+
+## Autoresearch and managed project execution
+
+HomeCloud's research layer supports three related forms of work. Guided research develops a question through source gathering, analysis, experiments, and synthesis. Coding research works directly against a repository with file, shell, Git, test, profiling, and benchmark tools. Managed project execution binds those activities to explicit phases, dependencies, success criteria, evidence, and handoffs so the work can continue across sessions and agent processes.
+
+All three use the same execution engine, context system, model routes, tool authority, isolated workspaces, checkpoint format, and lifecycle events. A long-running program can preserve plan and DAG state, trial history, tracked files, context, loop-detection state, score changes, phase markers, and produced artifacts rather than reducing the work to a transcript.
+
+Evaluation can be tied to the object under study. Software and kernel work can use compilation, tests, numerical comparison, profiler traces, and hardware measurements as deterministic evidence. Document and research work can preserve sources, citations, intermediate findings, and review state. The model proposes and interprets work; the application owns execution, measurement, persistence, and recovery.
+
+Project Manager provides an optional durable reasoning layer for these programs. It records the questions, hypotheses, experiments, findings, decisions, constraints, dependency graph, and session handoffs. HomeCloud executes the corresponding research and coding work, returns measured results and artifacts, and supplies the local inference and GPU capacity required by the program.
+
+## Volta/Llama — V100 inference engineering
+
+Volta/Llama is a concrete historical use of HomeCloud's autoresearch layer in conjunction with Project Manager. The project addresses the widening kernel-support gap for NVIDIA V100 and the SM70 architecture in current `llama.cpp`-family runtimes. Its private implementation, `volta_llama`, is an active fork of `ik_llama.cpp` that retargets modern LLM inference work to Volta rather than treating V100 as a compatibility-only backend.
+
+The project includes several related kernel and runtime families:
+
+| Work area | Implemented work |
+|---|---|
+| **VSIE-F primitives** | PTX-native V100 operations, per-lane emulation of newer load behavior, HMMA `m8n8k4` atom wrappers, online softmax primitives, SM70 shared-memory swizzles, and quantized-value unpacking. |
+| **WS-FA FP16-ACC** | Warp-specialized Flash Attention with single-CTA and Split-K variants, bank-conflict-aware shared-memory layouts, packed softmax writeback, and head-dimension support for 128, 256, and 512. |
+| **Marlin W4A16 SM70** | A Volta-adapted Marlin development path for quantized matrix multiplication, including correctness-tested bridges and later kernel stages. |
+| **PMK-R1** | A skinny Q4_K MMVQ pre-dispatch path for feed-forward down projections and attention output projections. |
+| **TurboQuant** | Hadamard-rotation quantization with a GPU inverse-WHT dequantization path. |
+| **Multi-GPU topology** | Validation and dispatch work across a single GPU, an NVLink pair, two NVLink pairs separated by PCIe, and a four-GPU 2×2 topology. |
+
+Same-build `llama-bench` measurements on one V100 with Gemma4 26B-A4B Q4_K_M show the default-on WS-FA plus Split-K path improving over the default CUDA Flash Attention path:
+
+| Token-generation benchmark | WS-FA + Split-K | Default CUDA FA | Improvement |
+|---:|---:|---:|---:|
+| `tg128` | 103.37 | 100.07 | **+3.3%** |
+| `tg512` | 93.52 | 83.11 | **+12.5%** |
+| `tg2048` | 84.83 | 61.19 | **+38.6%** |
+| `tg4096` | 81.51 | 57.16 | **+42.6%** |
+
+The research protocol is as important as the accepted kernels. A claimed improvement must first be shown to reach the intended dispatch path, then pass same-build end-to-end A/B measurement and numerical or output-quality checks. `nvprof` is used to rule out dead dispatch paths; Kullback-Leibler divergence is preferred to tokenizer-sensitive perplexity for output-quality validation.
+
+Rejected approaches remain part of the project record. One Marlin Stage 8 bridge passed numerical correctness checks but was retained as a research artifact after end-to-end diagnostics showed that the approach was dequantization-bound and slower than the existing MMQ dp4a path on the target V100 shape. Project Manager preserves that experiment, finding, and resulting decision; HomeCloud supplies the coding agents, isolated workspaces, local inference, GPU ownership, profiler access, benchmarks, checkpoints, and durable artifacts used to produce it.
 
 ## Request lifecycle
 
@@ -110,7 +150,7 @@ The pool converts model processes into application capacity that can be inspecte
 
 `HomeCloud.Infrastructure.GpuWorkloadScheduler` coordinates service lifecycle against queued work. It can ensure a requested service is running, detect idle lower-priority services, apply cooldowns to prevent thrashing, protect benchmark locks, return displaced hardware to a baseline, and report unavailable services.
 
-This layer prevents application features, research scripts, and media tools from independently deciding that the same accelerator may be reconfigured.
+This layer prevents application features, research programs, and media tools from independently deciding that the same accelerator may be reconfigured.
 
 ## Agent engineering
 
@@ -132,7 +172,9 @@ Context construction combines task state, project state, retrieval, discovered t
 
 ### Research and verified evaluation
 
-Research and optimization programs run as managed workloads. They can schedule trials, use lower-priority inference, persist results, and evaluate generated code or kernels through deterministic compilation, tests, correctness checks, or hardware measurement where appropriate.
+Research and optimization programs run as managed workloads. They can schedule trials, use lower-priority inference, persist results, and evaluate generated code or kernels through deterministic compilation, tests, numerical correctness checks, profiler evidence, or hardware measurement where appropriate.
+
+The Volta/Llama program demonstrates this path in practice. Project state determines the next experiment; agents modify kernels and runtime code in isolated workspaces; benchmark locks and GPU claims protect measurement; and accepted or rejected results become durable evidence for the next phase.
 
 Research is therefore connected to the same capacity, sandbox, context, telemetry, and checkpoint system as interactive agents. It does not become a separate set of scripts with hidden resource use and incompatible result state.
 
@@ -165,6 +207,7 @@ These services establish the operational purpose of HomeCloud. The platform exis
 | **Tool path escape** | Sandboxed file operations validate paths against the mounted workspace. |
 | **Background starvation of interactive work** | Priority-aware queues and protected baseline services keep user work visible to capacity control. |
 | **Deployment variance** | Optional services are configuration-driven and supervised; absent capability is reported rather than assumed. |
+| **Invalid optimization result** | Dispatch verification, correctness gates, same-build A/B comparison, and retained negative findings prevent a dead or numerically invalid path from being reported as an improvement. |
 
 ## Selected implementation evidence
 
@@ -182,12 +225,18 @@ HomeCloud's implementation repository is private. These paths identify the code 
 | `lib/home_cloud/intelligence/agent_sandbox.ex` | Containerized workspaces, durable storage, soft resource controls, tool execution, and path validation. |
 | `lib/home_cloud/intelligence/context_engine.ex` | Token budgeting, context construction, file tracking, retrieval, and compaction. |
 | `lib/home_cloud/intelligence/tool_registry.ex` | Typed runtime tool registry and profile-aware tool selection. |
+| `lib/home_cloud/intelligence/optimization/ttt_discover.ex` | Trial-oriented optimization search, candidate generation, and integration with verified reward signals. |
+| `lib/home_cloud/intelligence/optimization/cuda_reward.ex` | CUDA compilation, binary inspection, correctness checks, profiling, measurement validation, and performance scoring. |
+
+The private `volta_llama` repository contains the SM70-specific inference implementation and its benchmark, correctness, dispatch, and topology evidence. The portfolio describes that work without exposing the unavailable repository as a public link.
 
 ## Current boundaries
 
 - The public topology documents the four-V100 pool and separate A100 Drive accelerator but omits private hostnames, network layout, credentials, and security-sensitive service configuration.
-- HomeCloud is a self-hosted AI application and operations platform, not a general replacement for Kubernetes or a public multi-tenant cloud.
+- HomeCloud is a self-hosted GPU inference, agent, and autoresearch platform, not a general replacement for Kubernetes or a public multi-tenant cloud.
 - A private reference deployment demonstrates the system; it does not constrain the logical architecture to one accelerator model or host layout.
+- Project Manager integration supplies richer durable project reasoning but is optional; HomeCloud can run research and agent work independently.
+- Volta/Llama is a private specialized inference subproject. Public material includes architecture, research method, and selected benchmark results rather than source access.
 - Local-first operation does not require every workload to remain local when a hosted route is more appropriate for capability or availability.
 
 [← Back to portfolio](../README.md)
