@@ -1,6 +1,6 @@
 # Flip
 
-**A real-time community platform with a first-class AI participant runtime and a deliberate path from live conversation to durable forum knowledge.**
+**A group chat platform and community forum in which an AI assistant participates in conversation and curates selected chat into durable, retrievable forum threads.**
 
 <table>
 <tr>
@@ -15,9 +15,9 @@
 
 ## Product and system
 
-Flip joins live chat, threaded forums, media, search, and explicit AI participation in one community product. Chat remains optimized for immediate social interaction. Forum content remains optimized for durable reading and discussion. A separate synthesis lifecycle moves selected conversation between those modes without silently converting every message into a generated summary or global memory record.
+Flip combines group chat and threaded community forums in one product. Chat is the immediate social workspace; forums are the durable, searchable, and retrievable record. The AI assistant participates visibly in chat and can curate selected human conversation into forum threads. Direct assistant replies and chat-to-forum curation are separate workflows with different authorship, attribution, access, and lifecycle semantics.
 
-AI participation is implemented as product behavior rather than an unrestricted assistant endpoint. A visible mention or reply creates the turn. The application determines the actor, room, eligible context, available capabilities, permitted effects, inference route, persistence contract, and audience of the result. Generated replies, citations, tool results, images, video, and other artifacts become ordinary product objects with lifecycle and provenance rather than opaque text emitted by a provider call.
+The assistant's visible product role is supported by a first-class AI participant runtime. A mention, reply, or other explicit product action creates a turn. Before a model is called, the application resolves the invoking actor, the assistant's product identity, community and room or forum membership, eligible context, available capabilities, permitted effects, inference route, persistence contract, and audience of the result. Generated replies, citations, tool results, images, video, and other artifacts become ordinary product objects with durable lifecycle and provenance rather than opaque output from a provider call.
 
 <img src="diagrams/product-runtime.svg" alt="Flip community product and AI participant runtime" width="100%" />
 
