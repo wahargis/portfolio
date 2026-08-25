@@ -1,6 +1,6 @@
 # System Boundaries and Interfaces
 
-The portfolio contains four independent systems. They can exchange standards-based data or services, but none is a required component of another.
+The portfolio contains four independent primary systems. They can exchange standards-based data or services, but none is a required component of another. Volta/Llama is a specialized inference-engineering subproject within HomeCloud rather than a fifth control system.
 
 ## Responsibility boundaries
 
@@ -9,7 +9,7 @@ The portfolio contains four independent systems. They can exchange standards-bas
 | **Flip** | Community identity, membership, chat, forums, AI participation, media, citations, artifacts, synthesis, and user-facing authorization | Model-process scheduling, coding-agent delivery, or general project/research management |
 | **Project Manager** | Long-running project state: phases, experiments, findings, hypotheses, decisions, literature, constraints, review, retrieval, and session continuity | Repository mutation, model hosting, or community-product state |
 | **Baton** | Delegated software work: runs, plans, exact routes, persistent harness sessions, waves, interactions, workspaces, verification, review, and integration | The internal reasoning loop of each coding harness or the application state of the repository being changed |
-| **HomeCloud** | Local/remote inference routing, model instances, GPU capacity, agent execution, sandboxes, checkpoints, research workloads, and shared AI application services | Flip’s social authority, Project Manager’s project record, or Baton’s repository-delivery lifecycle |
+| **HomeCloud** | Local and remote inference routing, model instances, GPU capacity, agent execution, sandboxes, checkpoints, autoresearch workloads, verified hardware evaluation, and shared AI application services | Flip's social authority, Project Manager's project record, or Baton's repository-delivery lifecycle |
 
 ## Control surfaces and authoritative state
 
@@ -27,7 +27,7 @@ Baton exposes embedded application calls, an authenticated resident bus, CLI, we
 
 ### HomeCloud
 
-HomeCloud exposes Phoenix application surfaces, connectors, internal service calls, and model-compatible endpoints. OTP supervision owns process lifecycle. PostgreSQL/Ash persists application and execution records. Instance pools, GPU claims, and workload scheduling determine which local capacity is actually available.
+HomeCloud exposes Phoenix application surfaces, connectors, internal service calls, and model-compatible endpoints. OTP supervision owns process lifecycle. PostgreSQL/Ash persists application and execution records. Instance pools, GPU claims, workload scheduling, workspaces, and checkpoints determine which local capacity is available and how long-running research work survives interruption.
 
 ## Integration surfaces
 
@@ -37,7 +37,7 @@ Flip can route an AI turn to a HomeCloud-hosted OpenAI-compatible endpoint. Home
 
 ### Baton and project repositories
 
-Baton can coordinate work against any repository for which it has an admitted workspace and route. A repository does not need to adopt Baton’s internal data model. Baton’s output is a captured, reviewable result tied to the run that produced it; verification can be required by the admitted run or workflow policy.
+Baton can coordinate work against any repository for which it has an admitted workspace and route. A repository does not need to adopt Baton's internal data model. Baton's output is a captured, reviewable result tied to the run that produced it; verification can be required by the admitted run or workflow policy.
 
 ### Project Manager and agent workflows
 
@@ -47,6 +47,10 @@ A person or agent can use Project Manager to preserve the reasoning and executio
 
 HomeCloud can provide inference, tool execution, research, OCR, document, and media services to local applications. Those applications retain their own product authority. HomeCloud decides how finite compute and execution environments are operated.
 
+### HomeCloud, Project Manager, and Volta/Llama
+
+The Volta/Llama program uses the systems at their intended boundary. Project Manager preserves the research questions, hypotheses, experiments, findings, decisions, dependencies, and handoffs. HomeCloud supplies coding-agent execution, isolated workspaces, model services, GPU ownership, profiler and benchmark access, checkpoints, and durable artifacts. The private `volta_llama` fork is the inference implementation being measured and changed; it does not become authoritative for project reasoning or shared infrastructure state.
+
 ## Lifecycle and state diagrams
 
 | Project | Diagram | Scope |
@@ -54,11 +58,11 @@ HomeCloud can provide inference, tool execution, research, OCR, document, and me
 | Flip | [Conversation-to-forum lifecycle](flip-technical-overview/diagrams/conversation-to-forum.svg) | Synthesis admission, planning, operation ledger, forum commit, source lineage, linkback, and recuration |
 | Project Manager | [Typed project record](project-manager/assets/project-record.svg) | Phase DAG, experiments, findings, hypotheses, decisions, constraints, sessions, and review |
 | Baton | [Run lifecycle](baton/assets/run-lifecycle.svg) | Admission, allocation, persistent execution, interaction, recovery, capture, verification, review, integration, and closure |
-| HomeCloud | [Logical platform architecture](homecloud/assets/diagrams/architecture.svg) | Admission, model capacity, GPU authority, agent execution, checkpoints, persistence, and application services |
+| HomeCloud | [Logical platform architecture](homecloud/assets/diagrams/architecture.svg) | Admission, model capacity, GPU authority, agent and autoresearch execution, checkpoints, persistence, and application services |
 | HomeCloud | [Reference deployment](homecloud/assets/diagrams/reference-deployment.svg) | Dated accelerator, application, storage, and external-provider deployment |
 
 ## Source availability
 
-Project Manager and Baton have public implementation repositories. Flip and HomeCloud are private implementations; their portfolio pages cite internal module paths, persisted entities, and execution contracts without linking to inaccessible repositories or exposing production data and configuration.
+Project Manager and Baton have public implementation repositories. Flip, HomeCloud, and Volta/Llama are private implementations; their portfolio pages cite internal module paths, persisted entities, execution contracts, research methods, and selected benchmark results without linking to inaccessible repositories or exposing production data and configuration.
 
 [Back to the portfolio](README.md)
